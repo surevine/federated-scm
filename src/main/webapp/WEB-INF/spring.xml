@@ -6,5 +6,7 @@ http://www.springframework.org/schema/beans
 http://www.springframework.org/schema/beans/spring-beans.xsd">
     
     <bean class="com.surevine.gateway.scm.util.SpringApplicationContext"/>
+    
+    <bean class="com.surevine.gateway.scm.service.impl.FederatorServiceImpl" name="federatorService" />
 
 </beans>
