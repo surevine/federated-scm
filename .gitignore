@@ -6,3 +6,5 @@
 *.war
 .idea
 *.iml
+config/default.properties
+*.log

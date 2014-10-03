@@ -1,0 +1,9 @@
+# properties used for a default build of the federated SCM system
+redis.hostname=127.0.0.1
+redis.namespace=fedscm
+
+gateway.import.dir=/var/tmp/gateway/import
+gateway.export.dir=/var/tmp/gateway/export
+
+fedscm.export.interval=86400000
+fedscm.logfile=scm-federation.log
