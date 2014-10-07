@@ -23,22 +23,23 @@ public class StashGetProjectsCommand implements GetProjectsCommand {
     private static final String ALL_RESOURCE = "/rest/api/1.0/projects?limit=10000";
     private static final String SINGLE_RESOURCE = "/rest/api/1.0/projects/";
     private SCMSystemProperties scmSystemProperties;
-    private Client client;
     
     StashGetProjectsCommand() {
         scmSystemProperties = PropertyUtil.getSCMSystemProperties();
-        client = ClientBuilder.newClient();
     }
     
     @Override
     public Collection<ProjectBean> getProjects() {
         String resource = scmSystemProperties.getHost() + ALL_RESOURCE;
+        Client client = ClientBuilder.newClient();
         logger.debug("REST call to " + resource);
         
         PagedProjectResult response = client.target(resource)
                 .request(MediaType.APPLICATION_JSON)
                 .header("Authorization", scmSystemProperties.getBasicAuthHeader())
                 .get(PagedProjectResult.class);
+        
+        client.close();
                
         return response.getValues();
     }
@@ -46,6 +47,7 @@ public class StashGetProjectsCommand implements GetProjectsCommand {
     @Override
     public ProjectBean getProject(String projectKey) {
         String resource = scmSystemProperties.getHost() + SINGLE_RESOURCE + projectKey;
+        Client client = ClientBuilder.newClient();
         logger.debug("REST call to " + resource);
         
         ProjectBean response = null;
@@ -58,6 +60,8 @@ public class StashGetProjectsCommand implements GetProjectsCommand {
         } catch (NotFoundException nfe) {
             // no-op - acceptable response and will return a null object
         }
+        
+        client.close();
         
         return response;
     }

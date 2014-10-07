@@ -20,16 +20,15 @@ public class StashCreateProjectCommand implements CreateProjectCommand {
     private static Logger logger = Logger.getLogger(StashCreateProjectCommand.class);
     private static final String RESOURCE = "/rest/api/1.0/projects/";
     private SCMSystemProperties scmSystemProperties;
-    private Client client;
 
     StashCreateProjectCommand() {
         scmSystemProperties = PropertyUtil.getSCMSystemProperties();
-        client = ClientBuilder.newClient();
     }
 
     @Override
     public ProjectBean createProject(ProjectBean projectBean) throws SCMCallException {
         validate(projectBean);
+        Client client = ClientBuilder.newClient();
         
         String resource = scmSystemProperties.getHost() + RESOURCE;
         logger.debug("REST call to " + resource);
@@ -38,6 +37,8 @@ public class StashCreateProjectCommand implements CreateProjectCommand {
                 .request(MediaType.APPLICATION_JSON)
                 .header("Authorization", scmSystemProperties.getBasicAuthHeader())
                 .post(Entity.json(projectBean), ProjectBean.class);
+        
+        client.close();
 
         return response;
     }

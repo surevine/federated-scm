@@ -1,9 +1,6 @@
 package com.surevine.gateway.scm.scmclient.stash;
 
-import com.surevine.gateway.scm.scmclient.CommandFactory;
-import com.surevine.gateway.scm.scmclient.CreateProjectCommand;
-import com.surevine.gateway.scm.scmclient.DeleteProjectCommand;
-import com.surevine.gateway.scm.scmclient.GetProjectsCommand;
+import com.surevine.gateway.scm.scmclient.*;
 
 /**
  * Stash command factory
@@ -24,5 +21,20 @@ public class StashCommandFactory extends CommandFactory {
     @Override
     protected DeleteProjectCommand getDeleteProjectCommand() {
         return new StashDeleteProjectCommand();
+    }
+
+    @Override
+    public GetRepoCommand getGetRepoCommand() {
+        return new StashGetRepoCommand();
+    }
+
+    @Override
+    public CreateRepoCommand getCreateRepoCommand() {
+        return new StashCreateRepoCommand();
+    }
+
+    @Override
+    protected DeleteRepoCommand getDeleteRepoCommand() {
+        return new StashDeleteRepoCommand();
     }
 }

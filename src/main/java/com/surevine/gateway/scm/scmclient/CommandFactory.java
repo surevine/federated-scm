@@ -44,6 +44,25 @@ public abstract class CommandFactory {
     protected abstract DeleteProjectCommand getDeleteProjectCommand();
 
     /**
+     * SCM system specific GetRepoCommand implementation
+     * @return SCM system specific GetRepoCommand implementation
+     */
+    public abstract GetRepoCommand getGetRepoCommand();
+
+    /**
+     * SCM system specific CreateRepoCommand implementation
+     * @return SCM system specific CreateRepoCommand implementation
+     */
+    public abstract CreateRepoCommand getCreateRepoCommand();
+
+    /**
+     * SCM system specific DeleteRepoCommand implementation.
+     * Protected access to restrict to test cleanup. Open up if required.
+     * @return SCM system specific DeleteRepoCommand implementation
+     */
+    protected abstract DeleteRepoCommand getDeleteRepoCommand();
+
+    /**
      * Set a command factory implementation ignoring the configured type in system properties.
      * It's mostly for injecting a mock for testing but may be useful elsewhere.
      * @param commandFactory the command factory implementation.

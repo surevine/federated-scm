@@ -45,15 +45,13 @@ public class ProjectBean {
         this.description = description;
     }
 
+    @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("projectbean:id=").append(getId())
-                .append(", key:")
-                .append(getKey())
-                .append(", name:")
-                .append(getName())
-                .append(", desc:")
-                .append(getDescription());
-        return sb.toString();
+        return "ProjectBean{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", key='" + key + '\'' +
+                ", description='" + description + '\'' +
+                '}';
     }
 }
