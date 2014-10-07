@@ -5,6 +5,9 @@ import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import java.util.Collection;
+import java.util.Random;
+
+import static org.junit.Assert.assertNull;
 
 /**
  * @author nick.leaver@surevine.com
@@ -37,5 +40,17 @@ public class StashGetProjectsCommandTest {
             ProjectBean projectBean = getProjectsCommand.getProject(anActualKey);
             logger.debug(projectBean);
         }
+    }
+
+    /**
+     * Calls the actual configured Stash instance and therefore makes no assumptions about 
+     * the return. Fails on exception only.
+     */
+    @Test
+    public void testGetProjectThatDoesntExist() {
+        StashGetProjectsCommand getProjectsCommand = new StashGetProjectsCommand();
+        ProjectBean project = getProjectsCommand.getProject("" + new Random().nextInt());
+        
+        assertNull(project);
     }
 }

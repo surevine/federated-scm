@@ -12,13 +12,15 @@ public interface GetProjectsCommand {
     /**
      * Gets a collection of all projects in the SCM system
      * @return a collection of all projects in the SCM system
+     * @throws com.surevine.gateway.scm.scmclient.SCMCallException
      */
-    public Collection<ProjectBean> getProjects();
+    public Collection<ProjectBean> getProjects() throws SCMCallException;
 
     /**
      * Get details of a project in the SCM system
      * @param projectKey the project shortcode for unique project identification
      * @return details of a project in the SCM system
+     * @throws com.surevine.gateway.scm.scmclient.SCMCallException
      */
-    public ProjectBean getProject(String projectKey);
+    public ProjectBean getProject(String projectKey) throws SCMCallException;
 }

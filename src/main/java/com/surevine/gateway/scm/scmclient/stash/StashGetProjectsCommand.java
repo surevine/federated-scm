@@ -7,6 +7,7 @@ import com.surevine.gateway.scm.util.SCMSystemProperties;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
@@ -47,10 +48,16 @@ public class StashGetProjectsCommand implements GetProjectsCommand {
         String resource = scmSystemProperties.getHost() + SINGLE_RESOURCE + projectKey;
         logger.debug("REST call to " + resource);
         
-        ProjectBean response = client.target(resource)
-                .request(MediaType.APPLICATION_JSON)
-                .header("Authorization", scmSystemProperties.getBasicAuthHeader())
-                .get(ProjectBean.class);
+        ProjectBean response = null;
+        
+        try {
+            response = client.target(resource)
+                    .request(MediaType.APPLICATION_JSON)
+                    .header("Authorization", scmSystemProperties.getBasicAuthHeader())
+                    .get(ProjectBean.class);
+        } catch (NotFoundException nfe) {
+            // no-op - acceptable response and will return a null object
+        }
         
         return response;
     }

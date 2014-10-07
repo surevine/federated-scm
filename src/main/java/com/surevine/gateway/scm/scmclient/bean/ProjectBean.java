@@ -11,7 +11,8 @@ public class ProjectBean {
     private String id;
     private String name;
     private String key;
-
+    private String description;
+    
     public String getId() {
         return id;
     }
@@ -35,14 +36,24 @@ public class ProjectBean {
     public void setKey(String key) {
         this.key = key;
     }
-    
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("projectbean:id=").append(getId())
                 .append(", key:")
                 .append(getKey())
                 .append(", name:")
-                .append(getName());
+                .append(getName())
+                .append(", desc:")
+                .append(getDescription());
         return sb.toString();
     }
 }

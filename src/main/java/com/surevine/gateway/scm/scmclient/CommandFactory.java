@@ -31,11 +31,24 @@ public abstract class CommandFactory {
     public abstract GetProjectsCommand getGetProjectsCommand();
 
     /**
+     * SCM system specific CreateProjectCommand implementation
+     * @return SCM system specific CreateProjectCommand implementation
+     */
+    public abstract CreateProjectCommand getCreateProjectCommand();
+
+    /**
+     * SCM system specific DeleteProjectCommand implementation.
+     * Protected access to restrict to test cleanup. Open up if required.
+     * @return SCM system specific DeleteProjectCommand implementation
+     */
+    protected abstract DeleteProjectCommand getDeleteProjectCommand();
+
+    /**
      * Set a command factory implementation ignoring the configured type in system properties.
      * It's mostly for injecting a mock for testing but may be useful elsewhere.
      * @param commandFactory the command factory implementation.
      */
-    void setCommandFactoryImplementation(CommandFactory commandFactory) {
-        
+    static void setCommandFactoryImplementation(CommandFactory commandFactory) {
+        commandFactoryImplementation = commandFactory;
     }
 }
