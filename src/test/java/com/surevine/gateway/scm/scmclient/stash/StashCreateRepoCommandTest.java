@@ -20,6 +20,7 @@ package com.surevine.gateway.scm.scmclient.stash;
 import com.surevine.gateway.scm.scmclient.SCMCallException;
 import com.surevine.gateway.scm.scmclient.bean.ProjectBean;
 import com.surevine.gateway.scm.scmclient.bean.RepoBean;
+import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import java.util.Random;
@@ -30,6 +31,8 @@ import static org.junit.Assert.assertNotNull;
  * @author nick.leaver@surevine.com
  */
 public class StashCreateRepoCommandTest {
+    private static Logger logger = Logger.getLogger(StashCreateProjectCommandTest.class);
+    
     @Test
     public void testCreateAndDeleteRepo() throws SCMCallException {
         StashCreateRepoCommand createRepoCommand = new StashCreateRepoCommand();
@@ -45,6 +48,7 @@ public class StashCreateRepoCommandTest {
         // create a repo
         String randomRepoName = "REP" + new Random().nextInt();
         RepoBean response = createRepoCommand.createRepo(randomProjectKey,randomRepoName);
+        logger.debug(response);
         StashGetRepoCommand getRepoCommand = new StashGetRepoCommand();
         assertNotNull(getRepoCommand.getRepository(randomProjectKey,response.getSlug()));
 

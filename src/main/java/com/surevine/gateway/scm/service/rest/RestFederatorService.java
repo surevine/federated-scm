@@ -41,24 +41,27 @@ public class RestFederatorService implements FederatorService {
     @Path("newSharingPartner")
     @Override
     public void newSharingPartner(@QueryParam("partnerName") final String partnerName,
-                                  @QueryParam("projectName") final String projectName) {
-        getImplementation().newSharingPartner(partnerName, projectName);
+                                  @QueryParam("projectKey") final String projectKey,
+                                  @QueryParam("repositorySlug") final String repositorySlug) {
+        getImplementation().newSharingPartner(partnerName, projectKey, repositorySlug);
     }
 
     @POST
     @Path("redistribute")
     @Override
     public void redistribute(@QueryParam("partnerName") final String partnerName,
-                             @QueryParam("projectName") final String projectName) {
-        getImplementation().redistribute(partnerName, projectName);
+                             @QueryParam("projectKey") final String projectKey,
+                             @QueryParam("repositorySlug") final String repositorySlug) {
+        getImplementation().redistribute(partnerName, projectKey, repositorySlug);
     }
 
     @POST
     @Path("sharingPartnerRemoved")
     @Override
     public void sharingPartnerRemoved(@QueryParam("partnerName") final String partnerName,
-                                      @QueryParam("projectName") final String projectName) {
-        getImplementation().sharingPartnerRemoved(partnerName, projectName);
+                                      @QueryParam("projectKey") final String projectKey,
+                                      @QueryParam("repositorySlug") final String repositorySlug) {
+        getImplementation().sharingPartnerRemoved(partnerName, projectKey, repositorySlug);
     }
 
     @POST

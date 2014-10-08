@@ -29,18 +29,18 @@ public class FederatorServiceImpl implements FederatorService {
     private static Logger logger = Logger.getLogger(FederatorServiceImpl.class);
 
     @Override
-    public void newSharingPartner(final String partnerName, final String projectName) {
-        logger.debug("New sharing partner notification: " + partnerName + " for project " + projectName);
+    public void newSharingPartner(String partnerName, String projectKey, String repositorySlug) {
+        logger.debug("New sharing partner notification: " + partnerName + " for repository " + projectKey + ":" + repositorySlug);
     }
 
     @Override
-    public void redistribute(final String partnerName, final String projectName) {
-        logger.debug("Redistribution request: " + partnerName + " for project " + projectName);
+    public void redistribute(String partnerName, String projectKey, String repositorySlug) {
+        logger.debug("Redistribution request: " + partnerName + " for repository " + projectKey + ":" + repositorySlug);
     }
 
     @Override
-    public void sharingPartnerRemoved(final String partnerName, final String projectName) {
-        logger.debug("Removed sharing partner notification: " + partnerName + " for project " + projectName);
+    public void sharingPartnerRemoved(String partnerName, String projectKey, String repositorySlug) {
+        logger.debug("Removed sharing partner notification: " + partnerName + " for repository " + projectKey + ":" + repositorySlug);
     }
 
     @Override

@@ -10,13 +10,24 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <properties.file>config/default.properties</properties.file>
+        <default.properties.file>config/default.properties</default.properties.file>
+        <local.properties.file>config/local.properties</local.properties.file>
         <wildfly.hostname>127.0.0.1</wildfly.hostname>
         <wildfly.username>admin</wildfly.username>
         <wildfly.password>password</wildfly.password>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit</artifactId>
+            <version>3.5.0.201409260305-r</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.3.1</version>
+        </dependency>
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
@@ -92,9 +103,6 @@
                 <filtering>true</filtering>
             </resource>
         </resources>
-        <filters>
-            <filter>${properties.file}</filter>
-        </filters>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -114,23 +122,6 @@
                     <excludes>
                         <excludes>**/stash/*</excludes>
                     </excludes>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>2.4</version>
-                <configuration>
-                    <filters>
-                        <filter>${properties.file}</filter>
-                    </filters>
-                    <webResources>
-                        <resource>
-                            <directory>src/main/webapp/WEB-INF</directory>
-                            <filtering>true</filtering>
-                            <targetPath>WEB-INF</targetPath>
-                        </resource>
-                    </webResources>
                 </configuration>
             </plugin>
             <plugin>
@@ -205,7 +196,86 @@
         </repository>
     </repositories>
 
+    
     <profiles>
+        <!-- 
+        Filtering with default.properties by default. Primarily for CI builds that don't need real configuration values.
+        For a real build copy default.properties to local.properties and set correct properties there rather than 
+        changing default.properties as local.properties is ignored by Git.
+        -->
+        <profile>
+            <id>default-property-filter</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <file>
+                    <missing>${local.properties.file}</missing>
+                </file>
+            </activation>
+            <build>
+                <filters>
+                    <filter>${default.properties.file}</filter>
+                </filters>
+
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-war-plugin</artifactId>
+                        <version>2.4</version>
+                        <configuration>
+                            <filters>
+                                <filter>${default.properties.file}</filter>
+                            </filters>
+                            <webResources>
+                                <resource>
+                                    <directory>src/main/webapp/WEB-INF</directory>
+                                    <filtering>true</filtering>
+                                    <targetPath>WEB-INF</targetPath>
+                                </resource>
+                            </webResources>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- 
+        If local.properties is present then it is used for property filtering.
+        -->
+        <profile>
+            <id>local-property-filter</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+                <file>
+                    <exists>${local.properties.file}</exists>
+                </file>
+            </activation>
+            <build>
+                <filters>
+                    <filter>${local.properties.file}</filter>
+                </filters>
+
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-war-plugin</artifactId>
+                        <version>2.4</version>
+                        <configuration>
+                            <filters>
+                                <filter>${local.properties.file}</filter>
+                            </filters>
+                            <webResources>
+                                <resource>
+                                    <directory>src/main/webapp/WEB-INF</directory>
+                                    <filtering>true</filtering>
+                                    <targetPath>WEB-INF</targetPath>
+                                </resource>
+                            </webResources>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        
         <profile>
             <id>stash-integration-tests</id>
             <activation>

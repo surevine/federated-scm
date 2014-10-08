@@ -31,7 +31,7 @@ import javax.ws.rs.core.MediaType;
  * @author nick.leaver@surevine.com
  */
 public class StashDeleteRepoCommand implements DeleteRepoCommand {
-    private static Logger logger = Logger.getLogger(StashCreateProjectCommand.class);
+    private static Logger logger = Logger.getLogger(StashDeleteRepoCommand.class);
     private static final String RESOURCE = "/rest/api/1.0/projects/%s/repos/%s";
     private SCMSystemProperties scmSystemProperties;
 

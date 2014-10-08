@@ -25,26 +25,29 @@ import com.surevine.gateway.scm.service.bean.AcknowledgementBean;
  */
 public interface FederatorService {
     /**
-     * Informs the SCM Federator that a project is being shared with a new partner. Causes the SCM federator to package
-     * the project repository and distribute to the new partner via the Gateway.
+     * Informs the SCM Federator that a repository is being shared with a new partner. Causes the SCM federator to 
+     * package the repository and distribute to the new partner via the Gateway.
      * @param partnerName The name of the partner. Must match a Gateway management endpoint.
-     * @param projectName The name of the project. Must match the name in the SCM system.
+     * @param projectKey The project key of the project. Must match the key in the SCM system.
+     * @param repositorySlug The repository slug for the shared repository.
      */
-    void newSharingPartner(String partnerName, String projectName);
+    void newSharingPartner(String partnerName, String projectKey, String repositorySlug);
 
     /**
      * Causes the SCM Federator to redistribute an entire repository to a sharing partner.
      * @param partnerName The name of the partner. Must match a Gateway management endpoint.
-     * @param projectName The name of the project. Must match the name in the SCM system.
+     * @param projectKey The project key of the project. Must match the key in the SCM system.
+     * @param repositorySlug The repository slug for the shared repository.
      */
-    void redistribute(String partnerName, String projectName);
+    void redistribute(String partnerName, String projectKey, String repositorySlug);
 
     /**
      * Informs the SCM Federator that a project is no longer being shared with a partner.
      * @param partnerName The name of the partner. Must match a Gateway management endpoint.
-     * @param projectName The name of the project. Must match the name in the SCM system.
+     * @param projectKey The project key of the project. Must match the key in the SCM system.
+     * @param repositorySlug The repository slug for the shared repository.
      */
-    void sharingPartnerRemoved(String partnerName, String projectName);
+    void sharingPartnerRemoved(String partnerName, String projectKey, String repositorySlug);
 
     /**
      * Causes the SCM Federator to process a received acknowledgement file received from a sharing partner.

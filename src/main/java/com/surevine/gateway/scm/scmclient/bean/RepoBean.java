@@ -19,6 +19,9 @@ package com.surevine.gateway.scm.scmclient.bean;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * Bean for repo information
  * @author nick.leaver@surevine.com
@@ -30,6 +33,7 @@ public class RepoBean {
     private String slug;
     private String scmId = "git";
     private ProjectBean project;
+    private Map<String, List<Link>> links;
 
     public String getId() {
         return id;
@@ -71,6 +75,27 @@ public class RepoBean {
         this.project = project;
     }
 
+    public Map<String, List<Link>> getLinks() {
+        return links;
+    }
+
+    public void setLinks(Map<String, List<Link>> links) {
+        this.links = links;
+    }
+    
+    public String getRepoCloneURL() {
+        String cloneURL = null;
+        if (links != null && links.containsKey("clone")) {
+            for (Link link:links.get("clone")) {
+                if (link.getName().equalsIgnoreCase("ssh")) {
+                    cloneURL = link.getHref();
+                    break;
+                }
+            }
+        }
+        return cloneURL;
+    }
+
     @Override
     public String toString() {
         return "RepoBean{"
@@ -78,7 +103,29 @@ public class RepoBean {
                 + ", name='" + name + '\''
                 + ", slug='" + slug + '\''
                 + ", scmId='" + scmId + '\''
-                + ", project=" + project
+                + ", project=" + project + '\''
+                + ", links=" + links
                 + '}';
     }
+    
+    public static class Link {
+        private String name;
+        private String href;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getHref() {
+            return href;
+        }
+
+        public void setHref(String href) {
+            this.href = href;
+        }
+    };
 }
