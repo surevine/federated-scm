@@ -17,7 +17,12 @@
 */
 package com.surevine.gateway.scm.service.impl;
 
+import com.surevine.gateway.scm.git.GitException;
+import com.surevine.gateway.scm.git.GitFacade;
+import com.surevine.gateway.scm.scmclient.CommandFactory;
+import com.surevine.gateway.scm.scmclient.bean.RepoBean;
 import com.surevine.gateway.scm.service.FederatorService;
+import com.surevine.gateway.scm.service.SCMFederatorServiceException;
 import com.surevine.gateway.scm.service.bean.AcknowledgementBean;
 import org.apache.log4j.Logger;
 
@@ -29,18 +34,45 @@ public class FederatorServiceImpl implements FederatorService {
     private static Logger logger = Logger.getLogger(FederatorServiceImpl.class);
 
     @Override
-    public void newSharingPartner(String partnerName, String projectKey, String repositorySlug) {
-        logger.debug("New sharing partner notification: " + partnerName + " for repository " + projectKey + ":" + repositorySlug);
+    public void newSharingPartner(final String partnerName, final String projectKey, final String repositorySlug) 
+            throws SCMFederatorServiceException {
+        logger.debug("New sharing partner notification: " + partnerName + " for repository "
+                + projectKey + ":" + repositorySlug);
+        
+        RepoBean repo = CommandFactory.getInstance().getGetRepoCommand().getRepository(projectKey, repositorySlug);
+        if (repo ==  null) {
+            throw new SCMFederatorServiceException("The repository information for  " + projectKey + ":"
+                    + repositorySlug + " could not be retrieved from the SCM system.");
+        }
+
+        GitFacade gitFacade = GitFacade.getInstance();
+        boolean alreadyCloned = gitFacade.repoAlreadyCloned(repo);
+        
+        if (alreadyCloned) {
+            try {
+                gitFacade.pull(repo);
+            } catch (GitException ge) {
+                logger.error(ge);
+                throw new SCMFederatorServiceException("The Git pull command failed for the repository "
+                        + projectKey + ":" + repositorySlug);
+            }
+        } else {
+            // clone
+        }
+        
+        // create a bundle file
+        // write it away to the gateway
     }
 
     @Override
-    public void redistribute(String partnerName, String projectKey, String repositorySlug) {
+    public void redistribute(final String partnerName, final String projectKey, final String repositorySlug) {
         logger.debug("Redistribution request: " + partnerName + " for repository " + projectKey + ":" + repositorySlug);
     }
 
     @Override
-    public void sharingPartnerRemoved(String partnerName, String projectKey, String repositorySlug) {
-        logger.debug("Removed sharing partner notification: " + partnerName + " for repository " + projectKey + ":" + repositorySlug);
+    public void sharingPartnerRemoved(final String partnerName, final String projectKey, final String repositorySlug) {
+        logger.debug("Removed sharing partner notification: " + partnerName + " for repository "
+                + projectKey + ":" + repositorySlug);
     }
 
     @Override

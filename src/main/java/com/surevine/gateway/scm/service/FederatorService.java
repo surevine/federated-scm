@@ -31,7 +31,8 @@ public interface FederatorService {
      * @param projectKey The project key of the project. Must match the key in the SCM system.
      * @param repositorySlug The repository slug for the shared repository.
      */
-    void newSharingPartner(String partnerName, String projectKey, String repositorySlug);
+    void newSharingPartner(String partnerName, String projectKey, String repositorySlug)
+            throws SCMFederatorServiceException;
 
     /**
      * Causes the SCM Federator to redistribute an entire repository to a sharing partner.
@@ -39,7 +40,7 @@ public interface FederatorService {
      * @param projectKey The project key of the project. Must match the key in the SCM system.
      * @param repositorySlug The repository slug for the shared repository.
      */
-    void redistribute(String partnerName, String projectKey, String repositorySlug);
+    void redistribute(String partnerName, String projectKey, String repositorySlug) throws SCMFederatorServiceException;
 
     /**
      * Informs the SCM Federator that a project is no longer being shared with a partner.
@@ -47,11 +48,12 @@ public interface FederatorService {
      * @param projectKey The project key of the project. Must match the key in the SCM system.
      * @param repositorySlug The repository slug for the shared repository.
      */
-    void sharingPartnerRemoved(String partnerName, String projectKey, String repositorySlug);
+    void sharingPartnerRemoved(String partnerName, String projectKey, String repositorySlug)
+            throws SCMFederatorServiceException;
 
     /**
      * Causes the SCM Federator to process a received acknowledgement file received from a sharing partner.
      * @param acknowledgement The acknowledgement.
      */
-    void processAcknowledgementFile(AcknowledgementBean acknowledgement);
+    void processAcknowledgementFile(AcknowledgementBean acknowledgement) throws SCMFederatorServiceException;
 }

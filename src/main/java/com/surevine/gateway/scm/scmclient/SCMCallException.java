@@ -18,7 +18,8 @@
 package com.surevine.gateway.scm.scmclient;
 
 /**
- * Checked exception thrown when there is an issue calling an external SCM system
+ * Checked exception thrown when there is an issue calling an external SCM system. Wraps any SCM implementation
+ * specific exceptions in a consistent known exception type.
  * @author nick.leaver@surevine.com
  */
 public class SCMCallException extends Exception {

@@ -79,7 +79,7 @@ public class RepoBean {
         return links;
     }
 
-    public void setLinks(Map<String, List<Link>> links) {
+    public void setLinks(final Map<String, List<Link>> links) {
         this.links = links;
     }
     
@@ -116,7 +116,7 @@ public class RepoBean {
             return name;
         }
 
-        public void setName(String name) {
+        public void setName(final String name) {
             this.name = name;
         }
 
@@ -124,7 +124,7 @@ public class RepoBean {
             return href;
         }
 
-        public void setHref(String href) {
+        public void setHref(final String href) {
             this.href = href;
         }
     };

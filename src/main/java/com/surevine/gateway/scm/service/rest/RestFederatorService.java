@@ -18,14 +18,18 @@
 package com.surevine.gateway.scm.service.rest;
 
 import com.surevine.gateway.scm.service.FederatorService;
+import com.surevine.gateway.scm.service.SCMFederatorServiceException;
 import com.surevine.gateway.scm.service.bean.AcknowledgementBean;
 import com.surevine.gateway.scm.util.SpringApplicationContext;
+import org.apache.log4j.Logger;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
+import java.net.HttpURLConnection;
 
 /**
  * REST proxy for the federator service
@@ -35,6 +39,7 @@ import javax.ws.rs.QueryParam;
 @Produces("application/json")
 @Consumes("application/json")
 public class RestFederatorService implements FederatorService {
+    private Logger logger = Logger.getLogger(RestFederatorService.class);
     private FederatorService federatorService;
 
     @POST
@@ -42,7 +47,16 @@ public class RestFederatorService implements FederatorService {
     @Override
     public void newSharingPartner(@QueryParam("partnerName") final String partnerName,
                                   @QueryParam("projectKey") final String projectKey,
-                                  @QueryParam("repositorySlug") final String repositorySlug) {
+                                  @QueryParam("repositorySlug") final String repositorySlug)
+            throws SCMFederatorServiceException {
+        // check input
+        if (!InputValidator.partnerNameIsValid(partnerName) 
+                || !InputValidator.projectKeyIsValid(projectKey)
+                || !InputValidator.repoSlugIsValid(repositorySlug)) {
+            // one of the params is dirty and we can't use it so reject the request
+            throw new WebApplicationException(HttpURLConnection.HTTP_BAD_REQUEST);
+        }
+        
         getImplementation().newSharingPartner(partnerName, projectKey, repositorySlug);
     }
 
@@ -51,7 +65,16 @@ public class RestFederatorService implements FederatorService {
     @Override
     public void redistribute(@QueryParam("partnerName") final String partnerName,
                              @QueryParam("projectKey") final String projectKey,
-                             @QueryParam("repositorySlug") final String repositorySlug) {
+                             @QueryParam("repositorySlug") final String repositorySlug)
+            throws SCMFederatorServiceException {
+        // check input
+        if (!InputValidator.partnerNameIsValid(partnerName)
+                || !InputValidator.projectKeyIsValid(projectKey)
+                || !InputValidator.repoSlugIsValid(repositorySlug)) {
+            // one of the params is dirty and we can't use it so reject the request
+            throw new WebApplicationException(HttpURLConnection.HTTP_BAD_REQUEST);
+        }
+
         getImplementation().redistribute(partnerName, projectKey, repositorySlug);
     }
 
@@ -60,14 +83,30 @@ public class RestFederatorService implements FederatorService {
     @Override
     public void sharingPartnerRemoved(@QueryParam("partnerName") final String partnerName,
                                       @QueryParam("projectKey") final String projectKey,
-                                      @QueryParam("repositorySlug") final String repositorySlug) {
+                                      @QueryParam("repositorySlug") final String repositorySlug)
+            throws SCMFederatorServiceException {
+        // check input
+        if (!InputValidator.partnerNameIsValid(partnerName)
+                || !InputValidator.projectKeyIsValid(projectKey)
+                || !InputValidator.repoSlugIsValid(repositorySlug)) {
+            // one of the params is dirty and we can't use it so reject the request
+            throw new WebApplicationException(HttpURLConnection.HTTP_BAD_REQUEST);
+        }
+
         getImplementation().sharingPartnerRemoved(partnerName, projectKey, repositorySlug);
     }
 
     @POST
     @Path("processAcknowledgement")
     @Override
-    public void processAcknowledgementFile(final AcknowledgementBean acknowledgement) {
+    public void processAcknowledgementFile(final AcknowledgementBean acknowledgement)
+            throws SCMFederatorServiceException {
+        // check input
+        if (!InputValidator.acknowledgementBeanIsValid(acknowledgement)) {
+            // the bean is dirty so reject the request
+            throw new WebApplicationException(HttpURLConnection.HTTP_BAD_REQUEST);
+        }
+        
         getImplementation().processAcknowledgementFile(acknowledgement);
     }
 

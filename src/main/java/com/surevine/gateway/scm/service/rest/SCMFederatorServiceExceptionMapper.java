@@ -15,34 +15,22 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-package com.surevine.gateway.scm.git.jgit;
+package com.surevine.gateway.scm.service.rest;
 
-import com.surevine.gateway.scm.git.Git;
-import com.surevine.gateway.scm.git.GitException;
-import com.surevine.gateway.scm.util.PropertyUtil;
-import org.eclipse.jgit.api.CloneCommand;
+import com.surevine.gateway.scm.service.SCMFederatorServiceException;
 
-import java.io.File;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
+import java.net.HttpURLConnection;
 
 /**
  * @author nick.leaver@surevine.com
  */
-public class JGitGitImpl extends Git {
-    private File gitDirectory;
-    
-    public JGitGitImpl() {
-        this.gitDirectory = PropertyUtil.getGitDir();
-    }
-    
+@Provider
+public class SCMFederatorServiceExceptionMapper implements ExceptionMapper<SCMFederatorServiceException> {
     @Override
-    public void clone(final String repoURI) throws GitException {
-        CloneCommand cloneCommand = new CloneCommand();
-        cloneCommand.setDirectory(gitDirectory);
-        cloneCommand.setURI(repoURI);
-        try {
-            cloneCommand.call();
-        } catch (Exception e) {
-            throw new GitException(e);
-        }
+    public Response toResponse(final SCMFederatorServiceException exception) {
+        return Response.status(HttpURLConnection.HTTP_BAD_REQUEST).entity(exception.getUserMessage()).build();
     }
 }

@@ -19,7 +19,6 @@ package com.surevine.gateway.scm.util;
 
 import org.apache.log4j.Logger;
 
-import java.io.File;
 import java.util.ResourceBundle;
 
 /**
@@ -73,8 +72,8 @@ public final class PropertyUtil {
         return getProperty(PROP_VERSION);
     }
     
-    public static File getGitDir() {
-        return new File(getProperty(PROP_GIT_REPODIR));
+    public static String getGitDir() {
+        return getProperty(PROP_GIT_REPODIR);
     }
 
     public static SCMSystemProperties getSCMSystemProperties() {

@@ -18,10 +18,19 @@
 package com.surevine.gateway.scm.git;
 
 /**
+ * Wraps any Git library specific exceptions in a known expected exception type.
  * @author nick.leaver@surevine.com
  */
 public class GitException extends Exception {
-    public GitException(Exception e) {
-        super(e);
+    public GitException(final String message) {
+        super(message);
+    }
+
+    public GitException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
+
+    public GitException(final Throwable cause) {
+        super(cause);
     }
 }

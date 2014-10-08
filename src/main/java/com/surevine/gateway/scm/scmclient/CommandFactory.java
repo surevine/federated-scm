@@ -26,7 +26,7 @@ import com.surevine.gateway.scm.util.PropertyUtil;
  */
 public abstract class CommandFactory {
     private static CommandFactory commandFactoryImplementation;
-    private static CommandFactory getInstance() {
+    public static CommandFactory getInstance() {
         if (commandFactoryImplementation == null) {
             switch (PropertyUtil.getSCMType()) {
                 case STASH:

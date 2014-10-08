@@ -15,43 +15,20 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-package com.surevine.gateway.scm.git;
-
-import com.surevine.gateway.scm.git.jgit.JGitGitImpl;
+package com.surevine.gateway.scm.service;
 
 /**
+ * A system boundary checked exception for sending human readable error messages back to external service users.
  * @author nick.leaver@surevine.com
  */
-public abstract class Git {
-    private static Git instance;
+public class SCMFederatorServiceException extends Exception {
+    private String userMessage;
     
-    protected Git() {
-        // no-op
+    public SCMFederatorServiceException(final String userMessage) {
+        this.userMessage = userMessage;
     }
 
-    /**
-     * Clone a repo into the configured git repository directory
-     * @param repoURI the repo location
-     * @throws GitException
-     */
-    public abstract void clone(final String repoURI) throws GitException;
-
-    /**
-     * Set the Git implementation
-     * @param instance the git implementation
-     */
-    public static void setInstance(Git instance) {
-        Git.instance = instance;
-    }
-
-    /**
-     * Get Git implementation
-     * @return the git implementation
-     */
-    public static Git getInstance() {
-        if (instance == null) {
-            instance = new JGitGitImpl();
-        }
-        return instance;
+    public String getUserMessage() {
+        return userMessage;
     }
 }
