@@ -32,7 +32,19 @@ public class StringUtilTest {
         String dirty1 = "\t   ThIS $§string NEEDS\n\n\tto be cleaned    \n\t*&&^%%";
         String expected1 = "this_string_needs_to_be_cleaned";
         
+        String dirty2 = "/etc/passwd";
+        String expected2 = "etcpasswd";
+
+        String dirty3 = "scp /etc/secretfile root@127.0.0.1; useradd badguy";
+        String expected3 = "scp_etcsecretfile_root127001_useradd_badguy";
+        
+        String dirty4 = "C:\\Program Files\\AdminProgram.exe";
+        String expected4 = "cprogram_filesadminprogramexe";
+        
         assertEquals(expected1, StringUtil.cleanStringForFilePath(dirty1));
+        assertEquals(expected2, StringUtil.cleanStringForFilePath(dirty2));
+        assertEquals(expected3, StringUtil.cleanStringForFilePath(dirty3));
+        assertEquals(expected4, StringUtil.cleanStringForFilePath(dirty4));
     }
     
     @Test
