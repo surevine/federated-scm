@@ -111,11 +111,8 @@ public class JGitGitFacade extends GitFacade {
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
             Repository repository = builder.setGitDir(gitPath.toFile()).findGitDir().build();
             Git git = new Git(repository);
-
             BundleWriter bundleWriter = new BundleWriter(repository);
 
-            RevWalk walk = new RevWalk(repository);
-            RevCommit baseCommit = null;
 
             if (baseTagName != null && !baseTagName.isEmpty()) {
                 List<Ref> tags = git.tagList().call();
@@ -127,27 +124,13 @@ public class JGitGitFacade extends GitFacade {
                 }
                 
                 if (tagObject != null) {
-                    baseCommit = walk.parseCommit(tagObject);
+                    // tagObject is the tag to use as the baseline for the bundle
+                    // TODO: Configure the BundleWriter to write a bundle from this tagObject (all local branches)
                 } else {
                     throw new GitException("The provided baseline tag " + baseTagName + " does not exist in the repo");
                 }
             } else {
-                Iterable<RevCommit> commits = git.log().setMaxCount(1).call();
-                RevCommit firstCommit = commits.iterator().next();
-                if (firstCommit != null) {
-                    logger.debug("Bundling from first commit:" + firstCommit);
-                    baseCommit = walk.parseCommit(firstCommit);
-                }
-            }
-            
-            walk.markStart(baseCommit);            
-
-            Iterator<RevCommit> interestedCommits = walk.iterator();
-            while (interestedCommits.hasNext()) {
-                RevCommit revCommit = interestedCommits.next();
-
-                Ref ref = repository.getRef(revCommit.getName());
-                bundleWriter.include(ref);
+                // TODO: Configure the BundleWriter to write a bundle of the whole repository (all local branches)
             }
             
             String fileName = StringUtil.cleanStringForFilePath(repoBean.getProject().getKey()
@@ -156,7 +139,6 @@ public class JGitGitFacade extends GitFacade {
             Path outputPath = Paths.get(PropertyUtil.getGatewayExportDir(), fileName);
             OutputStream outputStream = Files.newOutputStream(outputPath);
             bundleWriter.writeBundle(NullProgressMonitor.INSTANCE, outputStream);
-
             repository.close();
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
