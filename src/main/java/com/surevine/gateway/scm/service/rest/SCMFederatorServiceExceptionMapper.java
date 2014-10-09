@@ -19,6 +19,7 @@ package com.surevine.gateway.scm.service.rest;
 
 import com.surevine.gateway.scm.service.SCMFederatorServiceException;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
@@ -31,6 +32,8 @@ import java.net.HttpURLConnection;
 public class SCMFederatorServiceExceptionMapper implements ExceptionMapper<SCMFederatorServiceException> {
     @Override
     public Response toResponse(final SCMFederatorServiceException exception) {
-        return Response.status(HttpURLConnection.HTTP_BAD_REQUEST).entity(exception.getUserMessage()).build();
+        return Response.status(HttpURLConnection.HTTP_BAD_REQUEST)
+                .entity(exception.getUserMessage())
+                .type(MediaType.TEXT_PLAIN).build();
     }
 }

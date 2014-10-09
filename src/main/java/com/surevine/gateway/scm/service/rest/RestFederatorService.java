@@ -29,6 +29,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.net.HttpURLConnection;
 
 /**
@@ -54,7 +56,9 @@ public class RestFederatorService implements FederatorService {
                 || !InputValidator.projectKeyIsValid(projectKey)
                 || !InputValidator.repoSlugIsValid(repositorySlug)) {
             // one of the params is dirty and we can't use it so reject the request
-            throw new WebApplicationException(HttpURLConnection.HTTP_BAD_REQUEST);
+            throw new WebApplicationException(Response.status(HttpURLConnection.HTTP_BAD_REQUEST)
+                    .entity("Received input was invalid")
+                    .type(MediaType.TEXT_PLAIN).build());
         }
         
         getImplementation().newSharingPartner(partnerName, projectKey, repositorySlug);
@@ -72,7 +76,9 @@ public class RestFederatorService implements FederatorService {
                 || !InputValidator.projectKeyIsValid(projectKey)
                 || !InputValidator.repoSlugIsValid(repositorySlug)) {
             // one of the params is dirty and we can't use it so reject the request
-            throw new WebApplicationException(HttpURLConnection.HTTP_BAD_REQUEST);
+            throw new WebApplicationException(Response.status(HttpURLConnection.HTTP_BAD_REQUEST)
+                    .entity("Received input was invalid")
+                    .type(MediaType.TEXT_PLAIN).build());
         }
 
         getImplementation().redistribute(partnerName, projectKey, repositorySlug);
@@ -90,7 +96,9 @@ public class RestFederatorService implements FederatorService {
                 || !InputValidator.projectKeyIsValid(projectKey)
                 || !InputValidator.repoSlugIsValid(repositorySlug)) {
             // one of the params is dirty and we can't use it so reject the request
-            throw new WebApplicationException(HttpURLConnection.HTTP_BAD_REQUEST);
+            throw new WebApplicationException(Response.status(HttpURLConnection.HTTP_BAD_REQUEST)
+                    .entity("Received input was invalid")
+                    .type(MediaType.TEXT_PLAIN).build());
         }
 
         getImplementation().sharingPartnerRemoved(partnerName, projectKey, repositorySlug);
@@ -104,7 +112,9 @@ public class RestFederatorService implements FederatorService {
         // check input
         if (!InputValidator.acknowledgementBeanIsValid(acknowledgement)) {
             // the bean is dirty so reject the request
-            throw new WebApplicationException(HttpURLConnection.HTTP_BAD_REQUEST);
+            throw new WebApplicationException(Response.status(HttpURLConnection.HTTP_BAD_REQUEST)
+                    .entity("Received input was invalid")
+                    .type(MediaType.TEXT_PLAIN).build());
         }
         
         getImplementation().processAcknowledgementFile(acknowledgement);

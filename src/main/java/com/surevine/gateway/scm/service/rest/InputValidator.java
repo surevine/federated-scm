@@ -29,18 +29,22 @@ public final class InputValidator {
     }
     
     public static boolean partnerNameIsValid(final String partnerName) {
-        return StringUtil.isClean(partnerName);
+        return partnerName != null && StringUtil.isClean(partnerName);
     }
     
     public static boolean projectKeyIsValid(final String projectKey) {
-        return StringUtil.isClean(projectKey);
+        return projectKey != null && StringUtil.isClean(projectKey);
     }
     
     public static boolean repoSlugIsValid(final String repoSlug) {
-        return StringUtil.isClean(repoSlug);
+        return repoSlug != null && StringUtil.isClean(repoSlug);
     }
     
     public static boolean acknowledgementBeanIsValid(final AcknowledgementBean bean) {
+        if (bean == null) {
+            return false;
+        }
+        
         for (String hash:bean.getReceivedCommitHashes()) {
             if (!StringUtil.isClean(hash)) {
                 return false;

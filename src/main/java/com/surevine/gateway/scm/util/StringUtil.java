@@ -33,11 +33,13 @@ public final class StringUtil {
      */
     public static String cleanStringForFilePath(final String dirty) {
         String clean = dirty;
-        clean = clean.replaceAll("\\s+", " "); // collapse all whitespace (spaces used here instead of _ to allow trim)
-        clean = clean.replaceAll("[^a-zA-Z0-9_ ]", ""); // remove any unwanted characters
-        clean = clean.trim(); // remove any leading or trailing whitespace
-        clean = clean.toLowerCase(); // drop to lower case
-        clean = clean.replaceAll("\\s+", "_"); // replace any remaining mid-string spaces with underscores
+        if (clean != null) {
+            clean = clean.replaceAll("\\s+", " "); // collapse all whitespace (spaces used here instead of _ to allow trim)
+            clean = clean.replaceAll("[^a-zA-Z0-9_ ]", ""); // remove any unwanted characters
+            clean = clean.trim(); // remove any leading or trailing whitespace
+            clean = clean.toLowerCase(); // drop to lower case
+            clean = clean.replaceAll("\\s+", "_"); // replace any remaining mid-string spaces with underscores
+        }
         return clean;
     }
 
@@ -48,6 +50,6 @@ public final class StringUtil {
      * @return true if the string only contains a-z A-Z 0-9 spaces or underscores
      */
     public static boolean isClean(final String dirty) {
-        return dirty.matches("[a-zA-Z0-9 _]+");
+        return dirty == null || dirty.matches("[a-zA-Z0-9 _]+");
     }
 }
