@@ -45,11 +45,26 @@ public abstract class GitFacade {
     public abstract void pull(RepoBean repoBean) throws GitException;
 
     /**
+     * Tags a repository
+     * @param repoBean the repository info
+     * @param tag the tag name
+     * @throws GitException
+     */
+    public abstract void tag(RepoBean repoBean, String tag) throws GitException;
+
+    /**
+     * Bundles a repository
+     * @param repoBean the repository information
+     * @param baseCommitHash the commit hash to baseline
+     */
+    public abstract void bundle(RepoBean repoBean, String baseCommitHash) throws GitException;
+    
+    /**
      * Determines if a repo has already been cloned into the scm federator working directory
      * @param repoBean Information about the remote Repo
      * @return true if ${git.repodir}/projectKey/repoSlug already exists and has a remote called origin set to repoURI
      */
-    public abstract boolean repoAlreadyCloned(RepoBean repoBean);
+    public abstract boolean repoAlreadyCloned(RepoBean repoBean) throws GitException;
 
     /**
      * Set the Git implementation

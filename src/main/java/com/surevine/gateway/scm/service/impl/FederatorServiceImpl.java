@@ -56,8 +56,7 @@ public class FederatorServiceImpl implements FederatorService {
                 gitFacade.clone(repo);
             }
             
-            // create a bundle file
-            // write it away to the gateway
+//            gitFacade.bundle(repo, null);
         } catch (GitException ge) {
             logger.error(ge);
             throw new SCMFederatorServiceException(ge.getMessage());
