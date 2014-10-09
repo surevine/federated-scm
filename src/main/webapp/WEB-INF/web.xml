@@ -8,17 +8,6 @@
         <session-timeout>15</session-timeout>
     </session-config>
 
-    <context-param>
-        <param-name>contextConfigLocation</param-name>
-        <param-value>/WEB-INF/spring.xml</param-value>
-    </context-param>
-
-    <listener>
-        <listener-class>
-            org.springframework.web.context.ContextLoaderListener
-        </listener-class>
-    </listener>
-
     <listener>
         <listener-class>com.surevine.gateway.scm.FederateSCMContextListener</listener-class>
     </listener>

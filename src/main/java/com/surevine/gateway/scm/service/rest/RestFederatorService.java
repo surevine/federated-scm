@@ -20,8 +20,7 @@ package com.surevine.gateway.scm.service.rest;
 import com.surevine.gateway.scm.service.FederatorService;
 import com.surevine.gateway.scm.service.SCMFederatorServiceException;
 import com.surevine.gateway.scm.service.bean.AcknowledgementBean;
-import com.surevine.gateway.scm.util.SpringApplicationContext;
-import org.apache.log4j.Logger;
+import com.surevine.gateway.scm.service.impl.FederatorServiceImpl;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -40,14 +39,12 @@ import java.net.HttpURLConnection;
 @Path("/federator")
 @Produces("application/json")
 @Consumes("application/json")
-public class RestFederatorService implements FederatorService {
-    private Logger logger = Logger.getLogger(RestFederatorService.class);
+public class RestFederatorService {
     private FederatorService federatorService;
 
     @POST
     @Path("newSharingPartner")
-    @Override
-    public void newSharingPartner(@QueryParam("partnerName") final String partnerName,
+    public Response newSharingPartner(@QueryParam("partnerName") final String partnerName,
                                   @QueryParam("projectKey") final String projectKey,
                                   @QueryParam("repositorySlug") final String repositorySlug)
             throws SCMFederatorServiceException {
@@ -62,12 +59,13 @@ public class RestFederatorService implements FederatorService {
         }
         
         getImplementation().newSharingPartner(partnerName, projectKey, repositorySlug);
+
+        return Response.ok(MediaType.APPLICATION_JSON).build();
     }
 
     @POST
     @Path("redistribute")
-    @Override
-    public void redistribute(@QueryParam("partnerName") final String partnerName,
+    public Response redistribute(@QueryParam("partnerName") final String partnerName,
                              @QueryParam("projectKey") final String projectKey,
                              @QueryParam("repositorySlug") final String repositorySlug)
             throws SCMFederatorServiceException {
@@ -82,12 +80,12 @@ public class RestFederatorService implements FederatorService {
         }
 
         getImplementation().redistribute(partnerName, projectKey, repositorySlug);
+        return Response.ok(MediaType.APPLICATION_JSON).build();
     }
 
     @POST
     @Path("sharingPartnerRemoved")
-    @Override
-    public void sharingPartnerRemoved(@QueryParam("partnerName") final String partnerName,
+    public Response sharingPartnerRemoved(@QueryParam("partnerName") final String partnerName,
                                       @QueryParam("projectKey") final String projectKey,
                                       @QueryParam("repositorySlug") final String repositorySlug)
             throws SCMFederatorServiceException {
@@ -102,12 +100,12 @@ public class RestFederatorService implements FederatorService {
         }
 
         getImplementation().sharingPartnerRemoved(partnerName, projectKey, repositorySlug);
+        return Response.ok(MediaType.APPLICATION_JSON).build();
     }
 
     @POST
     @Path("processAcknowledgement")
-    @Override
-    public void processAcknowledgementFile(final AcknowledgementBean acknowledgement)
+    public Response processAcknowledgementFile(final AcknowledgementBean acknowledgement)
             throws SCMFederatorServiceException {
         // check input
         if (!InputValidator.acknowledgementBeanIsValid(acknowledgement)) {
@@ -118,11 +116,12 @@ public class RestFederatorService implements FederatorService {
         }
         
         getImplementation().processAcknowledgementFile(acknowledgement);
+        return Response.ok(MediaType.APPLICATION_JSON).build();
     }
-
+    
     private FederatorService getImplementation() {
         if (federatorService == null) {
-            federatorService = (FederatorService) SpringApplicationContext.getBean("federatorService");
+            federatorService = new FederatorServiceImpl();
         }
         return federatorService;
     }

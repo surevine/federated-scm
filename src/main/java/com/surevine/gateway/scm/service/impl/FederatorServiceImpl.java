@@ -46,22 +46,22 @@ public class FederatorServiceImpl implements FederatorService {
         }
 
         GitFacade gitFacade = GitFacade.getInstance();
-        boolean alreadyCloned = gitFacade.repoAlreadyCloned(repo);
         
-        if (alreadyCloned) {
-            try {
+        try {
+            boolean alreadyCloned = gitFacade.repoAlreadyCloned(repo);
+        
+            if (alreadyCloned) {
                 gitFacade.pull(repo);
-            } catch (GitException ge) {
-                logger.error(ge);
-                throw new SCMFederatorServiceException("The Git pull command failed for the repository "
-                        + projectKey + ":" + repositorySlug);
+            } else {
+                gitFacade.clone(repo);
             }
-        } else {
-            // clone
+            
+            // create a bundle file
+            // write it away to the gateway
+        } catch (GitException ge) {
+            logger.error(ge);
+            throw new SCMFederatorServiceException(ge.getMessage());
         }
-        
-        // create a bundle file
-        // write it away to the gateway
     }
 
     @Override

@@ -45,7 +45,7 @@ public class JGitGitFacade extends GitFacade {
     public void clone(final RepoBean repoBean) throws GitException {
         CloneCommand cloneCommand = new CloneCommand();
         cloneCommand.setDirectory(getRepoPath(repoBean).toFile());
-        cloneCommand.setURI(repoBean.getSlug());
+        cloneCommand.setURI(repoBean.getRepoCloneURL());
         try {
             cloneCommand.call();
         } catch (Exception e) {
@@ -56,7 +56,8 @@ public class JGitGitFacade extends GitFacade {
     @Override
     public void pull(final RepoBean repoBean) throws GitException {
         try {
-            Repository repository = FileRepositoryBuilder.create(getRepoPath(repoBean).toFile());
+            Path gitPath = getRepoGitDirPath(repoBean);
+            Repository repository = FileRepositoryBuilder.create(gitPath.toFile());
             Git git = new org.eclipse.jgit.api.Git(repository);
             PullCommand pullCommand = git.pull();
             pullCommand.setRemote("origin");
@@ -81,5 +82,9 @@ public class JGitGitFacade extends GitFacade {
     
     private Path getRepoPath(final RepoBean repoBean) {
         return gitDirectoryPath.resolve(Paths.get(repoBean.getProject().getKey(), repoBean.getSlug()));
+    }
+    
+    private Path getRepoGitDirPath(final RepoBean repoBean) {
+        return getRepoPath(repoBean).resolve(".git");
     }
 }
