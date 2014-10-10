@@ -15,6 +15,8 @@
         <wildfly.hostname>127.0.0.1</wildfly.hostname>
         <wildfly.username>admin</wildfly.username>
         <wildfly.password>password</wildfly.password>
+		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.target>1.7</maven.compiler.target>
     </properties>
 
     <dependencies>
