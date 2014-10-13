@@ -34,7 +34,7 @@ public final class StringUtil {
     public static String cleanStringForFilePath(final String dirty) {
         String clean = dirty;
         if (clean != null) {
-            clean = clean.replaceAll("\\s+", " "); // collapse all whitespace (spaces used here instead of _ to allow trim)
+            clean = clean.replaceAll("\\s+", " "); // collapse whitespace (spaces used here instead of _ to allow trim)
             clean = clean.replaceAll("[^a-zA-Z0-9_ ]", ""); // remove any unwanted characters
             clean = clean.trim(); // remove any leading or trailing whitespace
             clean = clean.toLowerCase(); // drop to lower case

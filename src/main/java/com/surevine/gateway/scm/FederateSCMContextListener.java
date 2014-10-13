@@ -17,6 +17,11 @@
 */
 package com.surevine.gateway.scm;
 
+import com.surevine.gateway.scm.gatewayclient.GatewayConfigServiceFacade;
+import com.surevine.gateway.scm.gatewayclient.SharedRepoIdentification;
+import com.surevine.gateway.scm.service.FederatorService;
+import com.surevine.gateway.scm.service.SCMFederatorServiceException;
+import com.surevine.gateway.scm.service.impl.FederatorServiceImpl;
 import com.surevine.gateway.scm.util.PropertyUtil;
 import org.apache.log4j.Logger;
 
@@ -24,6 +29,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -33,7 +39,12 @@ import java.util.TimerTask;
  */
 public class FederateSCMContextListener implements ServletContextListener {
     private Logger logger = Logger.getLogger(FederateSCMContextListener.class);
+    private FederatorService federatorService;
     private static final String CONTEXT_KEY = "scmExporter";
+
+    public FederateSCMContextListener() {
+        federatorService = new FederatorServiceImpl();
+    }
 
     @Override
     public void contextInitialized(final ServletContextEvent servletContextEvent) {
@@ -44,7 +55,23 @@ public class FederateSCMContextListener implements ServletContextListener {
         TimerTask federateTask = new TimerTask() {
             @Override
             public void run() {
-                logger.debug("Running SCM export");
+                logger.info("Running SCM export");
+                List<SharedRepoIdentification> currentSharedRepositories 
+                        = GatewayConfigServiceFacade.getInstance().getSharedRepositories();
+                
+                if (currentSharedRepositories.size() > 0) {
+                    for (SharedRepoIdentification repoShare:currentSharedRepositories) {
+                        if (repoShare != null && repoShare.getProjectKey() != null
+                                && repoShare.getRepoSlug() != null) {
+                            try {
+                                federatorService.distribute(repoShare.getProjectKey(), repoShare.getProjectKey());
+                                logger.info("Distributed " + repoShare);
+                            } catch (SCMFederatorServiceException e) {
+                                logger.error("Failed to distribute " + repoShare, e);
+                            }
+                        }
+                    }
+                }
             }
         };
 

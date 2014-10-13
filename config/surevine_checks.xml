@@ -75,4 +75,7 @@ Surevine
   <module name="Translation"/>
   <module name="FileLength"/>
   <module name="FileTabCharacter"/>
+  <module name="SuppressionFilter">
+      <property name="file" value="suppressions.xml" />
+  </module>
 </module>

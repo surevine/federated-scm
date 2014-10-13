@@ -38,6 +38,7 @@ public final class PropertyUtil {
     private static final String PROP_SCM_PASSWORD = "scm.auth.password";
     private static final String PROP_SCM_HOSTNAME = "scm.hostname";
     private static final String PROP_GIT_REPODIR = "git.repodir";
+    private static final String PROP_GATEWAY_SERVICE_URL = "gateway.serviceURL";
     private static ResourceBundle bundle;
 
     private PropertyUtil() {
@@ -47,13 +48,13 @@ public final class PropertyUtil {
         checkInit();
         return bundle.getString(key);
     }
+    
+    public static String getGatewayURL() {
+        return getProperty(PROP_GATEWAY_SERVICE_URL);
+    }
 
     public static long getExportInterval() {
         return Long.parseLong(getProperty(PROP_EXPORT_INTERVAL));
-    }
-
-    public static String getRedisHostname() {
-        return getProperty(PROP_REDIS_HOSTNAME);
     }
 
     public static String getPropRedisNamespace() {

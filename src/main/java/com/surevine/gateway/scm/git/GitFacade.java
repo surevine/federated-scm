@@ -20,6 +20,8 @@ package com.surevine.gateway.scm.git;
 import com.surevine.gateway.scm.git.jgit.JGitGitFacade;
 import com.surevine.gateway.scm.scmclient.bean.RepoBean;
 
+import java.nio.file.Path;
+
 /**
  * @author nick.leaver@surevine.com
  */
@@ -40,9 +42,10 @@ public abstract class GitFacade {
     /**
      * Pull a remote into a git repository
      * @param repoBean Information about the remote Repo
+     * @return true if the pull resulted in an update to the local repository, false if there were no changes
      * @throws GitException
      */
-    public abstract void pull(RepoBean repoBean) throws GitException;
+    public abstract boolean pull(RepoBean repoBean) throws GitException;
 
     /**
      * Tags a repository
@@ -55,9 +58,9 @@ public abstract class GitFacade {
     /**
      * Bundles a repository
      * @param repoBean the repository information
-     * @param baseCommitHash the commit hash to baseline
+     * @return the Path to the bundle file
      */
-    public abstract void bundle(RepoBean repoBean, String baseCommitHash) throws GitException;
+    public abstract Path bundle(RepoBean repoBean) throws GitException;
     
     /**
      * Determines if a repo has already been cloned into the scm federator working directory

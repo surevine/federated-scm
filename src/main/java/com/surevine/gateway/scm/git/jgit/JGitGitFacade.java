@@ -25,26 +25,23 @@ import com.surevine.gateway.scm.util.StringUtil;
 import org.apache.log4j.Logger;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.PullCommand;
+import org.eclipse.jgit.api.PullResult;
+import org.eclipse.jgit.api.RebaseResult;
 import org.eclipse.jgit.api.TagCommand;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.NullProgressMonitor;
-import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevTree;
-import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
-import org.eclipse.jgit.transport.BundleWriter;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Iterator;
-import java.util.List;
+import java.util.Map;
 
 /**
  * @author nick.leaver@surevine.com
@@ -71,7 +68,8 @@ public class JGitGitFacade extends GitFacade {
     }
 
     @Override
-    public void pull(final RepoBean repoBean) throws GitException {
+    public boolean pull(final RepoBean repoBean) throws GitException {
+        PullResult result;
         try {
             Path gitPath = getRepoGitDirectory(repoBean);
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
@@ -79,16 +77,29 @@ public class JGitGitFacade extends GitFacade {
             Git git = new org.eclipse.jgit.api.Git(repository);
             PullCommand pullCommand = git.pull();
             pullCommand.setRemote("origin"); // always assume origin is the remote we want here
-            pullCommand.call();
+            result = pullCommand.call();
             repository.close();
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw new GitException(e);
         }
+        
+        boolean hadUpdates = false;            
+        
+        if (result != null && result.isSuccessful()) {
+            if (result.getMergeResult() != null) {
+                hadUpdates = !MergeResult.MergeStatus.ALREADY_UP_TO_DATE
+                        .equals(result.getMergeResult().getMergeStatus());
+            } else {
+                hadUpdates = !RebaseResult.Status.UP_TO_DATE.equals(result.getRebaseResult().getStatus());
+            }
+        }
+        
+        return hadUpdates;
     }
 
     @Override
-    public void tag(RepoBean repoBean, String tag) throws GitException {
+    public void tag(final RepoBean repoBean, final String tag) throws GitException {
         try {
             Path gitPath = getRepoGitDirectory(repoBean);
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
@@ -105,44 +116,38 @@ public class JGitGitFacade extends GitFacade {
     }
 
     @Override
-    public void bundle(RepoBean repoBean, String baseTagName) throws GitException {
+    public Path bundle(final RepoBean repoBean) throws GitException {
+        OutputStream outputStream = null;
         try {
             Path gitPath = getRepoGitDirectory(repoBean);
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
             Repository repository = builder.setGitDir(gitPath.toFile()).findGitDir().build();
-            Git git = new Git(repository);
             BundleWriter bundleWriter = new BundleWriter(repository);
-
-
-            if (baseTagName != null && !baseTagName.isEmpty()) {
-                List<Ref> tags = git.tagList().call();
-                ObjectId tagObject = null;
-                for (Ref tag:tags) {
-                    if (tag.getName().equals(baseTagName)) {
-                        tagObject = tag.getObjectId();
-                    }
-                }
-                
-                if (tagObject != null) {
-                    // tagObject is the tag to use as the baseline for the bundle
-                    // TODO: Configure the BundleWriter to write a bundle from this tagObject (all local branches)
-                } else {
-                    throw new GitException("The provided baseline tag " + baseTagName + " does not exist in the repo");
-                }
-            } else {
-                // TODO: Configure the BundleWriter to write a bundle of the whole repository (all local branches)
-            }
-            
             String fileName = StringUtil.cleanStringForFilePath(repoBean.getProject().getKey()
                     + "_" + repoBean.getSlug()) + ".bundle";
-            
             Path outputPath = Paths.get(PropertyUtil.getGatewayExportDir(), fileName);
-            OutputStream outputStream = Files.newOutputStream(outputPath);
+            outputStream = Files.newOutputStream(outputPath);
+            
+            Map<String, Ref> refMap = repository.getAllRefs();
+            for (Ref ref:refMap.values()) {
+                bundleWriter.include(ref);
+            }
+
             bundleWriter.writeBundle(NullProgressMonitor.INSTANCE, outputStream);
+            outputStream.close();
             repository.close();
+            return outputPath;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw new GitException(e);
+        } finally {
+            if (outputStream != null) {
+                try {
+                    outputStream.close();
+                } catch (IOException ioe) {
+                    logger.error(ioe);
+                }
+            }
         }
     }
 

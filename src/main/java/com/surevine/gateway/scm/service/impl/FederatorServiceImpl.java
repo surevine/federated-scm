@@ -17,14 +17,17 @@
 */
 package com.surevine.gateway.scm.service.impl;
 
+import com.surevine.gateway.scm.gatewayclient.GatewayUtil;
 import com.surevine.gateway.scm.git.GitException;
 import com.surevine.gateway.scm.git.GitFacade;
 import com.surevine.gateway.scm.scmclient.CommandFactory;
 import com.surevine.gateway.scm.scmclient.bean.RepoBean;
 import com.surevine.gateway.scm.service.FederatorService;
 import com.surevine.gateway.scm.service.SCMFederatorServiceException;
-import com.surevine.gateway.scm.service.bean.AcknowledgementBean;
 import org.apache.log4j.Logger;
+
+import java.nio.file.Path;
+import java.util.Map;
 
 /**
  * Implementation of Federator Service
@@ -34,48 +37,49 @@ public class FederatorServiceImpl implements FederatorService {
     private static Logger logger = Logger.getLogger(FederatorServiceImpl.class);
 
     @Override
-    public void newSharingPartner(final String partnerName, final String projectKey, final String repositorySlug) 
+    public void distribute(final String partnerName, final String projectKey, final String repositorySlug) 
             throws SCMFederatorServiceException {
-        logger.debug("New sharing partner notification: " + partnerName + " for repository "
+        logger.debug("Distributing to partner: " + partnerName + " repository "
                 + projectKey + ":" + repositorySlug);
-        
         RepoBean repo = CommandFactory.getInstance().getGetRepoCommand().getRepository(projectKey, repositorySlug);
+        distribute(repo, GatewayUtil.getSinglePartnerMetadata(repo, partnerName));        
+    }
+
+    @Override
+    public void distribute(final String projectKey, final String repositorySlug) throws SCMFederatorServiceException {
+        logger.debug("Distributing repository " + projectKey + ":" + repositorySlug);
+        RepoBean repo = CommandFactory.getInstance().getGetRepoCommand().getRepository(projectKey, repositorySlug);
+        distribute(repo, GatewayUtil.getMetadata(repo));
+    }
+
+    /**
+     * Distributes a repository via the gateway with the provided metadata map
+     * @param repo The repository to distribute.
+     * @param metadata the metadata to be send with the distribution
+     */
+    private void distribute(final RepoBean repo, final Map<String, String> metadata)
+            throws SCMFederatorServiceException {
         if (repo ==  null) {
-            throw new SCMFederatorServiceException("The repository information for  " + projectKey + ":"
-                    + repositorySlug + " could not be retrieved from the SCM system.");
+            throw new SCMFederatorServiceException("The repository information for  " + repo.getProject().getKey() + ":"
+                    + repo.getSlug() + " could not be retrieved from the SCM system.");
         }
 
         GitFacade gitFacade = GitFacade.getInstance();
-        
+
         try {
             boolean alreadyCloned = gitFacade.repoAlreadyCloned(repo);
-        
+
             if (alreadyCloned) {
                 gitFacade.pull(repo);
             } else {
                 gitFacade.clone(repo);
             }
-            
-//            gitFacade.bundle(repo, null);
+
+            Path bundlePath = gitFacade.bundle(repo);
+            GatewayUtil.sendFileToGateway(bundlePath, metadata);
         } catch (GitException ge) {
             logger.error(ge);
             throw new SCMFederatorServiceException(ge.getMessage());
         }
-    }
-
-    @Override
-    public void redistribute(final String partnerName, final String projectKey, final String repositorySlug) {
-        logger.debug("Redistribution request: " + partnerName + " for repository " + projectKey + ":" + repositorySlug);
-    }
-
-    @Override
-    public void sharingPartnerRemoved(final String partnerName, final String projectKey, final String repositorySlug) {
-        logger.debug("Removed sharing partner notification: " + partnerName + " for repository "
-                + projectKey + ":" + repositorySlug);
-    }
-
-    @Override
-    public void processAcknowledgementFile(final AcknowledgementBean acknowledgement) {
-        logger.debug("Received acknowledgement:" + acknowledgement);
     }
 }
