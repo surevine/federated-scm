@@ -57,6 +57,7 @@ public class JGitGitFacadeTest {
     public void setup() throws Exception {
         Path repoPath = Paths.get(tmpRepoRootPath, projectKey, repoSlug);
         Files.createDirectories(repoPath);
+        Files.createDirectories(Paths.get(PropertyUtil.getGatewayExportDir()));
         Repository repo = new FileRepository(repoPath.resolve(".git").toFile());
         repo.create();
         StoredConfig config = repo.getConfig();
@@ -101,6 +102,8 @@ public class JGitGitFacadeTest {
     
     @Test
     public void testBundle() throws Exception {
-        underTest.bundle(repoBean);
+        Path bundlePath = underTest.bundle(repoBean);
+        assertTrue(Files.exists(bundlePath));
+        assertTrue(Files.isRegularFile(bundlePath));
     }
 }
