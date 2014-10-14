@@ -17,6 +17,9 @@
 */
 package com.surevine.gateway.scm.service;
 
+import java.nio.file.Path;
+import java.util.Map;
+
 /**
  * SCM Federator Service
  * @author nick.leaver@surevine.com
@@ -27,6 +30,7 @@ public interface FederatorService {
      * @param partnerName The name of the partner. Must match a Gateway management endpoint.
      * @param projectKey The project key of the project. Must match the key in the SCM system.
      * @param repositorySlug The repository slug for the shared repository.
+     * @throws SCMFederatorServiceException
      */
     void distribute(final String partnerName, final String projectKey, final String repositorySlug)
             throws SCMFederatorServiceException;
@@ -35,7 +39,16 @@ public interface FederatorService {
      * Causes the SCM federator to package a repository and distribute via the Gateway.
      * @param projectKey The project key of the project. Must match the key in the SCM system.
      * @param repositorySlug The repository slug for the shared repository.
+     * @throws SCMFederatorServiceException
      */
     void distribute(final String projectKey, final String repositorySlug)
             throws SCMFederatorServiceException;
+
+    /**
+     * Causes the SCM federator to process an incoming SCM update file
+     * @param path the path to the received file
+     * @param metadata the metadata associated with the file
+     * @throws SCMFederatorServiceException
+     */
+    void processIncomingRepository(Path path, Map<String, String> metadata) throws SCMFederatorServiceException;
 }

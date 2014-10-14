@@ -53,7 +53,12 @@ public class JGitGitFacade extends GitFacade {
     public JGitGitFacade() {
         this.gitDirectoryPath = Paths.get(PropertyUtil.getGitDir());
     }
-    
+
+    @Override
+    public boolean push(final RepoBean repoBean) throws GitException {
+        throw new UnsupportedOperationException("Not yet implemented");        
+    }
+
     @Override
     public void clone(final RepoBean repoBean) throws GitException {
         CloneCommand cloneCommand = new CloneCommand();
@@ -125,7 +130,7 @@ public class JGitGitFacade extends GitFacade {
             BundleWriter bundleWriter = new BundleWriter(repository);
             String fileName = StringUtil.cleanStringForFilePath(repoBean.getProject().getKey()
                     + "_" + repoBean.getSlug()) + ".bundle";
-            Path outputPath = Paths.get(PropertyUtil.getGatewayExportDir(), fileName);
+            Path outputPath = Paths.get(PropertyUtil.getTempDir(), fileName);
             outputStream = Files.newOutputStream(outputPath);
             
             Map<String, Ref> refMap = repository.getAllRefs();

@@ -17,8 +17,8 @@
 */
 package com.surevine.gateway.scm.service.impl;
 
+import com.surevine.gateway.scm.gatewayclient.GatewayPackage;
 import com.surevine.gateway.scm.gatewayclient.GatewayUtil;
-import com.surevine.gateway.scm.git.GitException;
 import com.surevine.gateway.scm.git.GitFacade;
 import com.surevine.gateway.scm.scmclient.CommandFactory;
 import com.surevine.gateway.scm.scmclient.bean.RepoBean;
@@ -35,6 +35,16 @@ import java.util.Map;
  */
 public class FederatorServiceImpl implements FederatorService {
     private static Logger logger = Logger.getLogger(FederatorServiceImpl.class);
+
+    @Override
+    public void processIncomingRepository(final Path path, final Map<String, String> metadata) 
+            throws SCMFederatorServiceException {
+        // TODO
+        // examine metadata for project key and repo name
+        // determine if we have dealt with the repository before
+        // if we have seen it before update incoming fork repository and create merge requests
+        // if we haven't seen it before create new repo in SCM system and create fork from the repo for future changes
+    }
 
     @Override
     public void distribute(final String partnerName, final String projectKey, final String repositorySlug) 
@@ -76,10 +86,14 @@ public class FederatorServiceImpl implements FederatorService {
             }
 
             Path bundlePath = gitFacade.bundle(repo);
-            GatewayUtil.sendFileToGateway(bundlePath, metadata);
-        } catch (GitException ge) {
-            logger.error(ge);
-            throw new SCMFederatorServiceException(ge.getMessage());
+            
+            GatewayPackage gatewayPackage = new GatewayPackage(bundlePath, metadata);
+            gatewayPackage.createArchive();
+            GatewayUtil.sendToGateway(gatewayPackage);
+            
+        } catch (Exception e) {
+            logger.error(e);
+            throw new SCMFederatorServiceException(e.getMessage());
         }
     }
 }

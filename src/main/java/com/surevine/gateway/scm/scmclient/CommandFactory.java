@@ -40,6 +40,12 @@ public abstract class CommandFactory {
     }
 
     /**
+     * SCM system specific ForkRepoCommand implementation
+     * @return SCM system specific ForkRepoCommand implementation
+     */
+    public abstract ForkRepoCommand getForkRepoCommand();
+
+    /**
      * SCM system specific GetProjectsCommand implementation
      * @return SCM system specific GetProjectsCommand implementation
      */

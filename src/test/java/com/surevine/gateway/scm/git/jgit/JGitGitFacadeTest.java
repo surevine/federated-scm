@@ -17,6 +17,7 @@
 */
 package com.surevine.gateway.scm.git.jgit;
 
+import com.surevine.gateway.scm.TestUtility;
 import com.surevine.gateway.scm.scmclient.bean.ProjectBean;
 import com.surevine.gateway.scm.scmclient.bean.RepoBean;
 import com.surevine.gateway.scm.util.PropertyUtil;
@@ -46,64 +47,22 @@ import static org.junit.Assert.assertTrue;
  * @author nick.leaver@surevine.com
  */
 public class JGitGitFacadeTest {
-    private static String tmpRepoRootPath = PropertyUtil.getGitDir();
-    private static String projectKey = "testproject";
-    private static String repoSlug = "testrepo";
-    private static String repoURL = "ssh://fake_url";
     private JGitGitFacade underTest = new JGitGitFacade();
-    private RepoBean repoBean;
-    
-    @Before
-    public void setup() throws Exception {
-        Path repoPath = Paths.get(tmpRepoRootPath, projectKey, repoSlug);
-        Files.createDirectories(repoPath);
-        Files.createDirectories(Paths.get(PropertyUtil.getGatewayExportDir()));
-        Repository repo = new FileRepository(repoPath.resolve(".git").toFile());
-        repo.create();
-        StoredConfig config = repo.getConfig();
-        config.setString("remote", "origin", "url", repoURL);
-        config.save();
-
-        repoBean = new RepoBean();
-        ProjectBean projectBean = new ProjectBean();
-        projectBean.setKey(projectKey);
-        repoBean.setProject(projectBean);
-        repoBean.setSlug(repoSlug);
-
-        Map<String, List<RepoBean.Link>> links = new HashMap<String, List<RepoBean.Link>>();
-        RepoBean.Link link = new RepoBean.Link();
-        link.setName("ssh");
-        link.setHref(repoURL);
-        links.put("clone", Arrays.asList(link));
-        repoBean.setLinks(links);
-
-        Git git = new Git(repo);
-        
-        for (int i = 0; i < 3; i++) {
-            String filename = "newfile" + i + ".txt";
-            Files.write(repoPath.resolve(filename), Arrays.asList("Hello World"), StandardCharsets.UTF_8,
-                    StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-            git.add().addFilepattern(filename).call();
-            git.commit().setMessage("Added " + filename).call();
-        }
-        
-        repo.close();
-    }
-    
-    @After
-    public void removeTestRepo() throws Exception {
-        FileUtils.deleteDirectory(Paths.get(tmpRepoRootPath, projectKey).toFile());
-    }
     
     @Test
     public void testAlreadyCloned() throws Exception {
-        assertTrue(underTest.repoAlreadyCloned(repoBean));
+        RepoBean testRepo = TestUtility.createTestRepo();
+        assertTrue(underTest.repoAlreadyCloned(testRepo));
+        TestUtility.destroyTestRepo(testRepo);
     }
     
     @Test
     public void testBundle() throws Exception {
-        Path bundlePath = underTest.bundle(repoBean);
+        RepoBean testRepo = TestUtility.createTestRepo();
+        Path bundlePath = underTest.bundle(testRepo);
         assertTrue(Files.exists(bundlePath));
         assertTrue(Files.isRegularFile(bundlePath));
+        TestUtility.destroyTestRepo(testRepo);
+        Files.deleteIfExists(bundlePath);
     }
 }

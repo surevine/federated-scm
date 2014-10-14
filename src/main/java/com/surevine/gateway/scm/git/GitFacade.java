@@ -48,6 +48,14 @@ public abstract class GitFacade {
     public abstract boolean pull(RepoBean repoBean) throws GitException;
 
     /**
+     * Pushes a repo to a remote
+     * @param repoBean the repo bean
+     * @return true if the push succeeded
+     * @throws GitException if something went wrong
+     */
+    public abstract boolean push(RepoBean repoBean) throws GitException;
+
+    /**
      * Tags a repository
      * @param repoBean the repository info
      * @param tag the tag name

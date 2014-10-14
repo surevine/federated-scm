@@ -22,6 +22,7 @@ import com.surevine.gateway.scm.scmclient.CreateProjectCommand;
 import com.surevine.gateway.scm.scmclient.CreateRepoCommand;
 import com.surevine.gateway.scm.scmclient.DeleteProjectCommand;
 import com.surevine.gateway.scm.scmclient.DeleteRepoCommand;
+import com.surevine.gateway.scm.scmclient.ForkRepoCommand;
 import com.surevine.gateway.scm.scmclient.GetProjectsCommand;
 import com.surevine.gateway.scm.scmclient.GetRepoCommand;
 
@@ -30,6 +31,10 @@ import com.surevine.gateway.scm.scmclient.GetRepoCommand;
  * @author nick.leaver@surevine.com
  */
 public class StashCommandFactory extends CommandFactory {
+    @Override
+    public ForkRepoCommand getForkRepoCommand() {
+        return null;
+    }
 
     @Override
     public GetProjectsCommand getGetProjectsCommand() {

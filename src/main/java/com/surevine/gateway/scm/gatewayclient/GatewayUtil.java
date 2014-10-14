@@ -19,7 +19,6 @@ package com.surevine.gateway.scm.gatewayclient;
 
 import com.surevine.gateway.scm.scmclient.bean.RepoBean;
 
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,13 +39,8 @@ public final class GatewayUtil {
         // no-op
     }
     
-    public static void sendFileToGateway(final Path bundleFile, final Map<String, String> metadata) {
-        // TODO
-        // check bundleFile
-        // check metadata
-        // create JSON tmp file .metadata.json
-        // create tar.gz containing bundleFile and .metadata.json
-        // submit to the Gateway rest service
+    public static void sendToGateway(final GatewayPackage gatewayPackage) {
+        // TODO Send to Gateway service
     }
     
     public static Map<String, String> getSinglePartnerMetadata(final RepoBean repoBean, final String partner) {

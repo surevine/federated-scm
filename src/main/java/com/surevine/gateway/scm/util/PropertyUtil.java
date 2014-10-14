@@ -19,6 +19,8 @@ package com.surevine.gateway.scm.util;
 
 import org.apache.log4j.Logger;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ResourceBundle;
 
 /**
@@ -27,18 +29,17 @@ import java.util.ResourceBundle;
  */
 public final class PropertyUtil {
     private static Logger logger = Logger.getLogger(PropertyUtil.class);
-    private static final String PROP_REDIS_HOSTNAME = "redis.hostname";
-    private static final String PROP_REDIS_NAMESPACE = "redis.namespace";
-    private static final String PROP_GATEWAY_IMPORT_DIR = "gateway.import.dir";
-    private static final String PROP_GATEWAY_EXPORT_DIR = "gateway.export.dir";
+    private static final String PROP_TEMP_DIR = "fedscm.temp.dir";
     private static final String PROP_VERSION = "fedscm.version";
     private static final String PROP_EXPORT_INTERVAL = "fedscm.export.interval";
     private static final String PROP_SCM_TYPE = "scm.type";
     private static final String PROP_SCM_USERNAME = "scm.auth.username";
     private static final String PROP_SCM_PASSWORD = "scm.auth.password";
     private static final String PROP_SCM_HOSTNAME = "scm.hostname";
-    private static final String PROP_GIT_REPODIR = "git.repodir";
+    private static final String PROP_GIT_REPODIR = "fedscm.git.dir";
     private static final String PROP_GATEWAY_SERVICE_URL = "gateway.serviceURL";
+    private static final String PROP_PARTNER_PROJECT_KEY = "scm.import.project.key";
+    private static final String PROP_PARTNER_FORK_PROJECT_KEY = "scm.import.project.fork";
     private static ResourceBundle bundle;
 
     private PropertyUtil() {
@@ -49,6 +50,14 @@ public final class PropertyUtil {
         return bundle.getString(key);
     }
     
+    public static String getPartnerProjectKeyString(final String partnerName) {
+        return getProperty(String.format(PROP_PARTNER_PROJECT_KEY, partnerName));
+    }
+
+    public static String getPartnerForkProjectKeyString(final String partnerName) {
+        return getProperty(String.format(PROP_PARTNER_FORK_PROJECT_KEY, partnerName));
+    }
+    
     public static String getGatewayURL() {
         return getProperty(PROP_GATEWAY_SERVICE_URL);
     }
@@ -57,16 +66,14 @@ public final class PropertyUtil {
         return Long.parseLong(getProperty(PROP_EXPORT_INTERVAL));
     }
 
-    public static String getPropRedisNamespace() {
-        return getProperty(PROP_REDIS_NAMESPACE);
-    }
-
-    public static String getGatewayImportDir() {
-        return getProperty(PROP_GATEWAY_IMPORT_DIR);
-    }
-
-    public static String getGatewayExportDir() {
-        return getProperty(PROP_GATEWAY_EXPORT_DIR);
+    public static String getTempDir() {
+        String tmpDir = getProperty(PROP_TEMP_DIR);
+        try {
+            Files.createDirectories(Paths.get(tmpDir));
+        } catch (Exception e) {
+            logger.error(e);
+        }
+        return tmpDir;
     }
 
     public static String getSystemVersion() {
@@ -74,7 +81,13 @@ public final class PropertyUtil {
     }
     
     public static String getGitDir() {
-        return getProperty(PROP_GIT_REPODIR);
+        String gitDir = getProperty(PROP_GIT_REPODIR);
+        try {
+            Files.createDirectories(Paths.get(gitDir));
+        } catch (Exception e) {
+            logger.error(e);
+        }
+        return gitDir;
     }
 
     public static SCMSystemProperties getSCMSystemProperties() {
