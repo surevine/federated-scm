@@ -31,7 +31,7 @@ public final class GatewayUtil {
     private static final String KEY_LIMIT_DISTRIBUTION_TO = "limit_distribution_to";
     private static final String KEY_PROJECT = "project";
     private static final String KEY_REPO = "repo";
-    private static final String KEY_DISTRIBUTION_TYPE = "repo";
+    private static final String KEY_DISTRIBUTION_TYPE = "distribution_type";
     private static final String VALUE_SINGLE_DISTRIBUTION = "SINGLE_DISTRIBUTION";
     private static final String VALUE_DISTRIBUTE_TO_ALL_PERMITTED = "DISTRIBUTE_TO_ALL_PERMITTED";
     

@@ -43,7 +43,7 @@ public class RestFederatorService {
 
     @POST
     @Path("distribute")
-    public Response redistribute(@QueryParam("partnerName") final String partnerName,
+    public Response redistribute(@QueryParam("destination") final String partnerName,
                              @QueryParam("projectKey") final String projectKey,
                              @QueryParam("repositorySlug") final String repositorySlug)
             throws SCMFederatorServiceException {
