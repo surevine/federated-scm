@@ -19,7 +19,7 @@ package com.surevine.gateway.scm.gatewayclient;
 
 import com.surevine.gateway.scm.TestUtility;
 import com.surevine.gateway.scm.git.GitFacade;
-import com.surevine.gateway.scm.scmclient.bean.RepoBean;
+import com.surevine.gateway.scm.model.RepoBean;
 import org.junit.Test;
 
 import java.nio.file.Path;
@@ -33,7 +33,7 @@ public class GatewayPackageTest {
         RepoBean repo = TestUtility.createTestRepo();
         GitFacade git = GitFacade.getInstance();
         Path bundlePath = git.bundle(repo);
-        GatewayPackage gatewayPackage = new GatewayPackage(bundlePath, GatewayUtil.getMetadata(repo));
+        GatewayPackage gatewayPackage = new GatewayPackage(bundlePath, MetadataUtil.getMetadata(repo));
         gatewayPackage.createArchive();
         
         TestUtility.destroyTestRepo(repo);

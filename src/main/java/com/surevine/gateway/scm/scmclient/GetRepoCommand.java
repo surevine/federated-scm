@@ -17,8 +17,8 @@
 */
 package com.surevine.gateway.scm.scmclient;
 
-import com.surevine.gateway.scm.scmclient.bean.ProjectBean;
-import com.surevine.gateway.scm.scmclient.bean.RepoBean;
+import com.surevine.gateway.scm.model.ProjectBean;
+import com.surevine.gateway.scm.model.RepoBean;
 
 import java.util.Collection;
 import java.util.Map;

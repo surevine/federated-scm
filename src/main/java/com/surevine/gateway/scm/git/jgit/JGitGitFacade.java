@@ -19,7 +19,7 @@ package com.surevine.gateway.scm.git.jgit;
 
 import com.surevine.gateway.scm.git.GitException;
 import com.surevine.gateway.scm.git.GitFacade;
-import com.surevine.gateway.scm.scmclient.bean.RepoBean;
+import com.surevine.gateway.scm.model.RepoBean;
 import com.surevine.gateway.scm.util.PropertyUtil;
 import com.surevine.gateway.scm.util.StringUtil;
 import org.apache.log4j.Logger;
@@ -195,7 +195,20 @@ public class JGitGitFacade extends GitFacade {
      * @return a Path to the directory
      */
     private Path getRepoRootDirectory(final RepoBean repoBean) {
-        return gitDirectoryPath.resolve(Paths.get(repoBean.getProject().getKey(), repoBean.getSlug()));
+        Path repoDir;
+        if (repoBean.isRemote()) {
+            String sourcePartner = repoBean.getSourcePartner();
+            repoDir = gitDirectoryPath.resolve("from_gateway").resolve(sourcePartner).resolve(Paths.get(repoBean.getProject().getKey(), repoBean.getSlug()));
+        } else {
+            repoDir = gitDirectoryPath.resolve("local_scm").resolve(Paths.get(repoBean.getProject().getKey(), repoBean.getSlug()));
+        }
+        
+        try {
+            Files.createDirectories(repoDir);
+        } catch (IOException e) {
+            logger.error("Could not create repository directory " + repoDir, e);
+        }
+        return repoDir;
     }
 
     /**

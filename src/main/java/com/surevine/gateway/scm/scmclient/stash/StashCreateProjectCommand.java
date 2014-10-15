@@ -19,7 +19,7 @@ package com.surevine.gateway.scm.scmclient.stash;
 
 import com.surevine.gateway.scm.scmclient.CreateProjectCommand;
 import com.surevine.gateway.scm.scmclient.SCMCallException;
-import com.surevine.gateway.scm.scmclient.bean.ProjectBean;
+import com.surevine.gateway.scm.model.ProjectBean;
 import com.surevine.gateway.scm.util.PropertyUtil;
 import com.surevine.gateway.scm.util.SCMSystemProperties;
 import org.apache.log4j.Logger;

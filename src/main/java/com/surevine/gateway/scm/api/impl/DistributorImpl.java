@@ -15,14 +15,15 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-package com.surevine.gateway.scm.service.impl;
+package com.surevine.gateway.scm.api.impl;
 
+import com.surevine.gateway.scm.api.Distributor;
+import com.surevine.gateway.scm.gatewayclient.GatewayClient;
 import com.surevine.gateway.scm.gatewayclient.GatewayPackage;
-import com.surevine.gateway.scm.gatewayclient.GatewayUtil;
+import com.surevine.gateway.scm.gatewayclient.MetadataUtil;
 import com.surevine.gateway.scm.git.GitFacade;
+import com.surevine.gateway.scm.model.RepoBean;
 import com.surevine.gateway.scm.scmclient.CommandFactory;
-import com.surevine.gateway.scm.scmclient.bean.RepoBean;
-import com.surevine.gateway.scm.service.FederatorService;
 import com.surevine.gateway.scm.service.SCMFederatorServiceException;
 import org.apache.log4j.Logger;
 
@@ -30,21 +31,11 @@ import java.nio.file.Path;
 import java.util.Map;
 
 /**
- * Implementation of Federator Service
+ * Implementation of Distribution Service
  * @author nick.leaver@surevine.com
  */
-public class FederatorServiceImpl implements FederatorService {
-    private static Logger logger = Logger.getLogger(FederatorServiceImpl.class);
-
-    @Override
-    public void processIncomingRepository(final Path path, final Map<String, String> metadata) 
-            throws SCMFederatorServiceException {
-        // TODO
-        // examine metadata for project key and repo name
-        // determine if we have dealt with the repository before
-        // if we have seen it before update incoming fork repository and create merge requests
-        // if we haven't seen it before create new repo in SCM system and create fork from the repo for future changes
-    }
+public class DistributorImpl implements Distributor {
+    private static Logger logger = Logger.getLogger(DistributorImpl.class);
 
     @Override
     public void distribute(final String partnerName, final String projectKey, final String repositorySlug) 
@@ -52,14 +43,14 @@ public class FederatorServiceImpl implements FederatorService {
         logger.debug("Distributing to partner: " + partnerName + " repository "
                 + projectKey + ":" + repositorySlug);
         RepoBean repo = CommandFactory.getInstance().getGetRepoCommand().getRepository(projectKey, repositorySlug);
-        distribute(repo, GatewayUtil.getSinglePartnerMetadata(repo, partnerName));        
+        distribute(repo, MetadataUtil.getSinglePartnerMetadata(repo, partnerName));        
     }
 
     @Override
     public void distribute(final String projectKey, final String repositorySlug) throws SCMFederatorServiceException {
         logger.debug("Distributing repository " + projectKey + ":" + repositorySlug);
         RepoBean repo = CommandFactory.getInstance().getGetRepoCommand().getRepository(projectKey, repositorySlug);
-        distribute(repo, GatewayUtil.getMetadata(repo));
+        distribute(repo, MetadataUtil.getMetadata(repo));
     }
 
     /**
@@ -89,7 +80,7 @@ public class FederatorServiceImpl implements FederatorService {
             
             GatewayPackage gatewayPackage = new GatewayPackage(bundlePath, metadata);
             gatewayPackage.createArchive();
-            GatewayUtil.sendToGateway(gatewayPackage);
+            GatewayClient.getInstance().sendToGateway(gatewayPackage);
             
         } catch (Exception e) {
             logger.error(e);

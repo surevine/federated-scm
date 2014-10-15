@@ -15,17 +15,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-package com.surevine.gateway.scm.service.rest;
-
-import com.surevine.gateway.scm.service.bean.AcknowledgementBean;
-import com.surevine.gateway.scm.util.StringUtil;
+package com.surevine.gateway.scm.util;
 
 /**
  * @author nick.leaver@surevine.com
  */
 public final class InputValidator {
     private InputValidator() {
-        
+        // no-op
     }
     
     public static boolean partnerNameIsValid(final String partnerName) {
@@ -38,19 +35,5 @@ public final class InputValidator {
     
     public static boolean repoSlugIsValid(final String repoSlug) {
         return repoSlug != null && StringUtil.isClean(repoSlug);
-    }
-    
-    public static boolean acknowledgementBeanIsValid(final AcknowledgementBean bean) {
-        if (bean == null) {
-            return false;
-        }
-        
-        for (String hash:bean.getReceivedCommitHashes()) {
-            if (!StringUtil.isClean(hash)) {
-                return false;
-            }
-        }
-        
-        return partnerNameIsValid(bean.getPartnerName()) && projectKeyIsValid(bean.getProjectName());
     }
 }

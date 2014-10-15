@@ -15,11 +15,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-package com.surevine.gateway.scm.service.rest;
+package com.surevine.gateway.scm.service;
 
-import com.surevine.gateway.scm.service.FederatorService;
-import com.surevine.gateway.scm.service.SCMFederatorServiceException;
-import com.surevine.gateway.scm.service.impl.FederatorServiceImpl;
+import com.surevine.gateway.scm.api.Distributor;
+import com.surevine.gateway.scm.api.impl.DistributorImpl;
+import com.surevine.gateway.scm.util.InputValidator;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -39,11 +39,11 @@ import java.net.HttpURLConnection;
 @Produces("application/json")
 @Consumes("application/json")
 public class RestFederatorService {
-    private FederatorService federatorService;
+    private Distributor distributionService;
 
     @POST
     @Path("distribute")
-    public Response redistribute(@QueryParam("destination") final String partnerName,
+    public Response distribute(@QueryParam("destination") final String partnerName,
                              @QueryParam("projectKey") final String projectKey,
                              @QueryParam("repositorySlug") final String repositorySlug)
             throws SCMFederatorServiceException {
@@ -57,14 +57,14 @@ public class RestFederatorService {
                     .type(MediaType.TEXT_PLAIN).build());
         }
 
-        getImplementation().distribute(partnerName, projectKey, repositorySlug);
+        getDistributionService().distribute(partnerName, projectKey, repositorySlug);
         return Response.ok(MediaType.APPLICATION_JSON).build();
     }
 
-    private FederatorService getImplementation() {
-        if (federatorService == null) {
-            federatorService = new FederatorServiceImpl();
+    private Distributor getDistributionService() {
+        if (distributionService == null) {
+            distributionService = new DistributorImpl();
         }
-        return federatorService;
+        return distributionService;
     }
 }

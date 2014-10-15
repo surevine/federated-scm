@@ -15,19 +15,25 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-package com.surevine.gateway.scm.scmclient;
+package com.surevine.gateway.scm.service;
 
-import com.surevine.gateway.scm.model.ProjectBean;
+import com.surevine.gateway.scm.service.SCMFederatorServiceException;
+
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
+import java.net.HttpURLConnection;
 
 /**
  * @author nick.leaver@surevine.com
  */
-public interface CreateProjectCommand {
-    /**
-     * Creates a new project in the SCM system
-     * @param projectBean the project details
-     * @return The ProjectBean with any additional information from the SCM system (probably the ID)
-     * @throws com.surevine.gateway.scm.scmclient.SCMCallException
-     */
-    ProjectBean createProject(ProjectBean projectBean) throws SCMCallException;
+@Provider
+public class SCMFederatorServiceExceptionMapper implements ExceptionMapper<SCMFederatorServiceException> {
+    @Override
+    public Response toResponse(final SCMFederatorServiceException exception) {
+        return Response.status(HttpURLConnection.HTTP_BAD_REQUEST)
+                .entity(exception.getUserMessage())
+                .type(MediaType.TEXT_PLAIN).build();
+    }
 }

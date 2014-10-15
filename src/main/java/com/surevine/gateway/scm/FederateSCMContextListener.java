@@ -17,11 +17,11 @@
 */
 package com.surevine.gateway.scm;
 
+import com.surevine.gateway.scm.api.Distributor;
+import com.surevine.gateway.scm.api.impl.DistributorImpl;
 import com.surevine.gateway.scm.gatewayclient.GatewayConfigServiceFacade;
 import com.surevine.gateway.scm.gatewayclient.SharedRepoIdentification;
-import com.surevine.gateway.scm.service.FederatorService;
 import com.surevine.gateway.scm.service.SCMFederatorServiceException;
-import com.surevine.gateway.scm.service.impl.FederatorServiceImpl;
 import com.surevine.gateway.scm.util.PropertyUtil;
 import org.apache.log4j.Logger;
 
@@ -39,11 +39,11 @@ import java.util.TimerTask;
  */
 public class FederateSCMContextListener implements ServletContextListener {
     private Logger logger = Logger.getLogger(FederateSCMContextListener.class);
-    private FederatorService federatorService;
+    private Distributor federatorService;
     private static final String CONTEXT_KEY = "scmExporter";
 
     public FederateSCMContextListener() {
-        federatorService = new FederatorServiceImpl();
+        federatorService = new DistributorImpl();
     }
 
     @Override

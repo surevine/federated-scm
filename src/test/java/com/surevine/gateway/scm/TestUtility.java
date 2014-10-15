@@ -17,8 +17,8 @@
 */
 package com.surevine.gateway.scm;
 
-import com.surevine.gateway.scm.scmclient.bean.ProjectBean;
-import com.surevine.gateway.scm.scmclient.bean.RepoBean;
+import com.surevine.gateway.scm.model.ProjectBean;
+import com.surevine.gateway.scm.model.RepoBean;
 import com.surevine.gateway.scm.util.PropertyUtil;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
@@ -49,7 +49,7 @@ public final class TestUtility {
         String projectKey = "test_" + UUID.randomUUID().toString();
         String repoSlug = "testRepo";
         String repoURL = "ssh://fake_url";
-        Path repoPath = Paths.get(PropertyUtil.getGitDir(), projectKey, repoSlug);
+        Path repoPath = Paths.get(PropertyUtil.getGitDir(), "local_scm", projectKey, repoSlug);
         Files.createDirectories(repoPath);
         Repository repo = new FileRepository(repoPath.resolve(".git").toFile());
         repo.create();

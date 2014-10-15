@@ -15,15 +15,30 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-package com.surevine.gateway.scm.service.rest;
-
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+package com.surevine.gateway.scm.gatewayclient;
 
 /**
- * REST Application
  * @author nick.leaver@surevine.com
  */
-@ApplicationPath("rest")
-public class FederatorRestApplication extends Application {
+public class GatewayClient {
+    private static GatewayClient instance;
+    
+    protected GatewayClient() {
+        // no-op
+    }
+    
+    public void sendToGateway(final GatewayPackage gatewayPackage) {
+        // TODO
+    }
+    
+    public static GatewayClient getInstance() {
+        if (instance == null) {
+            instance = new GatewayClient();
+        }
+        return instance;
+    }
+    
+    public static void setInstance(final GatewayClient newClient) {
+        instance = newClient;
+    }
 }

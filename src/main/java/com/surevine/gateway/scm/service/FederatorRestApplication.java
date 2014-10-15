@@ -15,19 +15,15 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-package com.surevine.gateway.scm.scmclient;
+package com.surevine.gateway.scm.service;
 
-import com.surevine.gateway.scm.model.ProjectBean;
+import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.core.Application;
 
 /**
+ * REST Application
  * @author nick.leaver@surevine.com
  */
-public interface CreateProjectCommand {
-    /**
-     * Creates a new project in the SCM system
-     * @param projectBean the project details
-     * @return The ProjectBean with any additional information from the SCM system (probably the ID)
-     * @throws com.surevine.gateway.scm.scmclient.SCMCallException
-     */
-    ProjectBean createProject(ProjectBean projectBean) throws SCMCallException;
+@ApplicationPath("rest")
+public class FederatorRestApplication extends Application {
 }

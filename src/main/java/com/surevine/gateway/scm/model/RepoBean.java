@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-package com.surevine.gateway.scm.scmclient.bean;
+package com.surevine.gateway.scm.model;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
@@ -32,6 +32,8 @@ public class RepoBean {
     private String name;
     private String slug;
     private String scmId = "git";
+    private boolean remote;
+    private String sourcePartner;
     private ProjectBean project;
     private Map<String, List<Link>> links;
 
@@ -41,6 +43,22 @@ public class RepoBean {
 
     public void setId(final String id) {
         this.id = id;
+    }
+
+    public boolean isRemote() {
+        return remote;
+    }
+
+    public void setRemote(boolean remote) {
+        this.remote = remote;
+    }
+
+    public String getSourcePartner() {
+        return sourcePartner;
+    }
+
+    public void setSourcePartner(String sourcePartner) {
+        this.sourcePartner = sourcePartner;
     }
 
     public String getName() {

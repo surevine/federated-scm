@@ -15,25 +15,23 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-package com.surevine.gateway.scm.service.rest;
+package com.surevine.gateway.scm.api;
 
 import com.surevine.gateway.scm.service.SCMFederatorServiceException;
 
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
-import java.net.HttpURLConnection;
+import java.nio.file.Path;
+import java.util.Map;
 
 /**
+ * Processed incoming files
  * @author nick.leaver@surevine.com
  */
-@Provider
-public class SCMFederatorServiceExceptionMapper implements ExceptionMapper<SCMFederatorServiceException> {
-    @Override
-    public Response toResponse(final SCMFederatorServiceException exception) {
-        return Response.status(HttpURLConnection.HTTP_BAD_REQUEST)
-                .entity(exception.getUserMessage())
-                .type(MediaType.TEXT_PLAIN).build();
-    }
+public interface IncomingProcessor {
+    /**
+     * Causes the SCM federator to process an incoming SCM update file
+     * @param path the path to the received file
+     * @param metadata the metadata associated with the file
+     * @throws com.surevine.gateway.scm.service.SCMFederatorServiceException
+     */
+    void processIncomingRepository(Path path, Map<String, String> metadata) throws SCMFederatorServiceException;
 }

@@ -18,8 +18,8 @@
 package com.surevine.gateway.scm.scmclient.stash;
 
 import com.surevine.gateway.scm.scmclient.SCMCallException;
-import com.surevine.gateway.scm.scmclient.bean.ProjectBean;
-import com.surevine.gateway.scm.scmclient.bean.RepoBean;
+import com.surevine.gateway.scm.model.ProjectBean;
+import com.surevine.gateway.scm.model.RepoBean;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 

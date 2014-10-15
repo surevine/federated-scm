@@ -18,27 +18,11 @@
 package com.surevine.gateway.scm.git.jgit;
 
 import com.surevine.gateway.scm.TestUtility;
-import com.surevine.gateway.scm.scmclient.bean.ProjectBean;
-import com.surevine.gateway.scm.scmclient.bean.RepoBean;
-import com.surevine.gateway.scm.util.PropertyUtil;
-import org.apache.commons.io.FileUtils;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.lib.StoredConfig;
-import org.junit.After;
-import org.junit.Before;
+import com.surevine.gateway.scm.model.RepoBean;
 import org.junit.Test;
 
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static org.junit.Assert.assertTrue;
 

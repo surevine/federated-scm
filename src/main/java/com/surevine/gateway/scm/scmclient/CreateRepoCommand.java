@@ -17,7 +17,7 @@
 */
 package com.surevine.gateway.scm.scmclient;
 
-import com.surevine.gateway.scm.scmclient.bean.RepoBean;
+import com.surevine.gateway.scm.model.RepoBean;
 
 /**
  * @author nick.leaver@surevine.com

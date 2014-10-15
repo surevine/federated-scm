@@ -18,7 +18,7 @@
 package com.surevine.gateway.scm.git;
 
 import com.surevine.gateway.scm.git.jgit.JGitGitFacade;
-import com.surevine.gateway.scm.scmclient.bean.RepoBean;
+import com.surevine.gateway.scm.model.RepoBean;
 
 import java.nio.file.Path;
 

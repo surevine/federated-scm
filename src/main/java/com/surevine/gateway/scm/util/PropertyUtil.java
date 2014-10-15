@@ -20,6 +20,7 @@ package com.surevine.gateway.scm.util;
 import org.apache.log4j.Logger;
 
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ResourceBundle;
 
@@ -30,14 +31,17 @@ import java.util.ResourceBundle;
 public final class PropertyUtil {
     private static Logger logger = Logger.getLogger(PropertyUtil.class);
     private static final String PROP_TEMP_DIR = "fedscm.temp.dir";
+    private static final String PROP_REMOTE_BUNDLE_DIR = "fedscm.bundle.dir";
     private static final String PROP_VERSION = "fedscm.version";
     private static final String PROP_EXPORT_INTERVAL = "fedscm.export.interval";
+    private static final String PROP_ORG_NAME = "fedscm.org.name";
     private static final String PROP_SCM_TYPE = "scm.type";
     private static final String PROP_SCM_USERNAME = "scm.auth.username";
     private static final String PROP_SCM_PASSWORD = "scm.auth.password";
     private static final String PROP_SCM_HOSTNAME = "scm.hostname";
     private static final String PROP_GIT_REPODIR = "fedscm.git.dir";
     private static final String PROP_GATEWAY_SERVICE_URL = "gateway.serviceURL";
+    private static final String PROP_GATEWAY_IMPORT_DIR = "gateway.incoming.dir";
     private static final String PROP_PARTNER_PROJECT_KEY = "scm.import.project.key";
     private static final String PROP_PARTNER_FORK_PROJECT_KEY = "scm.import.project.fork";
     private static ResourceBundle bundle;
@@ -48,6 +52,10 @@ public final class PropertyUtil {
     public static String getProperty(final String key) {
         checkInit();
         return bundle.getString(key);
+    }
+    
+    public static String getOrgName() {
+        return getProperty(PROP_ORG_NAME);
     }
     
     public static String getPartnerProjectKeyString(final String partnerName) {
@@ -66,6 +74,10 @@ public final class PropertyUtil {
         return Long.parseLong(getProperty(PROP_EXPORT_INTERVAL));
     }
 
+    public static String getGatewayImportDir() {
+        return getProperty(PROP_GATEWAY_IMPORT_DIR);
+    }
+
     public static String getTempDir() {
         String tmpDir = getProperty(PROP_TEMP_DIR);
         try {
@@ -76,14 +88,27 @@ public final class PropertyUtil {
         return tmpDir;
     }
 
+    public static String getRemoteBundleDir() {
+        String bundleDir = getProperty(PROP_REMOTE_BUNDLE_DIR);
+        try {
+            Files.createDirectories(Paths.get(bundleDir));
+        } catch (Exception e) {
+            logger.error(e);
+        }
+        return bundleDir;
+    }
+
     public static String getSystemVersion() {
         return getProperty(PROP_VERSION);
     }
     
     public static String getGitDir() {
         String gitDir = getProperty(PROP_GIT_REPODIR);
+        Path gitDirPath = Paths.get(gitDir);
         try {
-            Files.createDirectories(Paths.get(gitDir));
+            Files.createDirectories(gitDirPath);
+            Files.createDirectories(gitDirPath.resolve("local_scm"));
+            Files.createDirectories(gitDirPath.resolve("from_gateway"));
         } catch (Exception e) {
             logger.error(e);
         }

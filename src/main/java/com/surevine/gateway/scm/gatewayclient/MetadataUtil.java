@@ -17,7 +17,8 @@
 */
 package com.surevine.gateway.scm.gatewayclient;
 
-import com.surevine.gateway.scm.scmclient.bean.RepoBean;
+import com.surevine.gateway.scm.model.RepoBean;
+import com.surevine.gateway.scm.util.PropertyUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,24 +26,21 @@ import java.util.Map;
 /**
  * @author nick.leaver@surevine.com
  */
-public final class GatewayUtil {
-    private static final String KEY_SOURCE = "source";
-    private static final String VALUE_SOURCE = "SCM";
-    private static final String KEY_LIMIT_DISTRIBUTION_TO = "limit_distribution_to";
-    private static final String KEY_PROJECT = "project";
-    private static final String KEY_REPO = "repo";
-    private static final String KEY_DISTRIBUTION_TYPE = "distribution_type";
-    private static final String VALUE_SINGLE_DISTRIBUTION = "SINGLE_DISTRIBUTION";
-    private static final String VALUE_DISTRIBUTE_TO_ALL_PERMITTED = "DISTRIBUTE_TO_ALL_PERMITTED";
+public final class MetadataUtil {
+    public static final String KEY_SOURCE = "source";
+    public static final String VALUE_SOURCE = "SCM";
+    public static final String KEY_LIMIT_DISTRIBUTION_TO = "limit_distribution_to";
+    public static final String KEY_PROJECT = "project";
+    public static final String KEY_REPO = "repo";
+    public static final String KEY_DISTRIBUTION_TYPE = "distribution_type";
+    public static final String KEY_ORGANISATION = "source_organisation";
+    public static final String VALUE_SINGLE_DISTRIBUTION = "SINGLE_DISTRIBUTION";
+    public static final String VALUE_DISTRIBUTE_TO_ALL_PERMITTED = "DISTRIBUTE_TO_ALL_PERMITTED";
     
-    private GatewayUtil() {
+    private MetadataUtil() {
         // no-op
     }
-    
-    public static void sendToGateway(final GatewayPackage gatewayPackage) {
-        // TODO Send to Gateway service
-    }
-    
+        
     public static Map<String, String> getSinglePartnerMetadata(final RepoBean repoBean, final String partner) {
         Map<String, String> metadataMap = generateMetadata(repoBean, VALUE_SINGLE_DISTRIBUTION);
         metadataMap.put(KEY_LIMIT_DISTRIBUTION_TO, partner);
@@ -59,6 +57,7 @@ public final class GatewayUtil {
         metadataMap.put(KEY_PROJECT, repoBean.getProject().getKey());
         metadataMap.put(KEY_REPO, repoBean.getSlug());
         metadataMap.put(KEY_DISTRIBUTION_TYPE, distributionType);
+        metadataMap.put(KEY_ORGANISATION, PropertyUtil.getOrgName());
         return metadataMap;
     }
 }

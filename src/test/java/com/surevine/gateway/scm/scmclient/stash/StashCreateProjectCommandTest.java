@@ -18,7 +18,7 @@
 package com.surevine.gateway.scm.scmclient.stash;
 
 import com.surevine.gateway.scm.scmclient.SCMCallException;
-import com.surevine.gateway.scm.scmclient.bean.ProjectBean;
+import com.surevine.gateway.scm.model.ProjectBean;
 import org.junit.Test;
 
 import java.util.Random;
