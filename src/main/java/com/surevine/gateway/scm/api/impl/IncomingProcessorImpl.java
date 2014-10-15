@@ -93,7 +93,7 @@ public class IncomingProcessorImpl implements IncomingProcessor {
             Path repositoryDirectory = repoBean.getRepoDirectory();
             
             if (Files.exists(repositoryDirectory)) {
-                // TODO: Process an update
+                // Process an update
             } else {
                 // New incoming repository
                 try {
@@ -117,8 +117,8 @@ public class IncomingProcessorImpl implements IncomingProcessor {
                     
                     // stash derives the slug from the repository name provided - we provided an existing slug as 
                     // the name when we created the repo so it should match but if it doesn't, fail here
-                    if (createdSCMRepository.getSlug() == null || 
-                            createdSCMRepository.getSlug().equals(repositorySlug)) {
+                    if (createdSCMRepository.getSlug() == null
+                            || createdSCMRepository.getSlug().equals(repositorySlug)) {
                         throw new SCMFederatorServiceException("Repository slug on new repo doesn't match incoming");
                     }
                     

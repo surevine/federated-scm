@@ -39,7 +39,7 @@ public class RepoBean {
         return remote;
     }
 
-    public void setRemote(boolean remote) {
+    public void setRemote(final boolean remote) {
         this.remote = remote;
     }
 
@@ -47,7 +47,7 @@ public class RepoBean {
         return sourcePartner;
     }
 
-    public void setSourcePartner(String sourcePartner) {
+    public void setSourcePartner(final String sourcePartner) {
         this.sourcePartner = sourcePartner;
     }
 
@@ -63,7 +63,7 @@ public class RepoBean {
         return cloneURL;
     }
 
-    public void setCloneURL(String cloneURL) {
+    public void setCloneURL(final String cloneURL) {
         this.cloneURL = cloneURL;
     }
 
@@ -71,7 +71,7 @@ public class RepoBean {
         return projectKey;
     }
 
-    public void setProjectKey(String projectKey) {
+    public void setProjectKey(final String projectKey) {
         this.projectKey = projectKey;
     }
 

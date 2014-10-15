@@ -17,8 +17,6 @@
 */
 package com.surevine.gateway.scm.service;
 
-import com.surevine.gateway.scm.service.SCMFederatorServiceException;
-
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;

@@ -29,7 +29,6 @@ import javax.ws.rs.core.MediaType;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author nick.leaver@surevine.com

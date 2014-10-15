@@ -19,9 +19,6 @@ package com.surevine.gateway.scm.api;
 
 import com.surevine.gateway.scm.service.SCMFederatorServiceException;
 
-import java.nio.file.Path;
-import java.util.Map;
-
 /**
  * SCM Federator Service
  * @author nick.leaver@surevine.com
