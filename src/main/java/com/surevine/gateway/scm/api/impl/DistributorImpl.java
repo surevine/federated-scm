@@ -23,7 +23,7 @@ import com.surevine.gateway.scm.gatewayclient.GatewayPackage;
 import com.surevine.gateway.scm.gatewayclient.MetadataUtil;
 import com.surevine.gateway.scm.git.GitFacade;
 import com.surevine.gateway.scm.model.RepoBean;
-import com.surevine.gateway.scm.scmclient.CommandFactory;
+import com.surevine.gateway.scm.scmclient.SCMCommandFactory;
 import com.surevine.gateway.scm.service.SCMFederatorServiceException;
 import org.apache.log4j.Logger;
 
@@ -42,14 +42,14 @@ public class DistributorImpl implements Distributor {
             throws SCMFederatorServiceException {
         logger.debug("Distributing to partner: " + partnerName + " repository "
                 + projectKey + ":" + repositorySlug);
-        RepoBean repo = CommandFactory.getInstance().getGetRepoCommand().getRepository(projectKey, repositorySlug);
+        RepoBean repo = SCMCommandFactory.getInstance().getGetRepoCommand().getRepository(projectKey, repositorySlug);
         distribute(repo, MetadataUtil.getSinglePartnerMetadata(repo, partnerName));        
     }
 
     @Override
     public void distribute(final String projectKey, final String repositorySlug) throws SCMFederatorServiceException {
         logger.debug("Distributing repository " + projectKey + ":" + repositorySlug);
-        RepoBean repo = CommandFactory.getInstance().getGetRepoCommand().getRepository(projectKey, repositorySlug);
+        RepoBean repo = SCMCommandFactory.getInstance().getGetRepoCommand().getRepository(projectKey, repositorySlug);
         distribute(repo, MetadataUtil.getMetadata(repo));
     }
 
@@ -61,7 +61,7 @@ public class DistributorImpl implements Distributor {
     private void distribute(final RepoBean repo, final Map<String, String> metadata)
             throws SCMFederatorServiceException {
         if (repo ==  null) {
-            throw new SCMFederatorServiceException("The repository information for  " + repo.getProject().getKey() + ":"
+            throw new SCMFederatorServiceException("The repository information for  " + repo.getProjectKey() + ":"
                     + repo.getSlug() + " could not be retrieved from the SCM system.");
         }
 
@@ -71,7 +71,7 @@ public class DistributorImpl implements Distributor {
             boolean alreadyCloned = gitFacade.repoAlreadyCloned(repo);
 
             if (alreadyCloned) {
-                gitFacade.pull(repo);
+                gitFacade.pull(repo, "origin");
             } else {
                 gitFacade.clone(repo);
             }

@@ -19,6 +19,9 @@ package com.surevine.gateway.scm.api.impl;
 
 import com.surevine.gateway.scm.api.IncomingProcessor;
 import com.surevine.gateway.scm.gatewayclient.MetadataUtil;
+import com.surevine.gateway.scm.git.GitFacade;
+import com.surevine.gateway.scm.model.RepoBean;
+import com.surevine.gateway.scm.scmclient.SCMCommandFactory;
 import com.surevine.gateway.scm.service.SCMFederatorServiceException;
 import com.surevine.gateway.scm.util.InputValidator;
 import com.surevine.gateway.scm.util.PropertyUtil;
@@ -44,6 +47,8 @@ public class IncomingProcessorImpl implements IncomingProcessor {
             String partnerName = metadata.get(MetadataUtil.KEY_ORGANISATION);
             String projectKey = metadata.get(MetadataUtil.KEY_PROJECT);
             String repositorySlug = metadata.get(MetadataUtil.KEY_REPO);
+            String scmProjectKey = PropertyUtil.getPartnerProjectKeyString(partnerName);
+            String scmProjectForkKey = PropertyUtil.getPartnerForkProjectKeyString(partnerName);
 
             if (!InputValidator.partnerNameIsValid(partnerName)
                     || !InputValidator.projectKeyIsValid(projectKey)
@@ -79,7 +84,61 @@ public class IncomingProcessorImpl implements IncomingProcessor {
             // if there isn't then we create a new repository from the bundle, push to a new repository in the SCM
             // system, and fork the SCM repository for future incoming updates
 
-            // TODO
+            RepoBean repoBean = new RepoBean();
+            repoBean.setRemote(true);
+            repoBean.setSourcePartner(partnerName);
+            repoBean.setSlug(repositorySlug);
+            repoBean.setProjectKey(projectKey);
+            
+            Path repositoryDirectory = repoBean.getRepoDirectory();
+            
+            if (Files.exists(repositoryDirectory)) {
+                // TODO: Process an update
+            } else {
+                // New incoming repository
+                try {
+                    // create local repository from bundle
+                    GitFacade.getInstance().clone(repoBean);
+
+                    // create SCM repository
+                    if (SCMCommandFactory.getInstance().getGetProjectsCommand()
+                            .getProjects().contains(scmProjectKey)) {
+                        SCMCommandFactory.getInstance().getCreateProjectCommand().createProject(scmProjectKey);
+                    }
+                    
+                    if (SCMCommandFactory.getInstance().getGetRepoCommand()
+                            .getRepository(scmProjectKey, repositorySlug) != null) {
+                        throw new SCMFederatorServiceException("Repository " + scmProjectKey + ":"
+                                + repositorySlug + " already exists.");
+                    }
+                    
+                    RepoBean createdSCMRepository = SCMCommandFactory.getInstance().getCreateRepoCommand()
+                            .createRepo(scmProjectKey, repositorySlug);
+                    
+                    // stash derives the slug from the repository name provided - we provided an existing slug as 
+                    // the name when we created the repo so it should match but if it doesn't, fail here
+                    if (createdSCMRepository.getSlug() == null || 
+                            createdSCMRepository.getSlug().equals(repositorySlug)) {
+                        throw new SCMFederatorServiceException("Repository slug on new repo doesn't match incoming");
+                    }
+                    
+                    // fork the new repository
+                    RepoBean forkedRepo = SCMCommandFactory.getInstance().getForkRepoCommand()
+                            .forkRepo(scmProjectKey, repositorySlug, scmProjectForkKey);
+                    
+                    // push into the fork
+                    GitFacade.getInstance().addRemote(repoBean, "scm", forkedRepo.getCloneURL());
+                    GitFacade.getInstance().push(repoBean, "scm");
+                    
+
+                } catch (Exception e) {
+                    logger.error("Could not import new repository " + repoBean, e);
+                }
+                
+                // - create SCM repository and push from local repository
+                // - fork SCM repository and set as a remote on local repository
+                
+            }
         }
     }
 }

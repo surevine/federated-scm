@@ -17,8 +17,6 @@
 */
 package com.surevine.gateway.scm.scmclient;
 
-import com.surevine.gateway.scm.model.ProjectBean;
-
 import java.util.Collection;
 
 /**
@@ -31,13 +29,5 @@ public interface GetProjectsCommand {
      * @return a collection of all projects in the SCM system
      * @throws com.surevine.gateway.scm.scmclient.SCMCallException
      */
-    Collection<ProjectBean> getProjects() throws SCMCallException;
-
-    /**
-     * Get details of a project in the SCM system
-     * @param projectKey the project shortcode for unique project identification
-     * @return details of a project in the SCM system
-     * @throws com.surevine.gateway.scm.scmclient.SCMCallException
-     */
-    ProjectBean getProject(String projectKey) throws SCMCallException;
+    Collection<String> getProjects() throws SCMCallException;
 }

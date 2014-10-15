@@ -17,9 +17,8 @@
 */
 package com.surevine.gateway.scm.scmclient.stash;
 
-import com.surevine.gateway.scm.scmclient.SCMCallException;
-import com.surevine.gateway.scm.model.ProjectBean;
 import com.surevine.gateway.scm.model.RepoBean;
+import com.surevine.gateway.scm.scmclient.SCMCallException;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
@@ -40,10 +39,7 @@ public class StashCreateRepoCommandTest {
         // create a dummy project
         StashCreateProjectCommand createProjectCommand = new StashCreateProjectCommand();
         String randomProjectKey = "PRJ" + new Random().nextInt();
-        ProjectBean projectBean = new ProjectBean();
-        projectBean.setKey(randomProjectKey);
-        projectBean.setName(randomProjectKey);
-        createProjectCommand.createProject(projectBean);
+        createProjectCommand.createProject(randomProjectKey);
         
         // create a repo
         String randomRepoName = "REP" + new Random().nextInt();

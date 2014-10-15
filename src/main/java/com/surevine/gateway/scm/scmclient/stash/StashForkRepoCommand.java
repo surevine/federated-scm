@@ -17,45 +17,49 @@
 */
 package com.surevine.gateway.scm.scmclient.stash;
 
-import com.surevine.gateway.scm.scmclient.CreateProjectCommand;
+import com.surevine.gateway.scm.model.RepoBean;
+import com.surevine.gateway.scm.scmclient.ForkRepoCommand;
 import com.surevine.gateway.scm.scmclient.SCMCallException;
 import com.surevine.gateway.scm.util.PropertyUtil;
 import com.surevine.gateway.scm.util.SCMSystemProperties;
 import org.apache.log4j.Logger;
+import org.json.JSONObject;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+import java.util.HashMap;
 
 /**
  * @author nick.leaver@surevine.com
  */
-public class StashCreateProjectCommand implements CreateProjectCommand {
-    private static Logger logger = Logger.getLogger(StashCreateProjectCommand.class);
-    private static final String RESOURCE = "/rest/api/1.0/projects/";
+public class StashForkRepoCommand implements ForkRepoCommand {
+    private static Logger logger = Logger.getLogger(StashForkRepoCommand.class);
+    private static final String RESOURCE = "/rest/api/1.0/projects/%s/repos/%s";
     private SCMSystemProperties scmSystemProperties;
 
-    StashCreateProjectCommand() {
+    StashForkRepoCommand() {
         scmSystemProperties = PropertyUtil.getSCMSystemProperties();
     }
-
+    
     @Override
-    public void createProject(final String projectKey) throws SCMCallException {
-        Client client = ClientBuilder.newClient();
-        StashProjectJSONBean projectBean = new StashProjectJSONBean();
-        projectBean.setName(projectKey);
-        projectBean.setKey(projectKey);
-        projectBean.setDescription(projectKey);
+    public RepoBean forkRepo(final String projectKey, final String repositorySlug, final String forkProjectKey)
+            throws SCMCallException {
+        HashMap<String, String> projectMap = new HashMap<String, String>();
+        projectMap.put("key", forkProjectKey);
+        JSONObject payload = new JSONObject().put("project", projectMap);
 
         String resource = scmSystemProperties.getHost() + RESOURCE;
         logger.debug("REST call to " + resource);
 
-        client.target(resource)
+        Client client = ClientBuilder.newClient();
+        StashRepoJSONBean response = client.target(resource)
                 .request(MediaType.APPLICATION_JSON)
                 .header("Authorization", scmSystemProperties.getBasicAuthHeader())
-                .post(Entity.json(projectBean), StashProjectJSONBean.class);
+                .post(Entity.json(payload), StashRepoJSONBean.class);
 
         client.close();
+        return response.asRepoBean();
     }
 }

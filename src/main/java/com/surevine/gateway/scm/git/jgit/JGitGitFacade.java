@@ -48,22 +48,22 @@ import java.util.Map;
  */
 public class JGitGitFacade extends GitFacade {
     private static Logger logger = Logger.getLogger(JGitGitFacade.class);
-    private Path gitDirectoryPath;
-    
-    public JGitGitFacade() {
-        this.gitDirectoryPath = Paths.get(PropertyUtil.getGitDir());
+
+    @Override
+    public boolean push(final RepoBean repoBean, final String remoteName) throws GitException {
+        throw new UnsupportedOperationException("Not yet implemented");        
     }
 
     @Override
-    public boolean push(final RepoBean repoBean) throws GitException {
-        throw new UnsupportedOperationException("Not yet implemented");        
+    public void addRemote(final RepoBean repoBean, final String remoteName, final String remoteURL) throws GitException {
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     @Override
     public void clone(final RepoBean repoBean) throws GitException {
         CloneCommand cloneCommand = new CloneCommand();
-        cloneCommand.setDirectory(getRepoRootDirectory(repoBean).toFile());
-        cloneCommand.setURI(repoBean.getRepoCloneURL());
+        cloneCommand.setDirectory(repoBean.getRepoDirectory().toFile());
+        cloneCommand.setURI(repoBean.getCloneURL());
         try {
             cloneCommand.call();
         } catch (Exception e) {
@@ -73,15 +73,15 @@ public class JGitGitFacade extends GitFacade {
     }
 
     @Override
-    public boolean pull(final RepoBean repoBean) throws GitException {
+    public boolean pull(final RepoBean repoBean, final String remoteName) throws GitException {
+        String remoteToPull = (remoteName == null) ? remoteName : "origin";
         PullResult result;
         try {
-            Path gitPath = getRepoGitDirectory(repoBean);
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
-            Repository repository = builder.setGitDir(gitPath.toFile()).findGitDir().build();
+            Repository repository = builder.setGitDir(repoBean.getRepoDirectory().toFile()).findGitDir().build();
             Git git = new org.eclipse.jgit.api.Git(repository);
             PullCommand pullCommand = git.pull();
-            pullCommand.setRemote("origin"); // always assume origin is the remote we want here
+            pullCommand.setRemote(remoteToPull);
             result = pullCommand.call();
             repository.close();
         } catch (Exception e) {
@@ -106,9 +106,8 @@ public class JGitGitFacade extends GitFacade {
     @Override
     public void tag(final RepoBean repoBean, final String tag) throws GitException {
         try {
-            Path gitPath = getRepoGitDirectory(repoBean);
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
-            Repository repository = builder.setGitDir(gitPath.toFile()).findGitDir().build();
+            Repository repository = builder.setGitDir(repoBean.getGitConfigDirectory().toFile()).findGitDir().build();
             Git git = new org.eclipse.jgit.api.Git(repository);
             TagCommand tagCommand = git.tag();
             tagCommand.setName(tag);
@@ -124,11 +123,10 @@ public class JGitGitFacade extends GitFacade {
     public Path bundle(final RepoBean repoBean) throws GitException {
         OutputStream outputStream = null;
         try {
-            Path gitPath = getRepoGitDirectory(repoBean);
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
-            Repository repository = builder.setGitDir(gitPath.toFile()).findGitDir().build();
+            Repository repository = builder.setGitDir(repoBean.getGitConfigDirectory().toFile()).findGitDir().build();
             BundleWriter bundleWriter = new BundleWriter(repository);
-            String fileName = StringUtil.cleanStringForFilePath(repoBean.getProject().getKey()
+            String fileName = StringUtil.cleanStringForFilePath(repoBean.getProjectKey()
                     + "_" + repoBean.getSlug()) + ".bundle";
             Path outputPath = Paths.get(PropertyUtil.getTempDir(), fileName);
             outputStream = Files.newOutputStream(outputPath);
@@ -160,26 +158,21 @@ public class JGitGitFacade extends GitFacade {
     public boolean repoAlreadyCloned(final RepoBean repoBean) throws GitException {
         boolean alreadyCloned = false;
         
-        // get the location of where the git repository should be (/configured_repo_dir/project_key/repo_slug)
-        Path repoDirectoryPath = getRepoRootDirectory(repoBean);
-        
         // if the enclosing directory exists then examine the repository to check it's the right one
-        if (Files.exists(repoDirectoryPath)) {
+        if (Files.exists(repoBean.getRepoDirectory())) {
             try {
-                // get the .git directory for this repository - jgit needs to use this
-                Path gitPath = getRepoGitDirectory(repoBean);
-                
                 // load the repository into jgit
                 FileRepositoryBuilder builder = new FileRepositoryBuilder();
-                Repository repository = builder.setGitDir(gitPath.toFile()).findGitDir().build();
+                Repository repository = 
+                        builder.setGitDir(repoBean.getGitConfigDirectory().toFile()).findGitDir().build();
                 
                 // examine the repository configuration and confirm whether it has a remote named "origin"
                 // that points to the clone URL in the argument repo information. If it does the repo has 
                 // already been cloned.
                 Config storedConfig = repository.getConfig();
                 String originURL = storedConfig.getString("remote", "origin", "url");        
-                alreadyCloned = originURL != null && repoBean.getRepoCloneURL() != null
-                        && originURL.equals(repoBean.getRepoCloneURL());
+                alreadyCloned = originURL != null && repoBean.getCloneURL() != null
+                        && originURL.equals(repoBean.getCloneURL());
                 repository.close();
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
@@ -189,34 +182,5 @@ public class JGitGitFacade extends GitFacade {
         return alreadyCloned;
     }
 
-    /**
-     * Gets the enclosing directory of a git repository
-     * @param repoBean the repo information
-     * @return a Path to the directory
-     */
-    private Path getRepoRootDirectory(final RepoBean repoBean) {
-        Path repoDir;
-        if (repoBean.isRemote()) {
-            String sourcePartner = repoBean.getSourcePartner();
-            repoDir = gitDirectoryPath.resolve("from_gateway").resolve(sourcePartner).resolve(Paths.get(repoBean.getProject().getKey(), repoBean.getSlug()));
-        } else {
-            repoDir = gitDirectoryPath.resolve("local_scm").resolve(Paths.get(repoBean.getProject().getKey(), repoBean.getSlug()));
-        }
-        
-        try {
-            Files.createDirectories(repoDir);
-        } catch (IOException e) {
-            logger.error("Could not create repository directory " + repoDir, e);
-        }
-        return repoDir;
-    }
-
-    /**
-     * Gets the .git directory for a repository
-     * @param repoBean the repo information
-     * @return a Path to the .git directory
-     */
-    private Path getRepoGitDirectory(final RepoBean repoBean) {
-        return getRepoRootDirectory(repoBean).resolve(".git");
-    }
+    
 }

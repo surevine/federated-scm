@@ -54,7 +54,7 @@ public final class MetadataUtil {
     private static Map<String, String> generateMetadata(final RepoBean repoBean, final String distributionType) {
         Map<String, String> metadataMap = new HashMap<String, String>();
         metadataMap.put(KEY_SOURCE, VALUE_SOURCE);
-        metadataMap.put(KEY_PROJECT, repoBean.getProject().getKey());
+        metadataMap.put(KEY_PROJECT, repoBean.getProjectKey());
         metadataMap.put(KEY_REPO, repoBean.getSlug());
         metadataMap.put(KEY_DISTRIBUTION_TYPE, distributionType);
         metadataMap.put(KEY_ORGANISATION, PropertyUtil.getOrgName());

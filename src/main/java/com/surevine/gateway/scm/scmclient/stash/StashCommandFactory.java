@@ -17,7 +17,7 @@
 */
 package com.surevine.gateway.scm.scmclient.stash;
 
-import com.surevine.gateway.scm.scmclient.CommandFactory;
+import com.surevine.gateway.scm.scmclient.SCMCommandFactory;
 import com.surevine.gateway.scm.scmclient.CreateProjectCommand;
 import com.surevine.gateway.scm.scmclient.CreateRepoCommand;
 import com.surevine.gateway.scm.scmclient.DeleteProjectCommand;
@@ -30,10 +30,10 @@ import com.surevine.gateway.scm.scmclient.GetRepoCommand;
  * Stash command factory
  * @author nick.leaver@surevine.com
  */
-public class StashCommandFactory extends CommandFactory {
+public class StashCommandFactory extends SCMCommandFactory {
     @Override
     public ForkRepoCommand getForkRepoCommand() {
-        return null;
+        return new StashForkRepoCommand();
     }
 
     @Override

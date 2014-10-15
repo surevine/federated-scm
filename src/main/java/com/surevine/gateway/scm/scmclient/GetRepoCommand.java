@@ -17,7 +17,6 @@
 */
 package com.surevine.gateway.scm.scmclient;
 
-import com.surevine.gateway.scm.model.ProjectBean;
 import com.surevine.gateway.scm.model.RepoBean;
 
 import java.util.Collection;
@@ -51,5 +50,5 @@ public interface GetRepoCommand {
      * @return a mapping of projects to repositories
      * @throws SCMCallException
      */
-    Map<ProjectBean, Collection<RepoBean>> getAllRepositories() throws SCMCallException;
+    Map<String, Collection<RepoBean>> getAllRepositories() throws SCMCallException;
 }

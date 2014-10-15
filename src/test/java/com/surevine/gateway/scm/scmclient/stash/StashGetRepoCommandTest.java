@@ -17,9 +17,8 @@
 */
 package com.surevine.gateway.scm.scmclient.stash;
 
-import com.surevine.gateway.scm.scmclient.SCMCallException;
-import com.surevine.gateway.scm.model.ProjectBean;
 import com.surevine.gateway.scm.model.RepoBean;
+import com.surevine.gateway.scm.scmclient.SCMCallException;
 import org.junit.Test;
 
 import java.util.Collection;
@@ -39,10 +38,7 @@ public class StashGetRepoCommandTest {
         // create a dummy project
         StashCreateProjectCommand createProjectCommand = new StashCreateProjectCommand();
         String randomProjectKey = "PRJ" + new Random().nextInt();
-        ProjectBean projectBean = new ProjectBean();
-        projectBean.setKey(randomProjectKey);
-        projectBean.setName(randomProjectKey);
-        createProjectCommand.createProject(projectBean);
+        createProjectCommand.createProject(randomProjectKey);
 
         // create a couple of repo
         String randomRepoName1 = "REP" + new Random().nextInt();
@@ -69,15 +65,9 @@ public class StashGetRepoCommandTest {
         // create a dummy project
         StashCreateProjectCommand createProjectCommand = new StashCreateProjectCommand();
         String randomProjectKey1 = "PRJ" + new Random().nextInt();
-        ProjectBean projectBean1 = new ProjectBean();
-        projectBean1.setKey(randomProjectKey1);
-        projectBean1.setName(randomProjectKey1);
-        createProjectCommand.createProject(projectBean1);
+        createProjectCommand.createProject(randomProjectKey1);
         String randomProjectKey2 = "PRJ" + new Random().nextInt();
-        ProjectBean projectBean2 = new ProjectBean();
-        projectBean2.setKey(randomProjectKey2);
-        projectBean2.setName(randomProjectKey2);
-        createProjectCommand.createProject(projectBean2);
+        createProjectCommand.createProject(randomProjectKey2);
 
         // create some repos
         String randomRepoName1 = "REP" + new Random().nextInt();
@@ -90,7 +80,7 @@ public class StashGetRepoCommandTest {
         String slug4 = createRepoCommand.createRepo(randomProjectKey2,randomRepoName4).getSlug();
 
         StashGetRepoCommand getRepoCommand = new StashGetRepoCommand();
-        Map<ProjectBean,Collection<RepoBean>> repos = getRepoCommand.getAllRepositories();
+        Map<String,Collection<RepoBean>> repos = getRepoCommand.getAllRepositories();
         
         assertTrue(repos.size() >= 2);
 
@@ -113,10 +103,7 @@ public class StashGetRepoCommandTest {
         // create a dummy project
         StashCreateProjectCommand createProjectCommand = new StashCreateProjectCommand();
         String randomProjectKey = "PRJ" + new Random().nextInt();
-        ProjectBean projectBean = new ProjectBean();
-        projectBean.setKey(randomProjectKey);
-        projectBean.setName(randomProjectKey);
-        createProjectCommand.createProject(projectBean);
+        createProjectCommand.createProject(randomProjectKey);
 
         // create a repo
         String randomRepoName = "REP" + new Random().nextInt();
@@ -133,9 +120,8 @@ public class StashGetRepoCommandTest {
 
     @Test
     public void testGetRepoThatDoesntExist() {
-        StashGetProjectsCommand getProjectsCommand = new StashGetProjectsCommand();
-        ProjectBean project = getProjectsCommand.getProject("" + new Random().nextInt());
-
-        assertNull(project);
+        StashGetRepoCommand getRepoCommand = new StashGetRepoCommand();
+        RepoBean repo = getRepoCommand.getRepository("" + new Random().nextInt(), "" + new Random().nextInt());
+        assertNull(repo);
     }
 }

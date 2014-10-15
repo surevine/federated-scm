@@ -17,10 +17,9 @@
 */
 package com.surevine.gateway.scm.scmclient.stash;
 
+import com.surevine.gateway.scm.model.RepoBean;
 import com.surevine.gateway.scm.scmclient.GetRepoCommand;
 import com.surevine.gateway.scm.scmclient.SCMCallException;
-import com.surevine.gateway.scm.model.ProjectBean;
-import com.surevine.gateway.scm.model.RepoBean;
 import com.surevine.gateway.scm.util.PropertyUtil;
 import com.surevine.gateway.scm.util.SCMSystemProperties;
 import org.apache.log4j.Logger;
@@ -32,6 +31,7 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -50,6 +50,8 @@ public class StashGetRepoCommand implements GetRepoCommand {
     
     @Override
     public Collection<RepoBean> getRepositories(final String projectKey) {
+        HashSet<RepoBean> repositories = new HashSet<RepoBean>();
+        
         Client client = ClientBuilder.newClient();
         String resource = scmSystemProperties.getHost() + String.format(ALL_RESOURCE, projectKey);
         logger.debug("REST call to " + resource);
@@ -61,7 +63,11 @@ public class StashGetRepoCommand implements GetRepoCommand {
 
         client.close();
         
-        return response.getValues();
+        for (StashRepoJSONBean stashRepoJSONBean:response.getValues()) {
+            repositories.add(stashRepoJSONBean.asRepoBean());
+        }
+        
+        return repositories;
     }
 
     @Override
@@ -70,40 +76,39 @@ public class StashGetRepoCommand implements GetRepoCommand {
         String resource = scmSystemProperties.getHost() + String.format(SINGLE_RESOURCE, projectKey, repositorySlug);
         logger.debug("REST call to " + resource);
 
-        RepoBean response = null;
+        StashRepoJSONBean response = null;
 
         try {
             response = client.target(resource)
                     .request(MediaType.APPLICATION_JSON)
                     .header("Authorization", scmSystemProperties.getBasicAuthHeader())
-                    .get(RepoBean.class);
+                    .get(StashRepoJSONBean.class);
         } catch (NotFoundException nfe) {
             // no-op - acceptable response and will return a null object
         }
         
         client.close();
 
-        return response;
+        return (response != null) ? response.asRepoBean() : null;
     }
 
     @Override
-    public Map<ProjectBean, Collection<RepoBean>> getAllRepositories() throws SCMCallException {
+    public Map<String, Collection<RepoBean>> getAllRepositories() throws SCMCallException {
+        Map<String, Collection<RepoBean>> repositories = new HashMap<String, Collection<RepoBean>>();
         logger.debug("Getting all repositories from Stash");
         int pCount = 0;
         int rCount = 0;
         
         StashGetProjectsCommand getProjectsCommand = new StashGetProjectsCommand();
-        Collection<ProjectBean> projects = getProjectsCommand.getProjects();
+        Collection<String> projects = getProjectsCommand.getProjects();
         if (projects.size() > 0) {
             pCount = projects.size();
         }
         
-        HashMap<ProjectBean, Collection<RepoBean>> repositories = new HashMap<ProjectBean, Collection<RepoBean>>();
-        
-        for (ProjectBean p:projects) {
-            Collection<RepoBean> repos = getRepositories(p.getKey());
+        for (String projectKey:projects) {
+            Collection<RepoBean> repos = getRepositories(projectKey);
             if (repos.size() > 0) {
-                repositories.put(p, repos);
+                repositories.put(projectKey, repos);
                 rCount += repos.size();
             }
         }
@@ -117,13 +122,13 @@ public class StashGetRepoCommand implements GetRepoCommand {
      */
     @JsonIgnoreProperties(ignoreUnknown = true)
     private static class PagedRepoResult {
-        private List<RepoBean> values;
+        private List<StashRepoJSONBean> values;
 
-        public List<RepoBean> getValues() {
+        public List<StashRepoJSONBean> getValues() {
             return values;
         }
 
-        public void setValues(final List<RepoBean> values) {
+        public void setValues(final List<StashRepoJSONBean> values) {
             this.values = values;
         }
     }

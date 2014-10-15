@@ -17,33 +17,23 @@
 */
 package com.surevine.gateway.scm.model;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import com.surevine.gateway.scm.util.PropertyUtil;
 
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
- * Bean for repo information
+ * Bean for information related to an existing, or future, local git repository
  * @author nick.leaver@surevine.com
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class RepoBean {
-    private String id;
-    private String name;
     private String slug;
-    private String scmId = "git";
     private boolean remote;
     private String sourcePartner;
-    private ProjectBean project;
-    private Map<String, List<Link>> links;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(final String id) {
-        this.id = id;
-    }
+    private String projectKey;
+    private String cloneURL;
 
     public boolean isRemote() {
         return remote;
@@ -61,14 +51,6 @@ public class RepoBean {
         this.sourcePartner = sourcePartner;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(final String name) {
-        this.name = name;
-    }
-
     public String getSlug() {
         return slug;
     }
@@ -77,73 +59,60 @@ public class RepoBean {
         this.slug = slug;
     }
 
-    public String getScmId() {
-        return scmId;
-    }
-
-    public void setScmId(final String scmId) {
-        this.scmId = scmId;
-    }
-
-    public ProjectBean getProject() {
-        return project;
-    }
-
-    public void setProject(final ProjectBean project) {
-        this.project = project;
-    }
-
-    public Map<String, List<Link>> getLinks() {
-        return links;
-    }
-
-    public void setLinks(final Map<String, List<Link>> links) {
-        this.links = links;
-    }
-    
-    public String getRepoCloneURL() {
-        String cloneURL = null;
-        if (links != null && links.containsKey("clone")) {
-            for (Link link:links.get("clone")) {
-                if (link.getName().equalsIgnoreCase("ssh")) {
-                    cloneURL = link.getHref();
-                    break;
-                }
-            }
-        }
+    public String getCloneURL() {
         return cloneURL;
+    }
+
+    public void setCloneURL(String cloneURL) {
+        this.cloneURL = cloneURL;
+    }
+
+    public String getProjectKey() {
+        return projectKey;
+    }
+
+    public void setProjectKey(String projectKey) {
+        this.projectKey = projectKey;
+    }
+
+    /**
+     * Gets the root directory of this repoBean
+     * @return a Path to the correct location for this repo's working directory - may or may not exist
+     */
+    public Path getRepoDirectory() {
+        Path repoDir;
+        if (isRemote()) {
+            String sourcePartner = getSourcePartner();
+            repoDir = Paths.get(PropertyUtil.getGitDir(), "from_gateway", sourcePartner,
+                    projectKey, getSlug());
+        } else {
+            repoDir = Paths.get(PropertyUtil.getGitDir(), "local_scm", projectKey, getSlug());
+        }
+
+        try {
+            Files.createDirectories(repoDir);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return repoDir;
+    }
+
+    /**
+     * Gets the .git directory for this repo bean
+     * @return a Path to the .git directory location for this repository - may or may not exist
+     */
+    public Path getGitConfigDirectory() {
+        return getRepoDirectory().resolve(".git");
     }
 
     @Override
     public String toString() {
-        return "RepoBean{"
-                + "id='" + id + '\''
-                + ", name='" + name + '\''
-                + ", slug='" + slug + '\''
-                + ", scmId='" + scmId + '\''
-                + ", project=" + project + '\''
-                + ", links=" + links
+        return "RepoBean{" 
+                + "slug='" + slug + '\''
+                + ", remote=" + remote
+                + ", sourcePartner='" + sourcePartner + '\''
+                + ", projectKey='" + projectKey + '\''
+                + ", cloneURL='" + cloneURL + '\''
                 + '}';
     }
-    
-    public static class Link {
-        private String name;
-        private String href;
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(final String name) {
-            this.name = name;
-        }
-
-        public String getHref() {
-            return href;
-        }
-
-        public void setHref(final String href) {
-            this.href = href;
-        }
-    };
 }

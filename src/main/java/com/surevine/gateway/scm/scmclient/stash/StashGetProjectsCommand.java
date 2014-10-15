@@ -18,18 +18,18 @@
 package com.surevine.gateway.scm.scmclient.stash;
 
 import com.surevine.gateway.scm.scmclient.GetProjectsCommand;
-import com.surevine.gateway.scm.model.ProjectBean;
 import com.surevine.gateway.scm.util.PropertyUtil;
 import com.surevine.gateway.scm.util.SCMSystemProperties;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author nick.leaver@surevine.com
@@ -37,7 +37,6 @@ import java.util.List;
 public class StashGetProjectsCommand implements GetProjectsCommand {
     private static Logger logger = Logger.getLogger(StashGetProjectsCommand.class);
     private static final String ALL_RESOURCE = "/rest/api/1.0/projects?limit=10000";
-    private static final String SINGLE_RESOURCE = "/rest/api/1.0/projects/";
     private SCMSystemProperties scmSystemProperties;
 
     StashGetProjectsCommand() {
@@ -45,7 +44,8 @@ public class StashGetProjectsCommand implements GetProjectsCommand {
     }
 
     @Override
-    public Collection<ProjectBean> getProjects() {
+    public Collection<String> getProjects() {
+        HashSet<String> projectKeys = new HashSet<String>();
         String resource = scmSystemProperties.getHost() + ALL_RESOURCE;
         Client client = ClientBuilder.newClient();
         logger.debug("REST call to " + resource);
@@ -56,30 +56,12 @@ public class StashGetProjectsCommand implements GetProjectsCommand {
                 .get(PagedProjectResult.class);
         
         client.close();
-               
-        return response.getValues();
-    }
-
-    @Override
-    public ProjectBean getProject(final String projectKey) {
-        String resource = scmSystemProperties.getHost() + SINGLE_RESOURCE + projectKey;
-        Client client = ClientBuilder.newClient();
-        logger.debug("REST call to " + resource);
         
-        ProjectBean response = null;
-        
-        try {
-            response = client.target(resource)
-                    .request(MediaType.APPLICATION_JSON)
-                    .header("Authorization", scmSystemProperties.getBasicAuthHeader())
-                    .get(ProjectBean.class);
-        } catch (NotFoundException nfe) {
-            // no-op - acceptable response and will return a null object
+        for (StashProjectJSONBean stashProjectJSONBean:response.getValues()) {
+            projectKeys.add(stashProjectJSONBean.getKey());
         }
-        
-        client.close();
-        
-        return response;
+               
+        return projectKeys;
     }
 
     /**
@@ -87,13 +69,13 @@ public class StashGetProjectsCommand implements GetProjectsCommand {
      */
     @JsonIgnoreProperties(ignoreUnknown = true)
     private static class PagedProjectResult {
-        private List<ProjectBean> values;
+        private List<StashProjectJSONBean> values;
 
-        public List<ProjectBean> getValues() {
+        public List<StashProjectJSONBean> getValues() {
             return values;
         }
 
-        public void setValues(final List<ProjectBean> values) {
+        public void setValues(final List<StashProjectJSONBean> values) {
             this.values = values;
         }
     }

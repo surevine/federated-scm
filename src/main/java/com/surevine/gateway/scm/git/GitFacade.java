@@ -40,20 +40,31 @@ public abstract class GitFacade {
     public abstract void clone(RepoBean repoBean) throws GitException;
 
     /**
+     * Adds a remote to a local repo
+     * @param repoBean the details of the repo
+     * @param remoteName the remote name
+     * @param remoteURL the remote URL
+     * @throws GitException
+     */
+    public abstract void addRemote(RepoBean repoBean, String remoteName, String remoteURL) throws GitException;
+
+    /**
      * Pull a remote into a git repository
      * @param repoBean Information about the remote Repo
+     * @param remoteName the name of the remote - will us origin if null
      * @return true if the pull resulted in an update to the local repository, false if there were no changes
      * @throws GitException
      */
-    public abstract boolean pull(RepoBean repoBean) throws GitException;
+    public abstract boolean pull(RepoBean repoBean, String remoteName) throws GitException;
 
     /**
      * Pushes a repo to a remote
      * @param repoBean the repo bean
+     * @param remoteName the name of the remote
      * @return true if the push succeeded
      * @throws GitException if something went wrong
      */
-    public abstract boolean push(RepoBean repoBean) throws GitException;
+    public abstract boolean push(RepoBean repoBean, String remoteName) throws GitException;
 
     /**
      * Tags a repository

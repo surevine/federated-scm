@@ -17,7 +17,6 @@
 */
 package com.surevine.gateway.scm;
 
-import com.surevine.gateway.scm.model.ProjectBean;
 import com.surevine.gateway.scm.model.RepoBean;
 import com.surevine.gateway.scm.util.PropertyUtil;
 import org.apache.commons.io.FileUtils;
@@ -32,9 +31,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -58,17 +54,9 @@ public final class TestUtility {
         config.save();
 
         RepoBean repoBean = new RepoBean();
-        ProjectBean projectBean = new ProjectBean();
-        projectBean.setKey(projectKey);
-        repoBean.setProject(projectBean);
+        repoBean.setProjectKey(projectKey);
         repoBean.setSlug(repoSlug);
-
-        Map<String, List<RepoBean.Link>> links = new HashMap<String, List<RepoBean.Link>>();
-        RepoBean.Link link = new RepoBean.Link();
-        link.setName("ssh");
-        link.setHref(repoURL);
-        links.put("clone", Arrays.asList(link));
-        repoBean.setLinks(links);
+        repoBean.setCloneURL(repoURL);
 
         Git git = new Git(repo);
 
@@ -85,8 +73,8 @@ public final class TestUtility {
     }
     
     public static void destroyTestRepo(final RepoBean repoBean) throws Exception {
-        if (repoBean.getProject().getKey().startsWith("test_")) {
-            Path repoTopLevelDir = Paths.get(PropertyUtil.getGitDir(), repoBean.getProject().getKey());
+        if (repoBean.getProjectKey().startsWith("test_")) {
+            Path repoTopLevelDir = Paths.get(PropertyUtil.getGitDir(), repoBean.getProjectKey());
             FileUtils.deleteDirectory(repoTopLevelDir.toFile());
         }
     } 

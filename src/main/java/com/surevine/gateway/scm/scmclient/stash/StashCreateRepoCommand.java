@@ -53,16 +53,16 @@ public class StashCreateRepoCommand implements CreateRepoCommand {
         String resource = scmSystemProperties.getHost() + String.format(RESOURCE, projectKey);
         logger.debug("REST call to " + resource);
 
-        RepoBean args = new RepoBean();
+        StashRepoJSONBean args = new StashRepoJSONBean();
         args.setName(name);
 
-        RepoBean response = client.target(resource)
+        StashRepoJSONBean response = client.target(resource)
                 .request(MediaType.APPLICATION_JSON)
                 .header("Authorization", scmSystemProperties.getBasicAuthHeader())
-                .post(Entity.json(args), RepoBean.class);
+                .post(Entity.json(args), StashRepoJSONBean.class);
 
         client.close();
 
-        return response;
+        return response.asRepoBean();
     }
 }

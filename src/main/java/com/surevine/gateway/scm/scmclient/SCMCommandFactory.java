@@ -24,9 +24,9 @@ import com.surevine.gateway.scm.util.PropertyUtil;
  * Factory for obtaining SCM system commands
  * @author nick.leaver@surevine.com
  */
-public abstract class CommandFactory {
-    private static CommandFactory commandFactoryImplementation;
-    public static CommandFactory getInstance() {
+public abstract class SCMCommandFactory {
+    private static SCMCommandFactory commandFactoryImplementation;
+    public static SCMCommandFactory getInstance() {
         if (commandFactoryImplementation == null) {
             switch (PropertyUtil.getSCMType()) {
                 case STASH:
@@ -75,20 +75,20 @@ public abstract class CommandFactory {
      * @return SCM system specific CreateRepoCommand implementation
      */
     public abstract CreateRepoCommand getCreateRepoCommand();
-
+    
     /**
      * SCM system specific DeleteRepoCommand implementation.
      * Protected access to restrict to test cleanup. Open up if required.
      * @return SCM system specific DeleteRepoCommand implementation
      */
     protected abstract DeleteRepoCommand getDeleteRepoCommand();
-
+    
     /**
      * Set a command factory implementation ignoring the configured type in system properties.
      * It's mostly for injecting a mock for testing but may be useful elsewhere.
      * @param commandFactory the command factory implementation.
      */
-    static void setCommandFactoryImplementation(final CommandFactory commandFactory) {
+    static void setCommandFactoryImplementation(final SCMCommandFactory commandFactory) {
         commandFactoryImplementation = commandFactory;
     }
 }

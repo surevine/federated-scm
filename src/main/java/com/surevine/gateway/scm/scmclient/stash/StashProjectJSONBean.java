@@ -15,16 +15,16 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-package com.surevine.gateway.scm.model;
+package com.surevine.gateway.scm.scmclient.stash;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 /**
- * Bean for Project information
+ * Bean for easily working with project information with the Stash API
  * @author nick.leaver@surevine.com
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ProjectBean {
+public class StashProjectJSONBean {
     private String id;
     private String name;
     private String key;
@@ -34,7 +34,7 @@ public class ProjectBean {
         return id;
     }
 
-    public void setId(final String id) {
+    void setId(final String id) {
         this.id = id;
     }
 
@@ -42,7 +42,7 @@ public class ProjectBean {
         return name;
     }
 
-    public void setName(final String name) {
+    void setName(final String name) {
         this.name = name;
     }
 
@@ -50,7 +50,7 @@ public class ProjectBean {
         return key;
     }
 
-    public void setKey(final String key) {
+    void setKey(final String key) {
         this.key = key;
     }
 
@@ -58,17 +58,7 @@ public class ProjectBean {
         return description;
     }
 
-    public void setDescription(final String description) {
+    void setDescription(final String description) {
         this.description = description;
-    }
-
-    @Override
-    public String toString() {
-        return "ProjectBean{"
-                + "id='" + id + '\''
-                + ", name='" + name + '\''
-                + ", key='" + key + '\''
-                + ", description='" + description + '\''
-                + '}';
     }
 }
