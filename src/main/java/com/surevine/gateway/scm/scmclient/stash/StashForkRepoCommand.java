@@ -50,14 +50,14 @@ public class StashForkRepoCommand implements ForkRepoCommand {
         projectMap.put("key", forkProjectKey);
         JSONObject payload = new JSONObject().put("project", projectMap);
 
-        String resource = scmSystemProperties.getHost() + RESOURCE;
+        String resource = scmSystemProperties.getHost() + String.format(RESOURCE, projectKey, repositorySlug);
         logger.debug("REST call to " + resource);
 
         Client client = ClientBuilder.newClient();
         StashRepoJSONBean response = client.target(resource)
                 .request(MediaType.APPLICATION_JSON)
                 .header("Authorization", scmSystemProperties.getBasicAuthHeader())
-                .post(Entity.json(payload), StashRepoJSONBean.class);
+                .post(Entity.json(payload.toString()), StashRepoJSONBean.class);
 
         client.close();
         return response.asRepoBean();

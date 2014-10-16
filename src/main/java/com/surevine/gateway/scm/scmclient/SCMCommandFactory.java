@@ -62,7 +62,7 @@ public abstract class SCMCommandFactory {
      * Protected access to restrict to test cleanup. Open up if required.
      * @return SCM system specific DeleteProjectCommand implementation
      */
-    protected abstract DeleteProjectCommand getDeleteProjectCommand();
+    public abstract DeleteProjectCommand getDeleteProjectCommand();
 
     /**
      * SCM system specific GetRepoCommand implementation
@@ -81,7 +81,7 @@ public abstract class SCMCommandFactory {
      * Protected access to restrict to test cleanup. Open up if required.
      * @return SCM system specific DeleteRepoCommand implementation
      */
-    protected abstract DeleteRepoCommand getDeleteRepoCommand();
+    public abstract DeleteRepoCommand getDeleteRepoCommand();
     
     /**
      * Set a command factory implementation ignoring the configured type in system properties.

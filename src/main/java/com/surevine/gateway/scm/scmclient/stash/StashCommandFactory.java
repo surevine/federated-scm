@@ -47,7 +47,7 @@ public class StashCommandFactory extends SCMCommandFactory {
     }
 
     @Override
-    protected DeleteProjectCommand getDeleteProjectCommand() {
+    public DeleteProjectCommand getDeleteProjectCommand() {
         return new StashDeleteProjectCommand();
     }
 
@@ -62,7 +62,7 @@ public class StashCommandFactory extends SCMCommandFactory {
     }
 
     @Override
-    protected DeleteRepoCommand getDeleteRepoCommand() {
+    public DeleteRepoCommand getDeleteRepoCommand() {
         return new StashDeleteRepoCommand();
     }
 }

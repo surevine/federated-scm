@@ -25,7 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Bean for information related to an existing, or future, local git repository
+ * Bean for information related to an existing, or future, git repository
  * @author nick.leaver@surevine.com
  */
 public class RepoBean {
