@@ -21,6 +21,7 @@ import com.surevine.gateway.scm.git.jgit.JGitGitFacade;
 import com.surevine.gateway.scm.model.RepoBean;
 
 import java.nio.file.Path;
+import java.util.Map;
 
 /**
  * @author nick.leaver@surevine.com
@@ -49,6 +50,23 @@ public abstract class GitFacade {
     public abstract void addRemote(RepoBean repoBean, String remoteName, String remoteURL) throws GitException;
 
     /**
+     * Updates a remote on a local repo
+     * @param repoBean the details of the repo
+     * @param remoteName the remote name
+     * @param remoteURL the remote URL
+     * @throws GitException
+     */
+    public abstract void updateRemote(RepoBean repoBean, String remoteName, String remoteURL) throws GitException;
+
+    /**
+     * Gets the remotes configured for a repository
+     * @param repoBean the repo bean
+     * @return the remotes configured for a repository
+     * @throws GitException
+     */
+    public abstract Map<String, String> getRemotes(RepoBean repoBean) throws GitException;
+
+    /**
      * Pull a remote into a git repository
      * @param repoBean Information about the remote Repo
      * @param remoteName the name of the remote - will us origin if null
@@ -61,10 +79,9 @@ public abstract class GitFacade {
      * Pushes a repo to a remote
      * @param repoBean the repo bean
      * @param remoteName the name of the remote
-     * @return true if the push succeeded
      * @throws GitException if something went wrong
      */
-    public abstract boolean push(RepoBean repoBean, String remoteName) throws GitException;
+    public abstract void push(RepoBean repoBean, String remoteName) throws GitException;
 
     /**
      * Tags a repository

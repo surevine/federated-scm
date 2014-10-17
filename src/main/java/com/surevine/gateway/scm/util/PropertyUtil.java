@@ -58,12 +58,12 @@ public final class PropertyUtil {
         return getProperty(PROP_ORG_NAME);
     }
     
-    public static String getPartnerProjectKeyString(final String partnerName) {
-        return getProperty(String.format(PROP_PARTNER_PROJECT_KEY, partnerName));
+    public static String getPartnerProjectKeyString(final String partnerName, final String partnerKey) {
+        return getProperty(String.format(PROP_PARTNER_PROJECT_KEY, partnerName, partnerKey));
     }
 
-    public static String getPartnerForkProjectKeyString(final String partnerName) {
-        return getProperty(String.format(PROP_PARTNER_FORK_PROJECT_KEY, partnerName));
+    public static String getPartnerForkProjectKeyString(final String partnerName, final String partnerKey) {
+        return getProperty(String.format(PROP_PARTNER_FORK_PROJECT_KEY, partnerName, partnerKey));
     }
     
     public static String getGatewayURL() {

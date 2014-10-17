@@ -59,6 +59,7 @@ public final class TestUtility {
         repoBean.setCloneURL(repoURL);
 
         Git git = new Git(repo);
+        
 
         for (int i = 0; i < 3; i++) {
             String filename = "newfile" + i + ".txt";
@@ -68,14 +69,16 @@ public final class TestUtility {
             git.commit().setMessage("Added " + filename).call();
         }
 
+        git.checkout().setName("master").call();
+
         repo.close();
         return repoBean;
     }
     
     public static void destroyTestRepo(final RepoBean repoBean) throws Exception {
-        if (repoBean.getProjectKey().startsWith("test_")) {
-            Path repoTopLevelDir = Paths.get(PropertyUtil.getGitDir(), repoBean.getProjectKey());
-            FileUtils.deleteDirectory(repoTopLevelDir.toFile());
+        Path parent = repoBean.getRepoDirectory().getParent();
+        if (parent.getFileName().toString().startsWith("test_")) {
+            FileUtils.deleteDirectory(repoBean.getRepoDirectory().getParent().toFile());
         }
     } 
 }

@@ -21,6 +21,7 @@ import com.surevine.gateway.scm.api.IncomingProcessor;
 import com.surevine.gateway.scm.gatewayclient.MetadataUtil;
 import com.surevine.gateway.scm.git.GitFacade;
 import com.surevine.gateway.scm.model.RepoBean;
+import com.surevine.gateway.scm.scmclient.GetRepoCommand;
 import com.surevine.gateway.scm.scmclient.SCMCommandFactory;
 import com.surevine.gateway.scm.service.SCMFederatorServiceException;
 import com.surevine.gateway.scm.util.InputValidator;
@@ -41,20 +42,19 @@ public class IncomingProcessorImpl implements IncomingProcessor {
     private Logger logger = Logger.getLogger(IncomingProcessorImpl.class);
     
     @Override
-    public void processIncomingRepository(final Path path, final Map<String, String> metadata)
+    public void processIncomingRepository(final Path tmpBundlePath, final Map<String, String> metadata)
             throws SCMFederatorServiceException {
         if (MetadataUtil.VALUE_SOURCE.equals(metadata.get(MetadataUtil.KEY_SOURCE))) {
             String partnerName = metadata.get(MetadataUtil.KEY_ORGANISATION);
             String projectKey = metadata.get(MetadataUtil.KEY_PROJECT);
             String repositorySlug = metadata.get(MetadataUtil.KEY_REPO);
-            String scmProjectKey = PropertyUtil.getPartnerProjectKeyString(partnerName);
-            String scmProjectForkKey = PropertyUtil.getPartnerForkProjectKeyString(partnerName);
+            
 
             if (!InputValidator.partnerNameIsValid(partnerName)
                     || !InputValidator.projectKeyIsValid(projectKey)
                     || !InputValidator.repoSlugIsValid(repositorySlug)) {
                 // one of the params is invalid and we can't use it so do not try and process the repository
-                throw new SCMFederatorServiceException("Could not process file " + path.getFileName()
+                throw new SCMFederatorServiceException("Could not process file " + tmpBundlePath.getFileName()
                         + ": missing or invalid metadata");
             }
 
@@ -69,76 +69,84 @@ public class IncomingProcessorImpl implements IncomingProcessor {
             try {
                 if (Files.exists(bundleDestination)) {
                     logger.info("Overwriting existing bundle at " + bundleDestination);
-                    Files.copy(path, bundleDestination, StandardCopyOption.REPLACE_EXISTING);
+                    Files.copy(tmpBundlePath, bundleDestination, StandardCopyOption.REPLACE_EXISTING);
                 } else {
                     Files.createDirectories(bundleDestination.getParent());
-                    Files.copy(path, bundleDestination);
+                    Files.copy(tmpBundlePath, bundleDestination);
                 }
             } catch (IOException ioe) {
                 logger.error("Could not write incoming bundle to disk: " + bundleDestination, ioe);
             }
 
-            // at this point the bundle is in the right place at ${bundle_directory}/$partner/$project/$repo.bundle
-            // now check if there's an existing working copy of the repository that has the correct remotes.
-            // if there is then we need to pull from the bundle, push into the SCM fork, and create merge requests,
-            // if there isn't then we create a new repository from the bundle, push to a new repository in the SCM
-            // system, and fork the SCM repository for future incoming updates
-
-            RepoBean repoBean = new RepoBean();
-            repoBean.setRemote(true);
-            repoBean.setSourcePartner(partnerName);
-            repoBean.setSlug(repositorySlug);
-            repoBean.setProjectKey(projectKey);
+            String scmProjectKey = PropertyUtil.getPartnerProjectKeyString(partnerName, projectKey);
+            String scmProjectForkKey = PropertyUtil.getPartnerForkProjectKeyString(partnerName, projectKey);
+            GetRepoCommand getRepoCommand = SCMCommandFactory.getInstance().getGetRepoCommand();
             
-            Path repositoryDirectory = repoBean.getRepoDirectory();
+            boolean mainRepoExists = getRepoCommand.getRepository(scmProjectKey, repositorySlug) != null;
+            boolean forkRepoExists = getRepoCommand.getRepository(scmProjectForkKey, repositorySlug) != null;
             
-            if (Files.exists(repositoryDirectory)) {
-                // Process an update
+            if (mainRepoExists && forkRepoExists) {
+                processUpdate(bundleDestination, metadata);
             } else {
-                // New incoming repository
-                try {
-                    // create local repository from bundle
-                    GitFacade.getInstance().clone(repoBean);
-
-                    // create SCM repository
-                    if (SCMCommandFactory.getInstance().getGetProjectsCommand()
-                            .getProjects().contains(scmProjectKey)) {
-                        SCMCommandFactory.getInstance().getCreateProjectCommand().createProject(scmProjectKey);
-                    }
-                    
-                    if (SCMCommandFactory.getInstance().getGetRepoCommand()
-                            .getRepository(scmProjectKey, repositorySlug) != null) {
-                        throw new SCMFederatorServiceException("Repository " + scmProjectKey + ":"
-                                + repositorySlug + " already exists.");
-                    }
-                    
-                    RepoBean createdSCMRepository = SCMCommandFactory.getInstance().getCreateRepoCommand()
-                            .createRepo(scmProjectKey, repositorySlug);
-                    
-                    // stash derives the slug from the repository name provided - we provided an existing slug as 
-                    // the name when we created the repo so it should match but if it doesn't, fail here
-                    if (createdSCMRepository.getSlug() == null
-                            || createdSCMRepository.getSlug().equals(repositorySlug)) {
-                        throw new SCMFederatorServiceException("Repository slug on new repo doesn't match incoming");
-                    }
-                    
-                    // fork the new repository
-                    RepoBean forkedRepo = SCMCommandFactory.getInstance().getForkRepoCommand()
-                            .forkRepo(scmProjectKey, repositorySlug, scmProjectForkKey);
-                    
-                    // push into the fork
-                    GitFacade.getInstance().addRemote(repoBean, "scm", forkedRepo.getCloneURL());
-                    GitFacade.getInstance().push(repoBean, "scm");
-                    
-
-                } catch (Exception e) {
-                    logger.error("Could not import new repository " + repoBean, e);
-                }
-                
-                // - create SCM repository and push from local repository
-                // - fork SCM repository and set as a remote on local repository
-                
+                processNewIncomingRepository(bundleDestination, metadata);
             }
         }
+    }
+    
+    private void processNewIncomingRepository(final Path bundleDestination, final Map<String, String> metadata) {
+        String partnerName = metadata.get(MetadataUtil.KEY_ORGANISATION);
+        String projectKey = metadata.get(MetadataUtil.KEY_PROJECT);
+        String repositorySlug = metadata.get(MetadataUtil.KEY_REPO);
+        String scmProjectKey = PropertyUtil.getPartnerProjectKeyString(partnerName, projectKey);
+        String scmProjectForkKey = PropertyUtil.getPartnerForkProjectKeyString(partnerName, projectKey);
+        RepoBean repoBean = new RepoBean();
+        repoBean.setProjectKey(scmProjectKey);
+        repoBean.setSlug(repositorySlug);
+        repoBean.setCloneURL(bundleDestination.toString());
+        
+        try {
+            // create local repository from bundle
+            GitFacade.getInstance().clone(repoBean);
+
+            // create project in the SCM system to hold repositories from this partner if it doesn't already exist
+            if (!SCMCommandFactory.getInstance().getGetProjectsCommand()
+                    .getProjects().contains(scmProjectKey)) {
+                SCMCommandFactory.getInstance().getCreateProjectCommand().createProject(scmProjectKey);
+            }
+            
+            // check that a repository doesn't already exists where we are planning on creating one in the SCM system
+            if (SCMCommandFactory.getInstance().getGetRepoCommand()
+                    .getRepository(scmProjectKey, repositorySlug) != null) {
+                throw new SCMFederatorServiceException("Repository " + scmProjectKey + ":"
+                        + repositorySlug + " already exists.");
+            }
+            
+            // create a new repository in the SCM system to hold the shared source
+            RepoBean createdSCMRepository = SCMCommandFactory.getInstance().getCreateRepoCommand()
+                    .createRepo(scmProjectKey, repositorySlug);
+            
+            // push the incoming repository into the new SCM repository
+            GitFacade.getInstance().addRemote(repoBean, "scm", createdSCMRepository.getCloneURL());
+            GitFacade.getInstance().push(repoBean, "scm");
+
+            // create project in the SCM system to hold update forks from this partner if it doesn't already exist
+            if (!SCMCommandFactory.getInstance().getGetProjectsCommand()
+                    .getProjects().contains(scmProjectForkKey)) {
+                SCMCommandFactory.getInstance().getCreateProjectCommand().createProject(scmProjectForkKey);
+            }
+                        
+            // fork the new repository to allow updates to pushed into the fork instead of the master copy in future
+            RepoBean forkedRepo = SCMCommandFactory.getInstance().getForkRepoCommand()
+                    .forkRepo(scmProjectKey, repositorySlug, scmProjectForkKey);
+            
+            // update local repository remote to point at the fork instead for its scm remote
+            GitFacade.getInstance().updateRemote(repoBean, "scm", forkedRepo.getCloneURL());
+        } catch (Exception e) {
+            logger.error("Could not import new repository " + repoBean, e);
+        }
+    }
+
+    private void processUpdate(final Path path, final Map<String, String> metadata) {
+        // todo
     }
 }

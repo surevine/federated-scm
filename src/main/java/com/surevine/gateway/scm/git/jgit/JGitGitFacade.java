@@ -28,20 +28,26 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeResult;
 import org.eclipse.jgit.api.PullCommand;
 import org.eclipse.jgit.api.PullResult;
+import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.RebaseResult;
 import org.eclipse.jgit.api.TagCommand;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.NullProgressMonitor;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.eclipse.jgit.transport.PushResult;
+import org.eclipse.jgit.transport.RemoteRefUpdate;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author nick.leaver@surevine.com
@@ -50,13 +56,93 @@ public class JGitGitFacade extends GitFacade {
     private static Logger logger = Logger.getLogger(JGitGitFacade.class);
 
     @Override
-    public boolean push(final RepoBean repoBean, final String remoteName) throws GitException {
-        throw new UnsupportedOperationException("Not yet implemented");        
+    public void push(final RepoBean repoBean, final String remoteName) throws GitException {
+        try {
+            FileRepositoryBuilder builder = new FileRepositoryBuilder();
+            Repository repository = builder.setGitDir(repoBean.getRepoDirectory().toFile()).findGitDir().build();
+            Git git = new org.eclipse.jgit.api.Git(repository);
+            
+            // dry run the push - if the push cannot be done automatically we have no way to recover so we just log
+            // and throw an exception
+            PushCommand dryRunPushCommand = git.push();
+            dryRunPushCommand.setRemote(remoteName);
+            dryRunPushCommand.setDryRun(true); 
+            Iterable<PushResult> dryRunResult = dryRunPushCommand.call();
+            for (PushResult result:dryRunResult) {
+                for (RemoteRefUpdate remoteRefUpdate:result.getRemoteUpdates()) {
+                    switch (remoteRefUpdate.getStatus()) {
+                        case OK:
+                        case UP_TO_DATE:
+                            continue;
+                        default:
+                            throw new GitException("During a dry run of a push one of the updates would have failed "
+                                    + "so the push was aborted for repo " + repoBean + " to remote "
+                                    + dryRunPushCommand.getRemote());
+                    }
+                }
+            }
+            
+            // if we get to this point the dry run was OK so try the real thing
+            PushCommand realPushCommand = git.push();
+            realPushCommand.setRemote(remoteName);
+            Iterable<PushResult> pushResults = realPushCommand.call();
+            for (PushResult result:pushResults) {
+                for (RemoteRefUpdate remoteRefUpdate:result.getRemoteUpdates()) {
+                    switch (remoteRefUpdate.getStatus()) {
+                        case OK:
+                        case UP_TO_DATE:
+                            continue;
+                        default:
+                            throw new GitException("Push failed for " + repoBean + " to remote "
+                                    + dryRunPushCommand.getRemote());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            throw new GitException(e);
+        } 
+    }
+
+    @Override
+    public Map<String, String> getRemotes(RepoBean repoBean) throws GitException {
+        Map<String, String> remotes = new HashMap<String, String>();
+        try {
+            FileRepositoryBuilder builder = new FileRepositoryBuilder();
+            Repository repository = builder.setGitDir(repoBean.getGitConfigDirectory().toFile()).findGitDir().build();
+            Git git = new org.eclipse.jgit.api.Git(repository);
+            StoredConfig config = git.getRepository().getConfig();
+            Set<String> remoteNames = config.getSubsections("remote");
+            for (String remoteName:remoteNames) {
+                remotes.put(remoteName, config.getString("remote", remoteName, "url"));
+            }
+        } catch (Exception e) {
+            throw new GitException(e);
+        }
+        return remotes;
     }
 
     @Override
     public void addRemote(final RepoBean repoBean, final String remoteName, final String remoteURL) throws GitException {
-        throw new UnsupportedOperationException("Not yet implemented");
+        try {
+            FileRepositoryBuilder builder = new FileRepositoryBuilder();
+            Repository repository = builder.setGitDir(repoBean.getGitConfigDirectory().toFile()).findGitDir().build();
+            Git git = new org.eclipse.jgit.api.Git(repository);
+            StoredConfig config = git.getRepository().getConfig();
+            config.setString("remote", remoteName, "url", remoteURL);
+            config.setString("remote", remoteName, "fetch", String.format("+refs/heads/*:refs/remotes/%s/*", remoteName));
+            config.save();
+
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            throw new GitException(e);
+        }
+    }
+
+    @Override
+    public void updateRemote(RepoBean repoBean, String remoteName, String remoteURL) throws GitException {
+        // same process as adding for jgit
+        addRemote(repoBean, remoteName, remoteURL);
     }
 
     @Override
@@ -74,11 +160,11 @@ public class JGitGitFacade extends GitFacade {
 
     @Override
     public boolean pull(final RepoBean repoBean, final String remoteName) throws GitException {
-        String remoteToPull = (remoteName == null) ? remoteName : "origin";
+        String remoteToPull = (remoteName != null) ? remoteName : "origin";
         PullResult result;
         try {
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
-            Repository repository = builder.setGitDir(repoBean.getRepoDirectory().toFile()).findGitDir().build();
+            Repository repository = builder.setGitDir(repoBean.getGitConfigDirectory().toFile()).findGitDir().build();
             Git git = new org.eclipse.jgit.api.Git(repository);
             PullCommand pullCommand = git.pull();
             pullCommand.setRemote(remoteToPull);
