@@ -31,15 +31,13 @@ public interface Distributor {
      * @param repositorySlug The repository slug for the shared repository.
      * @throws com.surevine.gateway.scm.service.SCMFederatorServiceException
      */
-    void distribute(final String partnerName, final String projectKey, final String repositorySlug)
+    void distributeToSingleDestination(final String partnerName, final String projectKey, final String repositorySlug)
             throws SCMFederatorServiceException;
 
     /**
-     * Causes the SCM federator to package a repository and distribute via the Gateway.
-     * @param projectKey The project key of the project. Must match the key in the SCM system.
-     * @param repositorySlug The repository slug for the shared repository.
-     * @throws SCMFederatorServiceException
+     * Fire and forget method to package and distribute all repositories configured for sharing 
+     * in the gateway.
+     * No exceptions are thrown from this method. Any errors with any configured repository will be logged internally.
      */
-    void distribute(final String projectKey, final String repositorySlug)
-            throws SCMFederatorServiceException;
+    void distributeAll();
 }

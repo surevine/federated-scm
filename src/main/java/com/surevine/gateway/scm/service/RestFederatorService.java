@@ -20,8 +20,10 @@ package com.surevine.gateway.scm.service;
 import com.surevine.gateway.scm.api.Distributor;
 import com.surevine.gateway.scm.api.impl.DistributorImpl;
 import com.surevine.gateway.scm.util.InputValidator;
+import org.jboss.resteasy.annotations.Suspend;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -41,9 +43,17 @@ import java.net.HttpURLConnection;
 public class RestFederatorService {
     private Distributor distributionService;
 
+    /**
+     * Causes the SCM federator to attempt to distribute the named repository to the specified destination.
+     * @param partnerName the name of the partner / gateway destination the repo should be sent to
+     * @param projectKey the project (SCM group) key
+     * @param repositorySlug the repository slug (short name) as it appears in the SCM system
+     * @return a HTTP response appropriate to the success or failure of the call
+     * @throws SCMFederatorServiceException if the specified repository could not be distributed
+     */
     @POST
     @Path("distribute")
-    public Response distribute(@QueryParam("destination") final String partnerName,
+    public Response distributeToSingleDestination(@QueryParam("destination") final String partnerName,
                              @QueryParam("projectKey") final String projectKey,
                              @QueryParam("repositorySlug") final String repositorySlug)
             throws SCMFederatorServiceException {
@@ -57,7 +67,23 @@ public class RestFederatorService {
                     .type(MediaType.TEXT_PLAIN).build());
         }
 
-        getDistributionService().distribute(partnerName, projectKey, repositorySlug);
+        getDistributionService().distributeToSingleDestination(partnerName, projectKey, repositorySlug);
+        return Response.ok(MediaType.APPLICATION_JSON).build();
+    }
+
+    /**
+     * Causes the SCM federator to attempt to distribute all shared repositories via the gateway. 
+     * No service errors are returned from this call. Any errors with individual repositories will be logged.
+     */
+    @GET
+    @Path("distributeAll")
+    public Response distributeAll() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                getDistributionService().distributeAll();
+            }
+        }).start();
         return Response.ok(MediaType.APPLICATION_JSON).build();
     }
 

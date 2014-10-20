@@ -99,7 +99,6 @@ public class JGitGitFacade extends GitFacade {
                 }
             }
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
             throw new GitException(e);
         } 
     }
@@ -134,7 +133,6 @@ public class JGitGitFacade extends GitFacade {
             config.save();
 
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
             throw new GitException(e);
         }
     }
@@ -151,9 +149,10 @@ public class JGitGitFacade extends GitFacade {
         cloneCommand.setDirectory(repoBean.getRepoDirectory().toFile());
         cloneCommand.setURI(repoBean.getCloneURL());
         try {
+            // TODO: An empty repository causes some errors in the system. Potentially check the repo isn't empty
+            // and clean up if it is.
             cloneCommand.call();
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
             throw new GitException(e);
         }
     }
@@ -171,7 +170,6 @@ public class JGitGitFacade extends GitFacade {
             result = pullCommand.call();
             repository.close();
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
             throw new GitException(e);
         }
         
@@ -200,7 +198,6 @@ public class JGitGitFacade extends GitFacade {
             tagCommand.call();
             repository.close();
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
             throw new GitException(e);
         }
     }
@@ -227,7 +224,6 @@ public class JGitGitFacade extends GitFacade {
             repository.close();
             return outputPath;
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
             throw new GitException(e);
         } finally {
             if (outputStream != null) {
@@ -261,7 +257,6 @@ public class JGitGitFacade extends GitFacade {
                         && originURL.equals(repoBean.getCloneURL());
                 repository.close();
             } catch (Exception e) {
-                logger.error(e.getMessage(), e);
                 throw new GitException(e);
             }
         }

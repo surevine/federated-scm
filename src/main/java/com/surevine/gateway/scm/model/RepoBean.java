@@ -18,6 +18,7 @@
 package com.surevine.gateway.scm.model;
 
 import com.surevine.gateway.scm.util.PropertyUtil;
+import org.apache.commons.io.FileUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -103,6 +104,22 @@ public class RepoBean {
      */
     public Path getGitConfigDirectory() {
         return getRepoDirectory().resolve(".git");
+    }
+
+    /**
+     * Attempts to delete the local repository directory. Fails silently as there's nothing the system can do to 
+     * recover and not deleting the directory shouldn't affect the usual operation of the system.
+     */
+    public void deleteLocalRepositoryDirectory() {
+        Path localDirectory = getRepoDirectory();
+        if (localDirectory != null && Files.exists(localDirectory) && localDirectory.startsWith(Paths.get(PropertyUtil.getGitDir()))) {
+            // check that it's a directory inside the system configured git directory before deleting
+            try {
+                FileUtils.deleteDirectory(localDirectory.toFile());
+            } catch (IOException e) {
+                // drop the exception
+            }
+        }
     }
 
     @Override

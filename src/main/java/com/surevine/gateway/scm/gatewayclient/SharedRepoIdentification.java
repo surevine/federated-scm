@@ -23,6 +23,15 @@ package com.surevine.gateway.scm.gatewayclient;
 public final class SharedRepoIdentification {
     private String projectKey;
     private String repoSlug;
+    
+    public SharedRepoIdentification() {
+        // no-op
+    }
+
+    public SharedRepoIdentification(String projectKey, String repoSlug) {
+        this.projectKey = projectKey;
+        this.repoSlug = repoSlug;
+    }
 
     public String getProjectKey() {
         return projectKey;

@@ -17,6 +17,8 @@
 */
 package com.surevine.gateway.scm.gatewayclient;
 
+import com.surevine.gateway.scm.util.PropertyUtil;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,9 +27,10 @@ import java.util.List;
  * @author nick.leaver@surevine.com
  */
 public class GatewayConfigServiceFacade {
+    private static final String USE_MOCK_KEY = "fedscm.mock.gatewayconfig";
     private static GatewayConfigServiceFacade instance;
     
-    GatewayConfigServiceFacade() {
+    protected GatewayConfigServiceFacade() {
         // external instantiation protection
     }
     
@@ -42,7 +45,8 @@ public class GatewayConfigServiceFacade {
     
     public static GatewayConfigServiceFacade getInstance() {
         if (instance == null) {
-            instance = new GatewayConfigServiceFacade();
+            boolean useMock = PropertyUtil.getBooleanProperty(USE_MOCK_KEY);
+            instance = (useMock) ? new MockGatewayConfigServiceFacade() : new GatewayConfigServiceFacade();
         }
         return instance;
     }

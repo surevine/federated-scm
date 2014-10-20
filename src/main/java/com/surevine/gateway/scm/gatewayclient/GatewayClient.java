@@ -17,10 +17,13 @@
 */
 package com.surevine.gateway.scm.gatewayclient;
 
+import com.surevine.gateway.scm.util.PropertyUtil;
+
 /**
  * @author nick.leaver@surevine.com
  */
 public class GatewayClient {
+    private static final String USE_MOCK_KEY = "fedscm.mock.gatewayclient";
     private static GatewayClient instance;
     
     protected GatewayClient() {
@@ -33,8 +36,8 @@ public class GatewayClient {
     
     public static GatewayClient getInstance() {
         if (instance == null) {
-            //instance = new GatewayClient();
-            instance = new MockFileWriterGatewayClient();
+            boolean useMock = PropertyUtil.getBooleanProperty(USE_MOCK_KEY);
+            instance = (useMock) ? new MockFileWriterGatewayClient() : new GatewayClient();
         }
         return instance;
     }

@@ -18,6 +18,7 @@
 package com.surevine.gateway.scm.gatewayclient;
 
 import com.surevine.gateway.scm.util.PropertyUtil;
+import org.apache.log4j.Logger;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,6 +28,7 @@ import java.nio.file.Paths;
  * @author nick.leaver@surevine.com
  */
 public class MockFileWriterGatewayClient extends GatewayClient {
+    private static Logger logger = Logger.getLogger(MockFileWriterGatewayClient.class);
     private Path tmpOutputDir;
 
     protected MockFileWriterGatewayClient() {
@@ -43,6 +45,7 @@ public class MockFileWriterGatewayClient extends GatewayClient {
         Path archivePath = gatewayPackage.getArchive();
         try {
             Files.copy(archivePath, tmpOutputDir.resolve(archivePath.getFileName().toString()));
+            logger.info("Copied distributable " + archivePath.getFileName() + " to " + tmpOutputDir);
         } catch (Exception e) {
             // drop exception - mock class
         }

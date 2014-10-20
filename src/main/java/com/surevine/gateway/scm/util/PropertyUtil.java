@@ -54,6 +54,10 @@ public final class PropertyUtil {
         return bundle.getString(key);
     }
     
+    public static boolean getBooleanProperty(final String key) {
+        return Boolean.parseBoolean(getProperty(key));
+    }
+    
     public static String getOrgName() {
         return getProperty(PROP_ORG_NAME);
     }
