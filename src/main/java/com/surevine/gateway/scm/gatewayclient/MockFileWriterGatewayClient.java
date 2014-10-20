@@ -17,29 +17,34 @@
 */
 package com.surevine.gateway.scm.gatewayclient;
 
+import com.surevine.gateway.scm.util.PropertyUtil;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 /**
  * @author nick.leaver@surevine.com
  */
-public class GatewayClient {
-    private static GatewayClient instance;
-    
-    protected GatewayClient() {
-        // no-op
-    }
-    
-    public void sendToGateway(final GatewayPackage gatewayPackage) {
-        // TODO
-    }
-    
-    public static GatewayClient getInstance() {
-        if (instance == null) {
-            //instance = new GatewayClient();
-            instance = new MockFileWriterGatewayClient();
+public class MockFileWriterGatewayClient extends GatewayClient {
+    private Path tmpOutputDir;
+
+    protected MockFileWriterGatewayClient() {
+        tmpOutputDir = Paths.get(PropertyUtil.getTempDir(), "gateway_mock_outputs");
+        try {
+            Files.createDirectories(tmpOutputDir);
+        } catch (Exception e) {
+            // drop exception - mock class
         }
-        return instance;
     }
     
-    public static void setInstance(final GatewayClient newClient) {
-        instance = newClient;
+    @Override
+    public void sendToGateway(GatewayPackage gatewayPackage) {
+        Path archivePath = gatewayPackage.getArchive();
+        try {
+            Files.copy(archivePath, tmpOutputDir.resolve(archivePath.getFileName().toString()));
+        } catch (Exception e) {
+            // drop exception - mock class
+        }
     }
 }
