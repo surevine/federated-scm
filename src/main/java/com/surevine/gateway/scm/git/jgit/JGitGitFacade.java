@@ -178,7 +178,6 @@ public class JGitGitFacade extends GitFacade {
             throw new GitException(e);
         }
         
-        // TODO: this is always returning true for non-empty repositories
         boolean hadUpdates = !result.getTrackingRefUpdates().isEmpty();        
         return hadUpdates;
     }
