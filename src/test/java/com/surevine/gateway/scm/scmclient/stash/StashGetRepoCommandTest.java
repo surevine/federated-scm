@@ -17,7 +17,7 @@
 */
 package com.surevine.gateway.scm.scmclient.stash;
 
-import com.surevine.gateway.scm.model.RepoBean;
+import com.surevine.gateway.scm.model.LocalRepoBean;
 import com.surevine.gateway.scm.scmclient.SCMCallException;
 import org.junit.Test;
 
@@ -47,7 +47,7 @@ public class StashGetRepoCommandTest {
         String slug2 = createRepoCommand.createRepo(randomProjectKey,randomRepoName2).getSlug();
         
         StashGetRepoCommand getRepoCommand = new StashGetRepoCommand();
-        Collection<RepoBean> repos = getRepoCommand.getRepositories(randomProjectKey);
+        Collection<LocalRepoBean> repos = getRepoCommand.getRepositories(randomProjectKey);
         assertEquals(2, repos.size());
         
         // clean up dummy project and repos
@@ -80,7 +80,7 @@ public class StashGetRepoCommandTest {
         String slug4 = createRepoCommand.createRepo(randomProjectKey2,randomRepoName4).getSlug();
 
         StashGetRepoCommand getRepoCommand = new StashGetRepoCommand();
-        Map<String,Collection<RepoBean>> repos = getRepoCommand.getAllRepositories();
+        Map<String,Collection<LocalRepoBean>> repos = getRepoCommand.getAllRepositories();
         
         assertTrue(repos.size() >= 2);
 
@@ -107,7 +107,7 @@ public class StashGetRepoCommandTest {
 
         // create a repo
         String randomRepoName = "REP" + new Random().nextInt();
-        RepoBean response = createRepoCommand.createRepo(randomProjectKey,randomRepoName);
+        LocalRepoBean response = createRepoCommand.createRepo(randomProjectKey,randomRepoName);
         StashGetRepoCommand getRepoCommand = new StashGetRepoCommand();
         assertNotNull(getRepoCommand.getRepository(randomProjectKey,response.getSlug()));
 
@@ -121,7 +121,7 @@ public class StashGetRepoCommandTest {
     @Test
     public void testGetRepoThatDoesntExist() {
         StashGetRepoCommand getRepoCommand = new StashGetRepoCommand();
-        RepoBean repo = getRepoCommand.getRepository("" + new Random().nextInt(), "" + new Random().nextInt());
+        LocalRepoBean repo = getRepoCommand.getRepository("" + new Random().nextInt(), "" + new Random().nextInt());
         assertNull(repo);
     }
 }

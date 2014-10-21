@@ -23,7 +23,7 @@ import com.surevine.gateway.scm.gatewayclient.GatewayPackage;
 import com.surevine.gateway.scm.gatewayclient.MetadataUtil;
 import com.surevine.gateway.scm.gatewayclient.SharedRepoIdentification;
 import com.surevine.gateway.scm.git.GitFacade;
-import com.surevine.gateway.scm.model.RepoBean;
+import com.surevine.gateway.scm.model.LocalRepoBean;
 import com.surevine.gateway.scm.scmclient.SCMCommandFactory;
 import com.surevine.gateway.scm.service.SCMFederatorServiceException;
 import org.apache.log4j.Logger;
@@ -44,7 +44,7 @@ public class DistributorImpl implements Distributor {
             throws SCMFederatorServiceException {
         logger.info("Distributing to partner: " + partnerName + " repository "
                 + projectKey + ":" + repositorySlug);
-        RepoBean repo = SCMCommandFactory.getInstance().getGetRepoCommand().getRepository(projectKey, repositorySlug);
+        LocalRepoBean repo = SCMCommandFactory.getInstance().getGetRepoCommand().getRepository(projectKey, repositorySlug);
         
         if (repo == null) {
             logger.error("Could not distribute repository:" + projectKey + ":" + repositorySlug
@@ -75,7 +75,7 @@ public class DistributorImpl implements Distributor {
                     String repositorySlug = repoShare.getRepoSlug();
                     
                     logger.info("Distributing repository " + projectKey + ":" + repositorySlug);
-                    RepoBean repo = SCMCommandFactory.getInstance().getGetRepoCommand().getRepository(projectKey, repositorySlug);
+                    LocalRepoBean repo = SCMCommandFactory.getInstance().getGetRepoCommand().getRepository(projectKey, repositorySlug);
 
                     if (repo == null) {
                         logger.info("Skipping distribution of " + projectKey + ":" + repositorySlug
@@ -98,7 +98,7 @@ public class DistributorImpl implements Distributor {
      * @param metadata the metadata to be send with the distribution
      * @param sendEvenIfNoUpdates if true the repo will be distributed even if there are no new updates since last export
      */
-    private void distribute(final RepoBean repo, final Map<String, String> metadata, final boolean sendEvenIfNoUpdates)
+    private void distribute(final LocalRepoBean repo, final Map<String, String> metadata, final boolean sendEvenIfNoUpdates)
             throws Exception {
         if (repo ==  null) {
             throw new SCMFederatorServiceException("The repository information for  " + repo.getProjectKey() + ":"

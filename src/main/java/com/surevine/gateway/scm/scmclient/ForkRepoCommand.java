@@ -17,7 +17,7 @@
 */
 package com.surevine.gateway.scm.scmclient;
 
-import com.surevine.gateway.scm.model.RepoBean;
+import com.surevine.gateway.scm.model.LocalRepoBean;
 
 /**
  * @author nick.leaver@surevine.com
@@ -29,5 +29,5 @@ public interface ForkRepoCommand {
      * @param repositorySlug the repository slug
      * @param forkProjectKey the target project/group key
      */
-    RepoBean forkRepo(String projectKey, String repositorySlug, String forkProjectKey) throws SCMCallException;
+    LocalRepoBean forkRepo(String projectKey, String repositorySlug, String forkProjectKey) throws SCMCallException;
 }

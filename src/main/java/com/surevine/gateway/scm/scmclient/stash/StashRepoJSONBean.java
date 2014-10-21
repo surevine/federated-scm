@@ -17,7 +17,7 @@
 */
 package com.surevine.gateway.scm.scmclient.stash;
 
-import com.surevine.gateway.scm.model.RepoBean;
+import com.surevine.gateway.scm.model.LocalRepoBean;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import java.util.List;
@@ -109,11 +109,11 @@ public class StashRepoJSONBean {
         }
     };
 
-    public RepoBean asRepoBean() {
-        RepoBean repoBean = new RepoBean();
-        repoBean.setCloneURL(getRepoCloneURL());
+    public LocalRepoBean asRepoBean() {
+        LocalRepoBean repoBean = new LocalRepoBean();
+        repoBean.setCloneSourceURI(getRepoCloneURL());
         repoBean.setSlug(slug);
-        repoBean.setRemote(false);
+        repoBean.setFromGateway(false);
         repoBean.setProjectKey(getProject().getKey());
         return repoBean;
     }

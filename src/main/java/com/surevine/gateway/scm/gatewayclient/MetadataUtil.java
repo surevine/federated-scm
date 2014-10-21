@@ -17,7 +17,7 @@
 */
 package com.surevine.gateway.scm.gatewayclient;
 
-import com.surevine.gateway.scm.model.RepoBean;
+import com.surevine.gateway.scm.model.LocalRepoBean;
 import com.surevine.gateway.scm.util.PropertyUtil;
 
 import java.util.HashMap;
@@ -41,17 +41,17 @@ public final class MetadataUtil {
         // no-op
     }
         
-    public static Map<String, String> getSinglePartnerMetadata(final RepoBean repoBean, final String partner) {
+    public static Map<String, String> getSinglePartnerMetadata(final LocalRepoBean repoBean, final String partner) {
         Map<String, String> metadataMap = generateMetadata(repoBean, VALUE_SINGLE_DISTRIBUTION);
         metadataMap.put(KEY_LIMIT_DISTRIBUTION_TO, partner);
         return metadataMap;
     }
     
-    public static Map<String, String> getMetadata(final RepoBean repoBean) {
+    public static Map<String, String> getMetadata(final LocalRepoBean repoBean) {
         return generateMetadata(repoBean, VALUE_DISTRIBUTE_TO_ALL_PERMITTED);
     }
     
-    private static Map<String, String> generateMetadata(final RepoBean repoBean, final String distributionType) {
+    private static Map<String, String> generateMetadata(final LocalRepoBean repoBean, final String distributionType) {
         Map<String, String> metadataMap = new HashMap<String, String>();
         metadataMap.put(KEY_SOURCE, VALUE_SOURCE);
         metadataMap.put(KEY_PROJECT, repoBean.getProjectKey());

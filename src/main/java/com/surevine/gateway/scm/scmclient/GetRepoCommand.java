@@ -17,7 +17,7 @@
 */
 package com.surevine.gateway.scm.scmclient;
 
-import com.surevine.gateway.scm.model.RepoBean;
+import com.surevine.gateway.scm.model.LocalRepoBean;
 
 import java.util.Collection;
 import java.util.Map;
@@ -33,7 +33,7 @@ public interface GetRepoCommand {
      * @return all repositories in the project
      * @throws SCMCallException
      */
-    Collection<RepoBean> getRepositories(String projectKey);
+    Collection<LocalRepoBean> getRepositories(String projectKey);
 
     /**
      * Gets a single repo from a project
@@ -42,7 +42,7 @@ public interface GetRepoCommand {
      * @return the repository info
      * @throws SCMCallException
      */
-    RepoBean getRepository(String projectKey, String repositorySlug);
+    LocalRepoBean getRepository(String projectKey, String repositorySlug);
 
     /**
      * Gets all repositories in the SCM system.
@@ -50,5 +50,5 @@ public interface GetRepoCommand {
      * @return a mapping of projects to repositories
      * @throws SCMCallException
      */
-    Map<String, Collection<RepoBean>> getAllRepositories() throws SCMCallException;
+    Map<String, Collection<LocalRepoBean>> getAllRepositories() throws SCMCallException;
 }

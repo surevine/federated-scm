@@ -17,7 +17,7 @@
 */
 package com.surevine.gateway.scm.scmclient;
 
-import com.surevine.gateway.scm.model.RepoBean;
+import com.surevine.gateway.scm.model.LocalRepoBean;
 
 /**
  * @author nick.leaver@surevine.com
@@ -30,5 +30,5 @@ public interface CreateRepoCommand {
      * @return a RepoBean populated with extra information from the SCM system
      * @throws SCMCallException
      */
-    RepoBean createRepo(String projectKey, String name) throws SCMCallException;
+    LocalRepoBean createRepo(String projectKey, String name) throws SCMCallException;
 }

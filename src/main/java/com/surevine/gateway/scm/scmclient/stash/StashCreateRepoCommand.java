@@ -17,9 +17,9 @@
 */
 package com.surevine.gateway.scm.scmclient.stash;
 
+import com.surevine.gateway.scm.model.LocalRepoBean;
 import com.surevine.gateway.scm.scmclient.CreateRepoCommand;
 import com.surevine.gateway.scm.scmclient.SCMCallException;
-import com.surevine.gateway.scm.model.RepoBean;
 import com.surevine.gateway.scm.util.PropertyUtil;
 import com.surevine.gateway.scm.util.SCMSystemProperties;
 import org.apache.log4j.Logger;
@@ -42,7 +42,7 @@ public class StashCreateRepoCommand implements CreateRepoCommand {
     }
 
     @Override
-    public RepoBean createRepo(final String projectKey, final String name) throws SCMCallException {
+    public LocalRepoBean createRepo(final String projectKey, final String name) throws SCMCallException {
         if (projectKey == null || projectKey.isEmpty()) {
             throw new SCMCallException("createRepo", "No project key was provided");
         } else if (name == null || name.isEmpty()) {

@@ -17,7 +17,7 @@
 */
 package com.surevine.gateway.scm.scmclient.stash;
 
-import com.surevine.gateway.scm.model.RepoBean;
+import com.surevine.gateway.scm.model.LocalRepoBean;
 import com.surevine.gateway.scm.scmclient.GetRepoCommand;
 import com.surevine.gateway.scm.scmclient.SCMCallException;
 import com.surevine.gateway.scm.util.PropertyUtil;
@@ -49,8 +49,8 @@ public class StashGetRepoCommand implements GetRepoCommand {
     }
     
     @Override
-    public Collection<RepoBean> getRepositories(final String projectKey) {
-        HashSet<RepoBean> repositories = new HashSet<RepoBean>();
+    public Collection<LocalRepoBean> getRepositories(final String projectKey) {
+        HashSet<LocalRepoBean> repositories = new HashSet<LocalRepoBean>();
         
         Client client = ClientBuilder.newClient();
         String resource = scmSystemProperties.getHost() + String.format(ALL_RESOURCE, projectKey);
@@ -71,7 +71,7 @@ public class StashGetRepoCommand implements GetRepoCommand {
     }
 
     @Override
-    public RepoBean getRepository(final String projectKey, final String repositorySlug) {
+    public LocalRepoBean getRepository(final String projectKey, final String repositorySlug) {
         Client client = ClientBuilder.newClient();
         String resource = scmSystemProperties.getHost() + String.format(SINGLE_RESOURCE, projectKey, repositorySlug);
         logger.debug("REST call to " + resource);
@@ -93,8 +93,8 @@ public class StashGetRepoCommand implements GetRepoCommand {
     }
 
     @Override
-    public Map<String, Collection<RepoBean>> getAllRepositories() throws SCMCallException {
-        Map<String, Collection<RepoBean>> repositories = new HashMap<String, Collection<RepoBean>>();
+    public Map<String, Collection<LocalRepoBean>> getAllRepositories() throws SCMCallException {
+        Map<String, Collection<LocalRepoBean>> repositories = new HashMap<String, Collection<LocalRepoBean>>();
         logger.debug("Getting all repositories from Stash");
         int pCount = 0;
         int rCount = 0;
@@ -106,7 +106,7 @@ public class StashGetRepoCommand implements GetRepoCommand {
         }
         
         for (String projectKey:projects) {
-            Collection<RepoBean> repos = getRepositories(projectKey);
+            Collection<LocalRepoBean> repos = getRepositories(projectKey);
             if (repos.size() > 0) {
                 repositories.put(projectKey, repos);
                 rCount += repos.size();

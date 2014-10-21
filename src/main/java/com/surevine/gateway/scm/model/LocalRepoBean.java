@@ -26,72 +26,136 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Bean for information related to an existing, or future, git repository
+ * Bean for information related to an existing, or future, git repository stored in the local filesystem
  * @author nick.leaver@surevine.com
  */
-public class RepoBean {
+public class LocalRepoBean {
     private String slug;
-    private boolean remote;
+    private boolean fromGateway;
     private String sourcePartner;
     private String projectKey;
-    private String cloneURL;
+    private String cloneSourceURI;
     private boolean localBare = true;
 
+    /**
+     * Returns true if this repo was, or should be, created bare
+     * @return true if this repo was, or should be, created bare
+     */
     public boolean isLocalBare() {
         return localBare;
     }
 
+    /**
+     * Sets whether this repo is / should be bare
+     * @param localBare if true the local is / should be bare
+     */
     public void setLocalBare(final boolean localBare) {
         this.localBare = localBare;
     }
 
-    public boolean isRemote() {
-        return remote;
+    /**
+     * Returns true if this local repository is the result of an incoming repository from the gateway
+     * @return true if this local repository is the result of an incoming repository from the gateway
+     */
+    public boolean isFromGateway() {
+        return fromGateway;
     }
 
-    public void setRemote(final boolean remote) {
-        this.remote = remote;
+    /**
+     * Sets whether this repo is from an incoming gateway bundle or not
+     * @param fromGateway true if from the gateway
+     */
+    public void setFromGateway(final boolean fromGateway) {
+        this.fromGateway = fromGateway;
     }
 
+    /**
+     * Repositories received across the gateway will have a source partner name in their metadata.
+     * @return the name of the source partner for this repository. Probably null if this isn't from the gateway.
+     */
     public String getSourcePartner() {
         return sourcePartner;
     }
 
+    /**
+     * Sets the source parner name for repositories received from the gateway
+     * @param sourcePartner the source partner name
+     */
     public void setSourcePartner(final String sourcePartner) {
         this.sourcePartner = sourcePartner;
     }
 
+    /**
+     * Gets the repository slug for this repository. Should relate to the SCM system slug of this repository,
+     * which should be the same on both the partner and local SCM systems. Forms part of the filesystem location of 
+     * the local repo.
+     * @return the repository slug
+     */
     public String getSlug() {
         return slug;
     }
 
+    /**
+     * Sets the repository slug
+     * @param slug the repository slug
+     */
     public void setSlug(final String slug) {
         this.slug = slug;
     }
 
-    public String getCloneURL() {
-        return cloneURL;
+    /**
+     * Gets the URI of the repository the local repository was, or will be, cloned from (if any)
+     * @return the URI of the repository the local repository was, or will be, cloned from (if any)
+     */
+    public String getCloneSourceURI() {
+        return cloneSourceURI;
     }
 
-    public void setCloneURL(final String cloneURL) {
-        this.cloneURL = cloneURL;
+    /**
+     * Sets the clone URI for this local repository
+     * @param cloneSourceURI /Users/nickl/projects/tpsc/code/federated-scm/src/main/java/com/surevine/gateway/scm/model/LocalRepoBean.java
+     */
+    public void setCloneSourceURI(final String cloneSourceURI) {
+        this.cloneSourceURI = cloneSourceURI;
     }
 
+    /**
+     * Gets the project / group / namespace key for this repository. Should relate to the SCM system project of this repository,
+     * which should be the same on both the partner and local SCM systems. Forms part of the filesystem location of 
+     * the local repo.
+     * @return the projecty / group / namespace of this repository
+     */
     public String getProjectKey() {
         return projectKey;
     }
 
+    /**
+     * Sets the project / group / namespace of this repo
+     * @param projectKey the project / group / namespace of this repo
+     */
     public void setProjectKey(final String projectKey) {
         this.projectKey = projectKey;
     }
 
     /**
-     * Gets the root directory of this repoBean
+     * Return true if this local repository exists in the filesystem. Naive check at the moment which simply tests
+     * for the presence of a directory in the correct location based on the properties of this bean.
+     * @return true if the repo directory exists
+     */
+    public boolean repoDirectoryExists() {
+        return Files.exists(getRepoDirectory());
+    }
+
+    /**
+     * Gets the root directory of this repoBean.
+     * Repos related to repositories cloned from the local SCM are stored at ${fedscm.git.dir}/local_scm/{projectKey}/{slug}
+     * Repos related to repositories cloned from incoming partner bundles are stored at ${fedscm.git.dir}/from_gateway/{sourcePartner}/{projectKey}/{slug}
+     * 
      * @return a Path to the correct location for this repo's working directory - may or may not exist
      */
     public Path getRepoDirectory() {
         Path repoDir;
-        if (isRemote()) {
+        if (isFromGateway()) {
             String sourcePartner = getSourcePartner();
             repoDir = Paths.get(PropertyUtil.getGitDir(), "from_gateway", sourcePartner,
                     projectKey, getSlug());
@@ -123,7 +187,7 @@ public class RepoBean {
      * Attempts to delete the local repository directory. Fails silently as there's nothing the system can do to 
      * recover and not deleting the directory shouldn't affect the usual operation of the system.
      */
-    public void deleteLocalRepositoryDirectory() {
+    public void deleteRepoDirectory() {
         Path localDirectory = getRepoDirectory();
         if (localDirectory != null && Files.exists(localDirectory) && localDirectory.startsWith(Paths.get(PropertyUtil.getGitDir()))) {
             // check that it's a directory inside the system configured git directory before deleting
@@ -139,10 +203,10 @@ public class RepoBean {
     public String toString() {
         return "RepoBean{" 
                 + "slug='" + slug + '\''
-                + ", remote=" + remote
+                + ", fromGateway=" + fromGateway
                 + ", sourcePartner='" + sourcePartner + '\''
                 + ", projectKey='" + projectKey + '\''
-                + ", cloneURL='" + cloneURL + '\''
+                + ", cloneSourceURI='" + cloneSourceURI + '\''
                 + '}';
     }
 }

@@ -19,7 +19,7 @@ package com.surevine.gateway.scm.git.jgit;
 
 import com.surevine.gateway.scm.git.GitException;
 import com.surevine.gateway.scm.git.GitFacade;
-import com.surevine.gateway.scm.model.RepoBean;
+import com.surevine.gateway.scm.model.LocalRepoBean;
 import com.surevine.gateway.scm.util.PropertyUtil;
 import com.surevine.gateway.scm.util.StringUtil;
 import org.apache.log4j.Logger;
@@ -55,7 +55,7 @@ public class JGitGitFacade extends GitFacade {
     private static Logger logger = Logger.getLogger(JGitGitFacade.class);
 
     @Override
-    public void push(final RepoBean repoBean, final String remoteName) throws GitException {
+    public void push(final LocalRepoBean repoBean, final String remoteName) throws GitException {
         try {
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
             Repository repository = builder.setGitDir(repoBean.getRepoDirectory().toFile()).findGitDir().build();
@@ -104,7 +104,7 @@ public class JGitGitFacade extends GitFacade {
     }
 
     @Override
-    public Map<String, String> getRemotes(final RepoBean repoBean) throws GitException {
+    public Map<String, String> getRemotes(final LocalRepoBean repoBean) throws GitException {
         Map<String, String> remotes = new HashMap<String, String>();
         try {
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
@@ -123,7 +123,7 @@ public class JGitGitFacade extends GitFacade {
     }
 
     @Override
-    public void addRemote(final RepoBean repoBean, final String remoteName, final String remoteURL) throws GitException {
+    public void addRemote(final LocalRepoBean repoBean, final String remoteName, final String remoteURL) throws GitException {
         try {
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
             Repository repository = builder.setGitDir(repoBean.getGitConfigDirectory().toFile()).findGitDir().build();
@@ -140,16 +140,16 @@ public class JGitGitFacade extends GitFacade {
     }
 
     @Override
-    public void updateRemote(final RepoBean repoBean, final String remoteName, final String remoteURL) throws GitException {
+    public void updateRemote(final LocalRepoBean repoBean, final String remoteName, final String remoteURL) throws GitException {
         // same process as adding for jgit
         addRemote(repoBean, remoteName, remoteURL);
     }
 
     @Override
-    public void clone(final RepoBean repoBean) throws GitException {
+    public void clone(final LocalRepoBean repoBean) throws GitException {
         CloneCommand cloneCommand = new CloneCommand();
         cloneCommand.setDirectory(repoBean.getRepoDirectory().toFile());
-        cloneCommand.setURI(repoBean.getCloneURL());
+        cloneCommand.setURI(repoBean.getCloneSourceURI());
         cloneCommand.setBare(repoBean.isLocalBare());
         try {
             cloneCommand.call();
@@ -160,7 +160,7 @@ public class JGitGitFacade extends GitFacade {
     }
 
     @Override
-    public boolean fetch(final RepoBean repoBean, final String remoteName) throws GitException {
+    public boolean fetch(final LocalRepoBean repoBean, final String remoteName) throws GitException {
         String remoteToPull = (remoteName != null) ? remoteName : "origin";        
         
         FetchResult result;
@@ -183,7 +183,7 @@ public class JGitGitFacade extends GitFacade {
     }
 
     @Override
-    public void tag(final RepoBean repoBean, final String tag) throws GitException {
+    public void tag(final LocalRepoBean repoBean, final String tag) throws GitException {
         try {
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
             Repository repository = builder.setGitDir(repoBean.getGitConfigDirectory().toFile()).findGitDir().build();
@@ -199,7 +199,7 @@ public class JGitGitFacade extends GitFacade {
     }
 
     @Override
-    public Path bundle(final RepoBean repoBean) throws GitException {
+    public Path bundle(final LocalRepoBean repoBean) throws GitException {
         OutputStream outputStream = null;
         try {
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
@@ -233,7 +233,7 @@ public class JGitGitFacade extends GitFacade {
     }
 
     @Override
-    public boolean repoAlreadyCloned(final RepoBean repoBean) throws GitException {
+    public boolean repoAlreadyCloned(final LocalRepoBean repoBean) throws GitException {
         boolean alreadyCloned = false;
         
         // if the enclosing directory exists then examine the repository to check it's the right one
@@ -249,8 +249,8 @@ public class JGitGitFacade extends GitFacade {
                 // already been cloned.
                 Config storedConfig = repository.getConfig();
                 String originURL = storedConfig.getString("remote", "origin", "url");        
-                alreadyCloned = originURL != null && repoBean.getCloneURL() != null
-                        && originURL.equals(repoBean.getCloneURL());
+                alreadyCloned = originURL != null && repoBean.getCloneSourceURI() != null
+                        && originURL.equals(repoBean.getCloneSourceURI());
                 repository.close();
             } catch (Exception e) {
                 logger.error(e);

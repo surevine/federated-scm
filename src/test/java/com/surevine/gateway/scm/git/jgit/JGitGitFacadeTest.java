@@ -17,9 +17,7 @@
 */
 package com.surevine.gateway.scm.git.jgit;
 
-import com.surevine.gateway.scm.model.RepoBean;
-import com.surevine.gateway.scm.util.PropertyUtil;
-import org.eclipse.jgit.api.CloneCommand;
+import com.surevine.gateway.scm.model.LocalRepoBean;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
@@ -29,7 +27,6 @@ import org.junit.Test;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.List;
@@ -48,15 +45,15 @@ public class JGitGitFacadeTest {
     
     @Test
     public void testAlreadyCloned() throws Exception {
-        RepoBean testRepo = TestUtility.createTestRepo();
-        testRepo.setCloneURL("ssh://fake_url");
+        LocalRepoBean testRepo = TestUtility.createTestRepo();
+        testRepo.setCloneSourceURI("ssh://fake_url");
         assertTrue(underTest.repoAlreadyCloned(testRepo));
         TestUtility.destroyTestRepo(testRepo);
     }
     
     @Test
     public void testBundle() throws Exception {
-        RepoBean testRepo = TestUtility.createTestRepo();
+        LocalRepoBean testRepo = TestUtility.createTestRepo();
         Path bundlePath = underTest.bundle(testRepo);
         assertTrue(Files.exists(bundlePath));
         assertTrue(Files.isRegularFile(bundlePath));
@@ -67,13 +64,13 @@ public class JGitGitFacadeTest {
     
     @Test
     public void testBundleMultipleBranches() throws Exception {
-        RepoBean repoWithBranches = TestUtility.createTestRepoMultipleBranches();
+        LocalRepoBean repoWithBranches = TestUtility.createTestRepoMultipleBranches();
         Path bundlePath = underTest.bundle(repoWithBranches);
         assertTrue(Files.exists(bundlePath));
         assertTrue(Files.isRegularFile(bundlePath));
         
-        RepoBean fromBundle = new RepoBean();
-        fromBundle.setCloneURL(bundlePath.toString());
+        LocalRepoBean fromBundle = new LocalRepoBean();
+        fromBundle.setCloneSourceURI(bundlePath.toString());
         fromBundle.setProjectKey(repoWithBranches.getProjectKey());
         fromBundle.setSlug(repoWithBranches.getSlug() + "_from_bundle");
         fromBundle.setLocalBare(true);
@@ -110,7 +107,7 @@ public class JGitGitFacadeTest {
         
     @Test
     public void testAddRemote() throws Exception {
-        RepoBean testRepo = TestUtility.createTestRepo();
+        LocalRepoBean testRepo = TestUtility.createTestRepo();
         underTest.addRemote(testRepo, "my_remote", "ssh://my_remote_url");
 
         Map<String, String> remotes = underTest.getRemotes(testRepo);
@@ -120,7 +117,7 @@ public class JGitGitFacadeTest {
 
     @Test
     public void testUpdateRemote() throws Exception {
-        RepoBean testRepo = TestUtility.createTestRepo();
+        LocalRepoBean testRepo = TestUtility.createTestRepo();
         underTest.addRemote(testRepo, "my_remote", "ssh://my_remote_url");
         underTest.updateRemote(testRepo, "my_remote", "ssh://updated_remote_url");
         Map<String, String> remotes = underTest.getRemotes(testRepo);
@@ -130,14 +127,14 @@ public class JGitGitFacadeTest {
     
     @Test
     public void testFetch() throws Exception {
-        RepoBean sourceRepoBean = TestUtility.createTestRepo();
+        LocalRepoBean sourceRepoBean = TestUtility.createTestRepo();
         String sourceDirectory = sourceRepoBean.getRepoDirectory().toString();
         
-        RepoBean targetRepoBean = new RepoBean();
+        LocalRepoBean targetRepoBean = new LocalRepoBean();
         targetRepoBean.setLocalBare(false);
         targetRepoBean.setProjectKey(sourceRepoBean.getProjectKey());
         targetRepoBean.setSlug(sourceRepoBean.getSlug() + "_clone");
-        targetRepoBean.setCloneURL(sourceDirectory);
+        targetRepoBean.setCloneSourceURI(sourceDirectory);
         underTest.clone(targetRepoBean);
         underTest.addRemote(targetRepoBean, "source_repo", sourceDirectory);
         Map<String, String> remotes = underTest.getRemotes(targetRepoBean);

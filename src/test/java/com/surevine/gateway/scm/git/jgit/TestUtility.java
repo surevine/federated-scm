@@ -17,7 +17,7 @@
 */
 package com.surevine.gateway.scm.git.jgit;
 
-import com.surevine.gateway.scm.model.RepoBean;
+import com.surevine.gateway.scm.model.LocalRepoBean;
 import com.surevine.gateway.scm.util.PropertyUtil;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.CloneCommand;
@@ -42,7 +42,7 @@ public final class TestUtility {
         // no-op
     }
     
-    public static RepoBean createBareClone(RepoBean nonBareSource) throws Exception {
+    public static LocalRepoBean createBareClone(LocalRepoBean nonBareSource) throws Exception {
         String projectKey = nonBareSource.getProjectKey();
         String repoSlug = nonBareSource.getSlug() + "_bare";
         String cloneURL = nonBareSource.getRepoDirectory().toString();
@@ -52,14 +52,14 @@ public final class TestUtility {
         CloneCommand cloneCommand = new CloneCommand();
         cloneCommand.setBare(true).setCloneAllBranches(true).setURI(cloneURL).call();
 
-        RepoBean repoBean = new RepoBean();
+        LocalRepoBean repoBean = new LocalRepoBean();
         repoBean.setProjectKey(projectKey);
         repoBean.setSlug(repoSlug);
         repoBean.setLocalBare(true);
         return repoBean;
     }
     
-    public static RepoBean createTestRepoMultipleBranches() throws Exception {
+    public static LocalRepoBean createTestRepoMultipleBranches() throws Exception {
         String projectKey = "test_" + UUID.randomUUID().toString();
         String repoSlug = "testRepo";
         String remoteURL = "ssh://fake_url";
@@ -71,7 +71,7 @@ public final class TestUtility {
         config.setString("remote", "origin", "url", remoteURL);
         config.save();
 
-        RepoBean repoBean = new RepoBean();
+        LocalRepoBean repoBean = new LocalRepoBean();
         repoBean.setProjectKey(projectKey);
         repoBean.setSlug(repoSlug);
         repoBean.setLocalBare(false);
@@ -110,7 +110,7 @@ public final class TestUtility {
         return repoBean;
     }
     
-    public static RepoBean createTestRepo() throws Exception {
+    public static LocalRepoBean createTestRepo() throws Exception {
         String projectKey = "test_" + UUID.randomUUID().toString();
         String repoSlug = "testRepo";
         String remoteURL = "ssh://fake_url";
@@ -122,7 +122,7 @@ public final class TestUtility {
         config.setString("remote", "origin", "url", remoteURL);
         config.save();
 
-        RepoBean repoBean = new RepoBean();
+        LocalRepoBean repoBean = new LocalRepoBean();
         repoBean.setProjectKey(projectKey);
         repoBean.setSlug(repoSlug);
         repoBean.setLocalBare(false);
@@ -144,7 +144,7 @@ public final class TestUtility {
         return repoBean;
     }
     
-    public static void destroyTestRepo(final RepoBean repoBean) throws Exception {
+    public static void destroyTestRepo(final LocalRepoBean repoBean) throws Exception {
         Path parent = repoBean.getRepoDirectory().getParent();
         if (parent.getFileName().toString().startsWith("test_")) {
             FileUtils.deleteDirectory(repoBean.getRepoDirectory().getParent().toFile());

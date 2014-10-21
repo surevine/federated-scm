@@ -17,7 +17,7 @@
 */
 package com.surevine.gateway.scm.scmclient.stash;
 
-import com.surevine.gateway.scm.model.RepoBean;
+import com.surevine.gateway.scm.model.LocalRepoBean;
 import com.surevine.gateway.scm.scmclient.ForkRepoCommand;
 import com.surevine.gateway.scm.scmclient.SCMCallException;
 import com.surevine.gateway.scm.util.PropertyUtil;
@@ -44,7 +44,7 @@ public class StashForkRepoCommand implements ForkRepoCommand {
     }
     
     @Override
-    public RepoBean forkRepo(final String projectKey, final String repositorySlug, final String forkProjectKey)
+    public LocalRepoBean forkRepo(final String projectKey, final String repositorySlug, final String forkProjectKey)
             throws SCMCallException {
         HashMap<String, String> projectMap = new HashMap<String, String>();
         projectMap.put("key", forkProjectKey);

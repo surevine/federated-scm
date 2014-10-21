@@ -18,7 +18,7 @@
 package com.surevine.gateway.scm.git;
 
 import com.surevine.gateway.scm.git.jgit.JGitGitFacade;
-import com.surevine.gateway.scm.model.RepoBean;
+import com.surevine.gateway.scm.model.LocalRepoBean;
 
 import java.nio.file.Path;
 import java.util.Map;
@@ -38,7 +38,7 @@ public abstract class GitFacade {
      * @param repoBean Information about the remote Repo
      * @throws GitException
      */
-    public abstract void clone(RepoBean repoBean) throws GitException;
+    public abstract void clone(LocalRepoBean repoBean) throws GitException;
 
     /**
      * Adds a remote to a local repo
@@ -47,7 +47,7 @@ public abstract class GitFacade {
      * @param remoteURL the remote URL
      * @throws GitException
      */
-    public abstract void addRemote(RepoBean repoBean, String remoteName, String remoteURL) throws GitException;
+    public abstract void addRemote(LocalRepoBean repoBean, String remoteName, String remoteURL) throws GitException;
 
     /**
      * Updates a remote on a local repo
@@ -56,7 +56,7 @@ public abstract class GitFacade {
      * @param remoteURL the remote URL
      * @throws GitException
      */
-    public abstract void updateRemote(RepoBean repoBean, String remoteName, String remoteURL) throws GitException;
+    public abstract void updateRemote(LocalRepoBean repoBean, String remoteName, String remoteURL) throws GitException;
 
     /**
      * Gets the remotes configured for a repository
@@ -64,7 +64,7 @@ public abstract class GitFacade {
      * @return the remotes configured for a repository
      * @throws GitException
      */
-    public abstract Map<String, String> getRemotes(RepoBean repoBean) throws GitException;
+    public abstract Map<String, String> getRemotes(LocalRepoBean repoBean) throws GitException;
 
     /**
      * Fetch from a remote
@@ -73,7 +73,7 @@ public abstract class GitFacade {
      * @return true if the fetch resulted in an update to the local repository, false if there were no changes
      * @throws GitException
      */
-    public abstract boolean fetch(RepoBean repoBean, String remoteName) throws GitException;
+    public abstract boolean fetch(LocalRepoBean repoBean, String remoteName) throws GitException;
 
     /**
      * Pushes a repo to a remote
@@ -81,7 +81,7 @@ public abstract class GitFacade {
      * @param remoteName the name of the remote
      * @throws GitException if something went wrong
      */
-    public abstract void push(RepoBean repoBean, String remoteName) throws GitException;
+    public abstract void push(LocalRepoBean repoBean, String remoteName) throws GitException;
 
     /**
      * Tags a repository
@@ -89,21 +89,21 @@ public abstract class GitFacade {
      * @param tag the tag name
      * @throws GitException
      */
-    public abstract void tag(RepoBean repoBean, String tag) throws GitException;
+    public abstract void tag(LocalRepoBean repoBean, String tag) throws GitException;
 
     /**
      * Bundles a repository
      * @param repoBean the repository information
      * @return the Path to the bundle file
      */
-    public abstract Path bundle(RepoBean repoBean) throws GitException;
+    public abstract Path bundle(LocalRepoBean repoBean) throws GitException;
     
     /**
      * Determines if a repo has already been cloned into the scm federator working directory
      * @param repoBean Information about the remote Repo
      * @return true if ${git.repodir}/projectKey/repoSlug already exists and has a remote called origin set to repoURI
      */
-    public abstract boolean repoAlreadyCloned(RepoBean repoBean) throws GitException;
+    public abstract boolean repoAlreadyCloned(LocalRepoBean repoBean) throws GitException;
 
     /**
      * Set the Git implementation
