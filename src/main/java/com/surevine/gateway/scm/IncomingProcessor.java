@@ -15,29 +15,23 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-package com.surevine.gateway.scm.api;
+package com.surevine.gateway.scm;
 
 import com.surevine.gateway.scm.service.SCMFederatorServiceException;
 
+import java.nio.file.Path;
+import java.util.Map;
+
 /**
- * SCM Federator Service
+ * Processed incoming files
  * @author nick.leaver@surevine.com
  */
-public interface Distributor {
+public interface IncomingProcessor {
     /**
-     * Causes the SCM federator to package a repository and distribute to a specific partner via the Gateway.
-     * @param partnerName The name of the partner. Must match a Gateway management endpoint.
-     * @param projectKey The project key of the project. Must match the key in the SCM system.
-     * @param repositorySlug The repository slug for the shared repository.
+     * Causes the SCM federator to process an incoming SCM update file
+     * @param path the path to the received file
+     * @param metadata the metadata associated with the file
      * @throws com.surevine.gateway.scm.service.SCMFederatorServiceException
      */
-    void distributeToSingleDestination(final String partnerName, final String projectKey, final String repositorySlug)
-            throws SCMFederatorServiceException;
-
-    /**
-     * Fire and forget method to package and distribute all repositories configured for sharing 
-     * in the gateway.
-     * No exceptions are thrown from this method. Any errors with any configured repository will be logged internally.
-     */
-    void distributeAll();
+    void processIncomingRepository(Path path, Map<String, String> metadata) throws SCMFederatorServiceException;
 }

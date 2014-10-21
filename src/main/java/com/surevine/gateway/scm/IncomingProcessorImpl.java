@@ -15,9 +15,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-package com.surevine.gateway.scm.api.impl;
+package com.surevine.gateway.scm;
 
-import com.surevine.gateway.scm.api.IncomingProcessor;
+import com.surevine.gateway.scm.IncomingProcessor;
 import com.surevine.gateway.scm.gatewayclient.MetadataUtil;
 import com.surevine.gateway.scm.git.GitFacade;
 import com.surevine.gateway.scm.model.RepoBean;
