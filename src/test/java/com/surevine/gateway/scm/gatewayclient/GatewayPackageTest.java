@@ -22,7 +22,10 @@ import com.surevine.gateway.scm.git.GitFacade;
 import com.surevine.gateway.scm.model.RepoBean;
 import org.junit.Test;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author nick.leaver@surevine.com
@@ -36,6 +39,8 @@ public class GatewayPackageTest {
         GatewayPackage gatewayPackage = new GatewayPackage(bundlePath, MetadataUtil.getMetadata(repo));
         gatewayPackage.createArchive();
         
+        assertTrue(Files.exists(gatewayPackage.getArchive()));
         TestUtility.destroyTestRepo(repo);
+        Files.delete(gatewayPackage.getArchive());
     }
 }

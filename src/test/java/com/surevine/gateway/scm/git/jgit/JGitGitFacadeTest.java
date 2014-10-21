@@ -105,6 +105,7 @@ public class JGitGitFacadeTest {
         
         TestUtility.destroyTestRepo(fromBundle);
         TestUtility.destroyTestRepo(repoWithBranches);
+        Files.deleteIfExists(bundlePath);
     }
         
     @Test
