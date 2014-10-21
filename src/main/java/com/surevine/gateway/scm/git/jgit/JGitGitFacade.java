@@ -24,12 +24,9 @@ import com.surevine.gateway.scm.util.PropertyUtil;
 import com.surevine.gateway.scm.util.StringUtil;
 import org.apache.log4j.Logger;
 import org.eclipse.jgit.api.CloneCommand;
+import org.eclipse.jgit.api.FetchCommand;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.MergeResult;
-import org.eclipse.jgit.api.PullCommand;
-import org.eclipse.jgit.api.PullResult;
 import org.eclipse.jgit.api.PushCommand;
-import org.eclipse.jgit.api.RebaseResult;
 import org.eclipse.jgit.api.TagCommand;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.NullProgressMonitor;
@@ -37,7 +34,9 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.eclipse.jgit.transport.FetchResult;
 import org.eclipse.jgit.transport.PushResult;
+import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
 
 import java.io.IOException;
@@ -99,6 +98,7 @@ public class JGitGitFacade extends GitFacade {
                 }
             }
         } catch (Exception e) {
+            logger.error(e);
             throw new GitException(e);
         } 
     }
@@ -116,6 +116,7 @@ public class JGitGitFacade extends GitFacade {
                 remotes.put(remoteName, config.getString("remote", remoteName, "url"));
             }
         } catch (Exception e) {
+            logger.error(e);
             throw new GitException(e);
         }
         return remotes;
@@ -133,6 +134,7 @@ public class JGitGitFacade extends GitFacade {
             config.save();
 
         } catch (Exception e) {
+            logger.error(e);
             throw new GitException(e);
         }
     }
@@ -148,42 +150,36 @@ public class JGitGitFacade extends GitFacade {
         CloneCommand cloneCommand = new CloneCommand();
         cloneCommand.setDirectory(repoBean.getRepoDirectory().toFile());
         cloneCommand.setURI(repoBean.getCloneURL());
+        cloneCommand.setBare(repoBean.isLocalBare());
         try {
-            // TODO: An empty repository causes some errors in the system. Potentially check the repo isn't empty
-            // and clean up if it is.
             cloneCommand.call();
         } catch (Exception e) {
+            logger.error(e);
             throw new GitException(e);
         }
     }
 
     @Override
-    public boolean pull(final RepoBean repoBean, final String remoteName) throws GitException {
-        String remoteToPull = (remoteName != null) ? remoteName : "origin";
-        PullResult result;
+    public boolean fetch(final RepoBean repoBean, final String remoteName) throws GitException {
+        String remoteToPull = (remoteName != null) ? remoteName : "origin";        
+        
+        FetchResult result;
         try {
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
             Repository repository = builder.setGitDir(repoBean.getGitConfigDirectory().toFile()).findGitDir().build();
             Git git = new org.eclipse.jgit.api.Git(repository);
-            PullCommand pullCommand = git.pull();
-            pullCommand.setRemote(remoteToPull);
-            result = pullCommand.call();
+            FetchCommand fetchCommand = git.fetch();
+            fetchCommand.setRemote(remoteToPull);
+            fetchCommand.setRefSpecs(new RefSpec("refs/heads/*:refs/remotes/origin/*"));
+            result = fetchCommand.call();
             repository.close();
         } catch (Exception e) {
+            logger.error(e);
             throw new GitException(e);
         }
         
-        boolean hadUpdates = false;            
-        
-        if (result != null && result.isSuccessful()) {
-            if (result.getMergeResult() != null) {
-                hadUpdates = !MergeResult.MergeStatus.ALREADY_UP_TO_DATE
-                        .equals(result.getMergeResult().getMergeStatus());
-            } else {
-                hadUpdates = !RebaseResult.Status.UP_TO_DATE.equals(result.getRebaseResult().getStatus());
-            }
-        }
-        
+        // TODO: this is always returning true for non-empty repositories
+        boolean hadUpdates = !result.getTrackingRefUpdates().isEmpty();        
         return hadUpdates;
     }
 
@@ -198,6 +194,7 @@ public class JGitGitFacade extends GitFacade {
             tagCommand.call();
             repository.close();
         } catch (Exception e) {
+            logger.error(e);
             throw new GitException(e);
         }
     }
@@ -257,6 +254,7 @@ public class JGitGitFacade extends GitFacade {
                         && originURL.equals(repoBean.getCloneURL());
                 repository.close();
             } catch (Exception e) {
+                logger.error(e);
                 throw new GitException(e);
             }
         }

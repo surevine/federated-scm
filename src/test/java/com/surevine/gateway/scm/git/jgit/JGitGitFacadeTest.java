@@ -17,10 +17,11 @@
 */
 package com.surevine.gateway.scm.git.jgit;
 
-import com.surevine.gateway.scm.TestUtility;
 import com.surevine.gateway.scm.model.RepoBean;
+import com.surevine.gateway.scm.util.PropertyUtil;
+import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.LsRemoteCommand;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.junit.Test;
@@ -28,10 +29,14 @@ import org.junit.Test;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -44,6 +49,7 @@ public class JGitGitFacadeTest {
     @Test
     public void testAlreadyCloned() throws Exception {
         RepoBean testRepo = TestUtility.createTestRepo();
+        testRepo.setCloneURL("ssh://fake_url");
         assertTrue(underTest.repoAlreadyCloned(testRepo));
         TestUtility.destroyTestRepo(testRepo);
     }
@@ -59,6 +65,48 @@ public class JGitGitFacadeTest {
         TestUtility.destroyTestRepo(testRepo);
     }
     
+    @Test
+    public void testBundleMultipleBranches() throws Exception {
+        RepoBean repoWithBranches = TestUtility.createTestRepoMultipleBranches();
+        Path bundlePath = underTest.bundle(repoWithBranches);
+        assertTrue(Files.exists(bundlePath));
+        assertTrue(Files.isRegularFile(bundlePath));
+        
+        RepoBean fromBundle = new RepoBean();
+        fromBundle.setCloneURL(bundlePath.toString());
+        fromBundle.setProjectKey(repoWithBranches.getProjectKey());
+        fromBundle.setSlug(repoWithBranches.getSlug() + "_from_bundle");
+        fromBundle.setLocalBare(true);
+        
+        underTest.clone(fromBundle);
+
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+
+        Repository originalRepo = builder.setGitDir(repoWithBranches.getGitConfigDirectory().toFile()).findGitDir().build();
+        Git original = new Git(originalRepo);
+        List<Ref> originalBranches = original.branchList().call();
+        
+
+        Repository fromBundleRepo = builder.setGitDir(fromBundle.getGitConfigDirectory().toFile()).findGitDir().build();
+        Git fromBundleGit = new Git(fromBundleRepo);
+        List<Ref> fromBundleBraches = fromBundleGit.branchList().call();
+        
+        int matches = 0;
+        for (Ref branchRef:originalBranches) {
+            for (Ref fromBundleRef:fromBundleBraches) {
+                if (branchRef.getName().equals(fromBundleRef.getName())) {
+                    matches++;
+                    continue;
+                }
+            }
+        }
+        
+        assertEquals(matches, originalBranches.size());
+        
+        TestUtility.destroyTestRepo(fromBundle);
+        TestUtility.destroyTestRepo(repoWithBranches);
+    }
+        
     @Test
     public void testAddRemote() throws Exception {
         RepoBean testRepo = TestUtility.createTestRepo();
@@ -80,13 +128,21 @@ public class JGitGitFacadeTest {
     }
     
     @Test
-    public void testPull() throws Exception {
+    public void testFetch() throws Exception {
         RepoBean sourceRepoBean = TestUtility.createTestRepo();
         String sourceDirectory = sourceRepoBean.getRepoDirectory().toString();
-        RepoBean targetRepo = TestUtility.createTestRepo();
-        underTest.addRemote(targetRepo, "source_repo", sourceDirectory);
-        Map<String, String> remotes = underTest.getRemotes(targetRepo);
+        
+        RepoBean targetRepoBean = new RepoBean();
+        targetRepoBean.setLocalBare(false);
+        targetRepoBean.setProjectKey(sourceRepoBean.getProjectKey());
+        targetRepoBean.setSlug(sourceRepoBean.getSlug() + "_clone");
+        targetRepoBean.setCloneURL(sourceDirectory);
+        underTest.clone(targetRepoBean);
+        underTest.addRemote(targetRepoBean, "source_repo", sourceDirectory);
+        Map<String, String> remotes = underTest.getRemotes(targetRepoBean);
+        
         assertTrue(remotes.containsKey("source_repo") && remotes.containsValue(sourceDirectory));
+        assertFalse(underTest.fetch(targetRepoBean, "source_repo"));
 
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         Repository sourceRepository = builder.setGitDir(sourceRepoBean.getGitConfigDirectory().toFile()).findGitDir().build();
@@ -98,10 +154,9 @@ public class JGitGitFacadeTest {
         git.add().addFilepattern(filename).call();
         git.commit().setMessage("Added " + filename).call();
         
-        underTest.pull(targetRepo, "source_repo");
+        assertTrue(underTest.fetch(targetRepoBean, "source_repo"));
         
-        assertTrue(Files.exists(targetRepo.getRepoDirectory().resolve("should_be_in_both.txt")));
         TestUtility.destroyTestRepo(sourceRepoBean);
-        TestUtility.destroyTestRepo(targetRepo);
+        TestUtility.destroyTestRepo(targetRepoBean);
     }
 }

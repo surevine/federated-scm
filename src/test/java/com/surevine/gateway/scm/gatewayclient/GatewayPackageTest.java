@@ -17,7 +17,7 @@
 */
 package com.surevine.gateway.scm.gatewayclient;
 
-import com.surevine.gateway.scm.TestUtility;
+import com.surevine.gateway.scm.git.jgit.TestUtility;
 import com.surevine.gateway.scm.git.GitFacade;
 import com.surevine.gateway.scm.model.RepoBean;
 import org.junit.Test;

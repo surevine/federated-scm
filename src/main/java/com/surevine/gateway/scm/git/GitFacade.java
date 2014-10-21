@@ -67,13 +67,13 @@ public abstract class GitFacade {
     public abstract Map<String, String> getRemotes(RepoBean repoBean) throws GitException;
 
     /**
-     * Pull a remote into a git repository
+     * Fetch from a remote
      * @param repoBean Information about the remote Repo
-     * @param remoteName the name of the remote - will us origin if null
-     * @return true if the pull resulted in an update to the local repository, false if there were no changes
+     * @param remoteName the name of the remote - will use origin if null
+     * @return true if the fetch resulted in an update to the local repository, false if there were no changes
      * @throws GitException
      */
-    public abstract boolean pull(RepoBean repoBean, String remoteName) throws GitException;
+    public abstract boolean fetch(RepoBean repoBean, String remoteName) throws GitException;
 
     /**
      * Pushes a repo to a remote

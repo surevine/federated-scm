@@ -35,6 +35,15 @@ public class RepoBean {
     private String sourcePartner;
     private String projectKey;
     private String cloneURL;
+    private boolean localBare = true;
+
+    public boolean isLocalBare() {
+        return localBare;
+    }
+
+    public void setLocalBare(boolean localBare) {
+        this.localBare = localBare;
+    }
 
     public boolean isRemote() {
         return remote;
@@ -103,7 +112,11 @@ public class RepoBean {
      * @return a Path to the .git directory location for this repository - may or may not exist
      */
     public Path getGitConfigDirectory() {
-        return getRepoDirectory().resolve(".git");
+        if (isLocalBare()) {
+            return getRepoDirectory();
+        } else {
+            return getRepoDirectory().resolve(".git");
+        }
     }
 
     /**

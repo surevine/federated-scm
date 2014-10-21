@@ -112,7 +112,7 @@ public class DistributorImpl implements Distributor {
         boolean hadUpdates;
 
         if (alreadyCloned) {
-            hadUpdates = gitFacade.pull(repo, "origin");
+            hadUpdates = gitFacade.fetch(repo, "origin");
         } else {
             gitFacade.clone(repo);
             hadUpdates = true;
