@@ -43,7 +43,7 @@ public class DistributorImpl implements Distributor {
     @Override
     public void distributeToSingleDestination(final String partnerName, final String projectKey, final String repositorySlug) 
             throws SCMFederatorServiceException {
-        logger.debug("Distributing to partner: " + partnerName + " repository "
+        logger.info("Distributing to partner: " + partnerName + " repository "
                 + projectKey + ":" + repositorySlug);
         RepoBean repo = SCMCommandFactory.getInstance().getGetRepoCommand().getRepository(projectKey, repositorySlug);
         
@@ -75,7 +75,7 @@ public class DistributorImpl implements Distributor {
                     String projectKey = repoShare.getProjectKey();
                     String repositorySlug = repoShare.getRepoSlug();
                     
-                    logger.debug("Distributing repository " + projectKey + ":" + repositorySlug);
+                    logger.info("Distributing repository " + projectKey + ":" + repositorySlug);
                     RepoBean repo = SCMCommandFactory.getInstance().getGetRepoCommand().getRepository(projectKey, repositorySlug);
 
                     if (repo == null) {

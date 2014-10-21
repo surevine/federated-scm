@@ -18,11 +18,22 @@
 package com.surevine.gateway.scm.gatewayclient;
 
 import com.surevine.gateway.scm.util.PropertyUtil;
+import org.apache.log4j.Logger;
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataOutput;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.GenericEntity;
+import javax.ws.rs.core.MediaType;
+import java.io.IOException;
+import java.nio.file.Files;
 
 /**
  * @author nick.leaver@surevine.com
  */
 public class GatewayClient {
+    private static Logger logger = Logger.getLogger(GatewayClient.class);
     private static final String USE_MOCK_KEY = "fedscm.mock.gatewayclient";
     private static GatewayClient instance;
     
@@ -31,7 +42,19 @@ public class GatewayClient {
     }
     
     public void sendToGateway(final GatewayPackage gatewayPackage) {
-        // TODO
+        String gatewayServiceURL = PropertyUtil.getGatewayURL();
+        Client client = ClientBuilder.newClient();
+        try {
+            MultipartFormDataOutput mfdo = new MultipartFormDataOutput();
+            mfdo.addFormData("filename", gatewayPackage.getDerivedFilename(), MediaType.TEXT_PLAIN_TYPE);
+            mfdo.addFormData("file", Files.readAllBytes(gatewayPackage.getArchive()), MediaType.APPLICATION_OCTET_STREAM_TYPE);
+            GenericEntity<MultipartFormDataOutput> entity = new GenericEntity<MultipartFormDataOutput>(mfdo) {
+            };
+            client.target(gatewayServiceURL).request().post(Entity.entity(entity, MediaType.MULTIPART_FORM_DATA_TYPE));
+            logger.info(gatewayPackage.getArchive().getFileName() + " sent to the gateway as " + gatewayPackage.getDerivedFilename());
+        } catch (IOException e) {
+            logger.error("Failed to send " + gatewayPackage.getArchive().toString() + " to the gateway", e);
+        }
     }
     
     public static GatewayClient getInstance() {
@@ -40,9 +63,5 @@ public class GatewayClient {
             instance = (useMock) ? new MockFileWriterGatewayClient() : new GatewayClient();
         }
         return instance;
-    }
-    
-    public static void setInstance(final GatewayClient newClient) {
-        instance = newClient;
     }
 }

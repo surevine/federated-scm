@@ -44,6 +44,7 @@ public final class PropertyUtil {
     private static final String PROP_GATEWAY_IMPORT_DIR = "gateway.incoming.dir";
     private static final String PROP_PARTNER_PROJECT_KEY = "scm.import.project.key";
     private static final String PROP_PARTNER_FORK_PROJECT_KEY = "scm.import.project.fork";
+    private static final String PROP_GATEWAY_RUN_AT_START = "fedscm.export.run_at_start";
     private static ResourceBundle bundle;
 
     private PropertyUtil() {
@@ -74,8 +75,12 @@ public final class PropertyUtil {
         return getProperty(PROP_GATEWAY_SERVICE_URL);
     }
 
-    public static long getExportInterval() {
-        return Long.parseLong(getProperty(PROP_EXPORT_INTERVAL));
+    public static int getExportInterval() {
+        return Integer.parseInt(getProperty(PROP_EXPORT_INTERVAL));
+    }
+    
+    public static boolean isExportAtStart() {
+        return getBooleanProperty(PROP_GATEWAY_RUN_AT_START);
     }
 
     public static String getGatewayImportDir() {

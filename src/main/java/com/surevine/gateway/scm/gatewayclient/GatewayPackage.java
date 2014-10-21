@@ -18,6 +18,7 @@
 package com.surevine.gateway.scm.gatewayclient;
 
 import com.surevine.gateway.scm.util.PropertyUtil;
+import com.surevine.gateway.scm.util.StringUtil;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -53,11 +54,20 @@ public class GatewayPackage {
         return archivePath;
     }
     
+    public String getDerivedFilename() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("scm_")
+                .append(metadata.get(MetadataUtil.KEY_ORGANISATION))
+                .append("_").append(metadata.get(MetadataUtil.KEY_PROJECT))
+                .append("_").append(metadata.get(MetadataUtil.KEY_REPO));
+        return StringUtil.cleanStringForFilePath(sb.toString()) + ".tar.gz";
+    }
+    
     public void createArchive() throws Exception {
         if (!archiveWritten) {
             String uuid = UUID.randomUUID().toString();
             archivePath = Paths.get(PropertyUtil.getTempDir(), uuid + ".tar.gz");
-            Path metadataPath = Paths.get(PropertyUtil.getTempDir(), uuid + "_metadata.json");
+            Path metadataPath = Paths.get(PropertyUtil.getTempDir(), ".metadata.json");
             Path tarPath = Paths.get(PropertyUtil.getTempDir(), uuid + ".tar");
 
             writeMetadata(metadataPath);

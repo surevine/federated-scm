@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Timer;
@@ -45,8 +46,15 @@ public class FederateSCMContextListener implements ServletContextListener {
     @Override
     public void contextInitialized(final ServletContextEvent servletContextEvent) {
         logger.info("Initialising SCM export timer");
+        int interval = PropertyUtil.getExportInterval();
+        boolean exportAtStart = PropertyUtil.isExportAtStart();
         Timer timer = new Timer();
         Calendar cal = Calendar.getInstance();
+        
+        if (!exportAtStart) {
+            cal.add(Calendar.SECOND, interval);
+        }
+        
         Date start = cal.getTime();
         TimerTask federateTask = new TimerTask() {
             @Override
@@ -56,9 +64,15 @@ public class FederateSCMContextListener implements ServletContextListener {
             }
         };
 
-        timer.scheduleAtFixedRate(federateTask, start, PropertyUtil.getExportInterval() * 1000);
+        timer.scheduleAtFixedRate(federateTask, start, interval * 1000);
         servletContextEvent.getServletContext().setAttribute(CONTEXT_KEY, timer);
-        logger.info("SCM export timer initialised");
+        
+        if (exportAtStart) {
+            logger.info("SCM export timer initialised");
+        } else {
+            String startTimeString = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(start);
+            logger.info("SCM export timer initialised with delayed start. First export will run in " + interval + " seconds at " + startTimeString);
+        }
     }
 
     @Override
