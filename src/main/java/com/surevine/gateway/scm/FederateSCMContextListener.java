@@ -17,8 +17,6 @@
 */
 package com.surevine.gateway.scm;
 
-import com.surevine.gateway.scm.Distributor;
-import com.surevine.gateway.scm.DistributorImpl;
 import com.surevine.gateway.scm.util.PropertyUtil;
 import org.apache.log4j.Logger;
 

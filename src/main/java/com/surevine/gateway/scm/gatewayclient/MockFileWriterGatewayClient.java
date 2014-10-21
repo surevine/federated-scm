@@ -41,7 +41,7 @@ public class MockFileWriterGatewayClient extends GatewayClient {
     }
     
     @Override
-    public void sendToGateway(GatewayPackage gatewayPackage) {
+    public void sendToGateway(final GatewayPackage gatewayPackage) {
         Path archivePath = gatewayPackage.getArchive();
         try {
             Files.copy(archivePath, tmpOutputDir.resolve(archivePath.getFileName().toString()));

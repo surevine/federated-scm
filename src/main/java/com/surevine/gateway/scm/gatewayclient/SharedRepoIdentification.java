@@ -28,7 +28,7 @@ public final class SharedRepoIdentification {
         // no-op
     }
 
-    public SharedRepoIdentification(String projectKey, String repoSlug) {
+    public SharedRepoIdentification(final String projectKey, final String repoSlug) {
         this.projectKey = projectKey;
         this.repoSlug = repoSlug;
     }

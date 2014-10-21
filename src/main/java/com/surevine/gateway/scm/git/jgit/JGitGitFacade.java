@@ -104,7 +104,7 @@ public class JGitGitFacade extends GitFacade {
     }
 
     @Override
-    public Map<String, String> getRemotes(RepoBean repoBean) throws GitException {
+    public Map<String, String> getRemotes(final RepoBean repoBean) throws GitException {
         Map<String, String> remotes = new HashMap<String, String>();
         try {
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
@@ -140,7 +140,7 @@ public class JGitGitFacade extends GitFacade {
     }
 
     @Override
-    public void updateRemote(RepoBean repoBean, String remoteName, String remoteURL) throws GitException {
+    public void updateRemote(final RepoBean repoBean, final String remoteName, final String remoteURL) throws GitException {
         // same process as adding for jgit
         addRemote(repoBean, remoteName, remoteURL);
     }

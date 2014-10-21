@@ -41,7 +41,7 @@ public class RepoBean {
         return localBare;
     }
 
-    public void setLocalBare(boolean localBare) {
+    public void setLocalBare(final boolean localBare) {
         this.localBare = localBare;
     }
 

@@ -17,7 +17,6 @@
 */
 package com.surevine.gateway.scm;
 
-import com.surevine.gateway.scm.Distributor;
 import com.surevine.gateway.scm.gatewayclient.GatewayClient;
 import com.surevine.gateway.scm.gatewayclient.GatewayConfigServiceFacade;
 import com.surevine.gateway.scm.gatewayclient.GatewayPackage;
@@ -99,7 +98,7 @@ public class DistributorImpl implements Distributor {
      * @param metadata the metadata to be send with the distribution
      * @param sendEvenIfNoUpdates if true the repo will be distributed even if there are no new updates since last export
      */
-    private void distribute(final RepoBean repo, final Map<String, String> metadata, boolean sendEvenIfNoUpdates)
+    private void distribute(final RepoBean repo, final Map<String, String> metadata, final boolean sendEvenIfNoUpdates)
             throws Exception {
         if (repo ==  null) {
             throw new SCMFederatorServiceException("The repository information for  " + repo.getProjectKey() + ":"

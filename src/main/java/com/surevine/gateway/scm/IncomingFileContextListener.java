@@ -17,8 +17,6 @@
 */
 package com.surevine.gateway.scm;
 
-import com.surevine.gateway.scm.IncomingProcessor;
-import com.surevine.gateway.scm.IncomingProcessorImpl;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContextEvent;

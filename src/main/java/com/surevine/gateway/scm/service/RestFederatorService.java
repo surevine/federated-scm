@@ -20,7 +20,6 @@ package com.surevine.gateway.scm.service;
 import com.surevine.gateway.scm.Distributor;
 import com.surevine.gateway.scm.DistributorImpl;
 import com.surevine.gateway.scm.util.InputValidator;
-import org.jboss.resteasy.annotations.Suspend;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;

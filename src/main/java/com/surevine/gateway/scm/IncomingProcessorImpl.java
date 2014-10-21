@@ -17,7 +17,6 @@
 */
 package com.surevine.gateway.scm;
 
-import com.surevine.gateway.scm.IncomingProcessor;
 import com.surevine.gateway.scm.gatewayclient.MetadataUtil;
 import com.surevine.gateway.scm.git.GitFacade;
 import com.surevine.gateway.scm.model.RepoBean;
