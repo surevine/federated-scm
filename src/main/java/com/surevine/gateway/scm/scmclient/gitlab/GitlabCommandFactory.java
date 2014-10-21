@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-package com.surevine.gateway.scm.scmclient.stash;
+package com.surevine.gateway.scm.scmclient.gitlab;
 
 import com.surevine.gateway.scm.scmclient.CreateProjectCommand;
 import com.surevine.gateway.scm.scmclient.CreateRepoCommand;
@@ -27,42 +27,42 @@ import com.surevine.gateway.scm.scmclient.GetRepoCommand;
 import com.surevine.gateway.scm.scmclient.SCMCommandFactory;
 
 /**
- * Stash command factory
+ * Gitlab SCM command factory
  * @author nick.leaver@surevine.com
  */
-public class StashCommandFactory implements SCMCommandFactory {
+public class GitlabCommandFactory implements SCMCommandFactory {
     @Override
     public ForkRepoCommand getForkRepoCommandImpl() {
-        return new StashForkRepoCommand();
+        return new GitlabForkRepoCommand();
     }
 
     @Override
     public GetProjectsCommand getGetProjectsCommandImpl() {
-        return new StashGetProjectsCommand();
+        return new GitlabGetProjectsCommand();
     }
 
     @Override
     public CreateProjectCommand getCreateProjectCommandImpl() {
-        return new StashCreateProjectCommand();
+        return new GitlabCreateProjectCommand();
     }
 
     @Override
     public DeleteProjectCommand getDeleteProjectCommandImpl() {
-        return new StashDeleteProjectCommand();
+        return new GitlabDeleteProjectCommand();
     }
 
     @Override
     public GetRepoCommand getGetRepoCommandImpl() {
-        return new StashGetRepoCommand();
+        return new GitlabGetRepoCommand();
     }
 
     @Override
     public CreateRepoCommand getCreateRepoCommandImpl() {
-        return new StashCreateRepoCommand();
+        return new GitlabCreateRepoCommand();
     }
 
     @Override
     public DeleteRepoCommand getDeleteRepoCommandImpl() {
-        return new StashDeleteRepoCommand();
+        return new GitlabDeleteRepoCommand();
     }
 }

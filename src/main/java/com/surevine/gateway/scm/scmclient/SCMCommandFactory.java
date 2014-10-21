@@ -17,78 +17,51 @@
 */
 package com.surevine.gateway.scm.scmclient;
 
-import com.surevine.gateway.scm.scmclient.stash.StashCommandFactory;
-import com.surevine.gateway.scm.util.PropertyUtil;
-
 /**
- * Factory for obtaining SCM system commands
  * @author nick.leaver@surevine.com
  */
-public abstract class SCMCommandFactory {
-    private static SCMCommandFactory commandFactoryImplementation;
-    public static SCMCommandFactory getInstance() {
-        if (commandFactoryImplementation == null) {
-            switch (PropertyUtil.getSCMType()) {
-                case STASH:
-                    commandFactoryImplementation = new StashCommandFactory();
-                    break;
-                default:
-                    break;
-            }
-        }
-        return commandFactoryImplementation;
-    }
-
+public interface SCMCommandFactory {
     /**
      * SCM system specific ForkRepoCommand implementation
      * @return SCM system specific ForkRepoCommand implementation
      */
-    public abstract ForkRepoCommand getForkRepoCommand();
+    ForkRepoCommand getForkRepoCommandImpl();
 
     /**
      * SCM system specific GetProjectsCommand implementation
      * @return SCM system specific GetProjectsCommand implementation
      */
-    public abstract GetProjectsCommand getGetProjectsCommand();
+    GetProjectsCommand getGetProjectsCommandImpl();
 
     /**
      * SCM system specific CreateProjectCommand implementation
      * @return SCM system specific CreateProjectCommand implementation
      */
-    public abstract CreateProjectCommand getCreateProjectCommand();
+    CreateProjectCommand getCreateProjectCommandImpl();
 
     /**
      * SCM system specific DeleteProjectCommand implementation.
      * Protected access to restrict to test cleanup. Open up if required.
      * @return SCM system specific DeleteProjectCommand implementation
      */
-    public abstract DeleteProjectCommand getDeleteProjectCommand();
+    DeleteProjectCommand getDeleteProjectCommandImpl();
 
     /**
      * SCM system specific GetRepoCommand implementation
      * @return SCM system specific GetRepoCommand implementation
      */
-    public abstract GetRepoCommand getGetRepoCommand();
+    GetRepoCommand getGetRepoCommandImpl();
 
     /**
      * SCM system specific CreateRepoCommand implementation
      * @return SCM system specific CreateRepoCommand implementation
      */
-    public abstract CreateRepoCommand getCreateRepoCommand();
-    
+    CreateRepoCommand getCreateRepoCommandImpl();
+
     /**
      * SCM system specific DeleteRepoCommand implementation.
      * Protected access to restrict to test cleanup. Open up if required.
      * @return SCM system specific DeleteRepoCommand implementation
      */
-    public abstract DeleteRepoCommand getDeleteRepoCommand();
-    
-    /**
-     * Set a command factory implementation ignoring the configured type in system properties.
-     * It's mostly for injecting a mock for testing but may be useful elsewhere.
-     * @param commandFactory the command factory implementation.
-     */
-    static void setCommandFactoryImplementation(final SCMCommandFactory commandFactory) {
-        commandFactoryImplementation = commandFactory;
-    }
+    DeleteRepoCommand getDeleteRepoCommandImpl();
 }

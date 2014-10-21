@@ -20,8 +20,7 @@ package com.surevine.gateway.scm;
 import com.surevine.gateway.scm.gatewayclient.MetadataUtil;
 import com.surevine.gateway.scm.git.GitFacade;
 import com.surevine.gateway.scm.model.LocalRepoBean;
-import com.surevine.gateway.scm.scmclient.GetRepoCommand;
-import com.surevine.gateway.scm.scmclient.SCMCommandFactory;
+import com.surevine.gateway.scm.scmclient.SCMCommand;
 import com.surevine.gateway.scm.service.SCMFederatorServiceException;
 import com.surevine.gateway.scm.util.InputValidator;
 import com.surevine.gateway.scm.util.PropertyUtil;
@@ -79,10 +78,9 @@ public class IncomingProcessorImpl implements IncomingProcessor {
 
             String scmProjectKey = PropertyUtil.getPartnerProjectKeyString(partnerName, projectKey);
             String scmProjectForkKey = PropertyUtil.getPartnerForkProjectKeyString(partnerName, projectKey);
-            GetRepoCommand getRepoCommand = SCMCommandFactory.getInstance().getGetRepoCommand();
             
-            boolean mainRepoExists = getRepoCommand.getRepository(scmProjectKey, repositorySlug) != null;
-            boolean forkRepoExists = getRepoCommand.getRepository(scmProjectForkKey, repositorySlug) != null;
+            boolean mainRepoExists = SCMCommand.getRepository(scmProjectKey, repositorySlug) != null;
+            boolean forkRepoExists = SCMCommand.getRepository(scmProjectForkKey, repositorySlug) != null;
             
             if (mainRepoExists && forkRepoExists) {
                 processUpdate(bundleDestination, metadata);
@@ -108,35 +106,30 @@ public class IncomingProcessorImpl implements IncomingProcessor {
             GitFacade.getInstance().clone(repoBean);
 
             // create project in the SCM system to hold repositories from this partner if it doesn't already exist
-            if (!SCMCommandFactory.getInstance().getGetProjectsCommand()
-                    .getProjects().contains(scmProjectKey)) {
-                SCMCommandFactory.getInstance().getCreateProjectCommand().createProject(scmProjectKey);
+            if (!SCMCommand.getProjects().contains(scmProjectKey)) {
+                SCMCommand.createProject(scmProjectKey);
             }
             
             // check that a repository doesn't already exists where we are planning on creating one in the SCM system
-            if (SCMCommandFactory.getInstance().getGetRepoCommand()
-                    .getRepository(scmProjectKey, repositorySlug) != null) {
+            if (SCMCommand.getRepository(scmProjectKey, repositorySlug) != null) {
                 throw new SCMFederatorServiceException("Repository " + scmProjectKey + ":"
                         + repositorySlug + " already exists.");
             }
             
             // create a new repository in the SCM system to hold the shared source
-            LocalRepoBean createdSCMRepository = SCMCommandFactory.getInstance().getCreateRepoCommand()
-                    .createRepo(scmProjectKey, repositorySlug);
+            LocalRepoBean createdSCMRepository = SCMCommand.createRepo(scmProjectKey, repositorySlug);
             
             // push the incoming repository into the new SCM repository
             GitFacade.getInstance().addRemote(repoBean, "scm", createdSCMRepository.getCloneSourceURI());
             GitFacade.getInstance().push(repoBean, "scm");
 
             // create project in the SCM system to hold update forks from this partner if it doesn't already exist
-            if (!SCMCommandFactory.getInstance().getGetProjectsCommand()
-                    .getProjects().contains(scmProjectForkKey)) {
-                SCMCommandFactory.getInstance().getCreateProjectCommand().createProject(scmProjectForkKey);
+            if (!SCMCommand.getProjects().contains(scmProjectForkKey)) {
+                SCMCommand.createProject(scmProjectForkKey);
             }
                         
             // fork the new repository to allow updates to pushed into the fork instead of the master copy in future
-            LocalRepoBean forkedRepo = SCMCommandFactory.getInstance().getForkRepoCommand()
-                    .forkRepo(scmProjectKey, repositorySlug, scmProjectForkKey);
+            LocalRepoBean forkedRepo = SCMCommand.forkRepo(scmProjectKey, repositorySlug, scmProjectForkKey);
             
             // update local repository remote to point at the fork instead for its scm remote
             GitFacade.getInstance().updateRemote(repoBean, "scm", forkedRepo.getCloneSourceURI());

@@ -24,7 +24,7 @@ import com.surevine.gateway.scm.gatewayclient.MetadataUtil;
 import com.surevine.gateway.scm.gatewayclient.SharedRepoIdentification;
 import com.surevine.gateway.scm.git.GitFacade;
 import com.surevine.gateway.scm.model.LocalRepoBean;
-import com.surevine.gateway.scm.scmclient.SCMCommandFactory;
+import com.surevine.gateway.scm.scmclient.SCMCommand;
 import com.surevine.gateway.scm.service.SCMFederatorServiceException;
 import org.apache.log4j.Logger;
 
@@ -44,7 +44,7 @@ public class DistributorImpl implements Distributor {
             throws SCMFederatorServiceException {
         logger.info("Distributing to partner: " + partnerName + " repository "
                 + projectKey + ":" + repositorySlug);
-        LocalRepoBean repo = SCMCommandFactory.getInstance().getGetRepoCommand().getRepository(projectKey, repositorySlug);
+        LocalRepoBean repo = SCMCommand.getRepository(projectKey, repositorySlug);
         
         if (repo == null) {
             logger.error("Could not distribute repository:" + projectKey + ":" + repositorySlug
@@ -75,7 +75,7 @@ public class DistributorImpl implements Distributor {
                     String repositorySlug = repoShare.getRepoSlug();
                     
                     logger.info("Distributing repository " + projectKey + ":" + repositorySlug);
-                    LocalRepoBean repo = SCMCommandFactory.getInstance().getGetRepoCommand().getRepository(projectKey, repositorySlug);
+                    LocalRepoBean repo = SCMCommand.getRepository(projectKey, repositorySlug);
 
                     if (repo == null) {
                         logger.info("Skipping distribution of " + projectKey + ":" + repositorySlug
