@@ -19,12 +19,13 @@ package com.surevine.gateway.scm.gatewayclient;
 
 import com.surevine.gateway.scm.util.PropertyUtil;
 import com.surevine.gateway.scm.util.StringUtil;
+import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.compress.compressors.CompressorOutputStream;
 import org.apache.commons.compress.compressors.CompressorStreamFactory;
-import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -39,7 +40,6 @@ import java.util.UUID;
  * @author nick.leaver@surevine.com
  */
 public class GatewayPackage {
-    private Logger logger = Logger.getLogger(this.getClass());
     private Path bundlePath;
     private Map<String, String> metadata;
     private Path archivePath;
@@ -63,7 +63,7 @@ public class GatewayPackage {
         return StringUtil.cleanStringForFilePath(sb.toString()) + ".tar.gz";
     }
     
-    public void createArchive() throws Exception {
+    public void createArchive() throws IOException, ArchiveException, CompressorException {
         if (!archiveWritten) {
             String uuid = UUID.randomUUID().toString();
             archivePath = Paths.get(PropertyUtil.getTempDir(), uuid + ".tar.gz");
@@ -83,7 +83,7 @@ public class GatewayPackage {
         }
     }
     
-    void writeGZ(final Path gzPath, final Path tarPath) throws Exception {
+    void writeGZ(final Path gzPath, final Path tarPath) throws IOException, CompressorException {
         CompressorOutputStream cos = new CompressorStreamFactory()
                 .createCompressorOutputStream("gz", Files.newOutputStream(gzPath));
 
@@ -94,7 +94,7 @@ public class GatewayPackage {
         }
     }
     
-    void createTar(final Path tarPath, final Path ... paths) throws Exception {
+    void createTar(final Path tarPath, final Path ... paths) throws IOException, ArchiveException {
         ArchiveOutputStream os = new ArchiveStreamFactory()
                 .createArchiveOutputStream("tar", Files.newOutputStream(tarPath));
         try {

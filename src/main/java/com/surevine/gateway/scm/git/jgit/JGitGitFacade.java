@@ -28,6 +28,7 @@ import org.eclipse.jgit.api.FetchCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PushCommand;
 import org.eclipse.jgit.api.TagCommand;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.NullProgressMonitor;
 import org.eclipse.jgit.lib.Ref;
@@ -97,7 +98,7 @@ public class JGitGitFacade extends GitFacade {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (GitAPIException | IOException e) {
             logger.error(e);
             throw new GitException(e);
         } 
@@ -115,7 +116,7 @@ public class JGitGitFacade extends GitFacade {
             for (String remoteName:remoteNames) {
                 remotes.put(remoteName, config.getString("remote", remoteName, "url"));
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             logger.error(e);
             throw new GitException(e);
         }
@@ -133,7 +134,7 @@ public class JGitGitFacade extends GitFacade {
             config.setString("remote", remoteName, "fetch", String.format("+refs/heads/*:refs/remotes/%s/*", remoteName));
             config.save();
 
-        } catch (Exception e) {
+        } catch (IOException e) {
             logger.error(e);
             throw new GitException(e);
         }
@@ -153,7 +154,7 @@ public class JGitGitFacade extends GitFacade {
         cloneCommand.setBare(repoBean.isLocalBare());
         try {
             cloneCommand.call();
-        } catch (Exception e) {
+        } catch (GitAPIException e) {
             logger.error(e);
             throw new GitException(e);
         }
@@ -173,7 +174,7 @@ public class JGitGitFacade extends GitFacade {
             fetchCommand.setRefSpecs(new RefSpec("refs/heads/*:refs/remotes/origin/*"));
             result = fetchCommand.call();
             repository.close();
-        } catch (Exception e) {
+        } catch (GitAPIException | IOException e) {
             logger.error(e);
             throw new GitException(e);
         }
@@ -192,7 +193,7 @@ public class JGitGitFacade extends GitFacade {
             tagCommand.setName(tag);
             tagCommand.call();
             repository.close();
-        } catch (Exception e) {
+        } catch (GitAPIException | IOException e) {
             logger.error(e);
             throw new GitException(e);
         }
@@ -219,7 +220,7 @@ public class JGitGitFacade extends GitFacade {
             outputStream.close();
             repository.close();
             return outputPath;
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new GitException(e);
         } finally {
             if (outputStream != null) {
@@ -252,7 +253,7 @@ public class JGitGitFacade extends GitFacade {
                 alreadyCloned = originURL != null && repoBean.getCloneSourceURI() != null
                         && originURL.equals(repoBean.getCloneSourceURI());
                 repository.close();
-            } catch (Exception e) {
+            } catch (IOException e) {
                 logger.error(e);
                 throw new GitException(e);
             }

@@ -22,13 +22,18 @@ import com.surevine.gateway.scm.gatewayclient.GatewayConfigServiceFacade;
 import com.surevine.gateway.scm.gatewayclient.GatewayPackage;
 import com.surevine.gateway.scm.gatewayclient.MetadataUtil;
 import com.surevine.gateway.scm.gatewayclient.SharedRepoIdentification;
+import com.surevine.gateway.scm.git.GitException;
 import com.surevine.gateway.scm.git.GitFacade;
 import com.surevine.gateway.scm.model.LocalRepoBean;
 import com.surevine.gateway.scm.scmclient.SCMCallException;
 import com.surevine.gateway.scm.scmclient.SCMCommand;
 import com.surevine.gateway.scm.service.SCMFederatorServiceException;
+import org.apache.commons.compress.archivers.ArchiveException;
+import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.log4j.Logger;
+import org.eclipse.jgit.api.errors.GitAPIException;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +61,7 @@ public class DistributorImpl implements Distributor {
             }
 
             distribute(repo, MetadataUtil.getSinglePartnerMetadata(repo, partnerName), true);
-        } catch (Exception e) {
+        } catch (GitException | SCMCallException | CompressorException | ArchiveException | IOException e) {
             throw new SCMFederatorServiceException("Could not distribute " + projectKey + ":" + repositorySlug
                     + " due to internal error: " + e.getMessage());
         }
@@ -86,7 +91,7 @@ public class DistributorImpl implements Distributor {
                         } else {
                                 distribute(repo, MetadataUtil.getMetadata(repo), false);
                         }
-                    } catch (Exception e) {
+                    } catch (SCMFederatorServiceException | GitException | SCMCallException | CompressorException | ArchiveException | IOException e) {
                         logger.info("Skipping distribution of " + projectKey + ":" + repositorySlug + " due to error: " + e.getMessage());
                     }
                 }
@@ -100,8 +105,8 @@ public class DistributorImpl implements Distributor {
      * @param metadata the metadata to be send with the distribution
      * @param sendEvenIfNoUpdates if true the repo will be distributed even if there are no new updates since last export
      */
-    private void distribute(final LocalRepoBean repo, final Map<String, String> metadata, final boolean sendEvenIfNoUpdates)
-            throws Exception {
+    private void distribute(final LocalRepoBean repo, final Map<String, String> metadata, final boolean sendEvenIfNoUpdates) 
+            throws SCMFederatorServiceException, GitException, CompressorException, ArchiveException, IOException {
         if (repo ==  null) {
             throw new SCMFederatorServiceException("The repository information for  " + repo.getProjectKey() + ":"
                     + repo.getSlug() + " could not be retrieved from the SCM system.");
