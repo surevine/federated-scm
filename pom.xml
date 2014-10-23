@@ -232,7 +232,7 @@
             <activation>
                 <activeByDefault>true</activeByDefault>
                 <file>
-                    <missing>${local.properties.file}</missing>
+                    <missing>custom-config/local.properties</missing>
                 </file>
             </activation>
             <build>
@@ -270,7 +270,7 @@
             <activation>
                 <activeByDefault>false</activeByDefault>
                 <file>
-                    <exists>${local.properties.file}</exists>
+                    <exists>custom-config/local.properties</exists>
                 </file>
             </activation>
             <build>
