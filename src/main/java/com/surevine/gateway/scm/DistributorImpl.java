@@ -24,6 +24,7 @@ import com.surevine.gateway.scm.gatewayclient.MetadataUtil;
 import com.surevine.gateway.scm.gatewayclient.SharedRepoIdentification;
 import com.surevine.gateway.scm.git.GitFacade;
 import com.surevine.gateway.scm.model.LocalRepoBean;
+import com.surevine.gateway.scm.scmclient.SCMCallException;
 import com.surevine.gateway.scm.scmclient.SCMCommand;
 import com.surevine.gateway.scm.service.SCMFederatorServiceException;
 import org.apache.log4j.Logger;
@@ -44,19 +45,19 @@ public class DistributorImpl implements Distributor {
             throws SCMFederatorServiceException {
         logger.info("Distributing to partner: " + partnerName + " repository "
                 + projectKey + ":" + repositorySlug);
-        LocalRepoBean repo = SCMCommand.getRepository(projectKey, repositorySlug);
-        
-        if (repo == null) {
-            logger.error("Could not distribute repository:" + projectKey + ":" + repositorySlug
-                    + " does not exist in the SCM system");
-            throw new SCMFederatorServiceException(projectKey + ":" + repositorySlug
-                    + " does not exist in the SCM system");
-        }
-        
         try {
+            LocalRepoBean repo = SCMCommand.getRepository(projectKey, repositorySlug);
+
+            if (repo == null) {
+                logger.error("Could not distribute repository:" + projectKey + ":" + repositorySlug
+                        + " does not exist in the SCM system");
+                throw new SCMFederatorServiceException(projectKey + ":" + repositorySlug
+                        + " does not exist in the SCM system");
+            }
+
             distribute(repo, MetadataUtil.getSinglePartnerMetadata(repo, partnerName), true);
         } catch (Exception e) {
-            throw new SCMFederatorServiceException("Could not distribute " + repo.getProjectKey() + ":" + repo.getSlug()
+            throw new SCMFederatorServiceException("Could not distribute " + projectKey + ":" + repositorySlug
                     + " due to internal error: " + e.getMessage());
         }
     }
@@ -75,17 +76,18 @@ public class DistributorImpl implements Distributor {
                     String repositorySlug = repoShare.getRepoSlug();
                     
                     logger.info("Distributing repository " + projectKey + ":" + repositorySlug);
-                    LocalRepoBean repo = SCMCommand.getRepository(projectKey, repositorySlug);
 
-                    if (repo == null) {
-                        logger.info("Skipping distribution of " + projectKey + ":" + repositorySlug
-                                + " because the repository does not exist in the SCM system");
-                    } else {
-                        try {
-                            distribute(repo, MetadataUtil.getMetadata(repo), false);
-                        } catch (Exception e) {
-                            logger.info("Skipping distribution of " + projectKey + ":" + repositorySlug + " due to error: " + e.getMessage());
+                    try {
+                        LocalRepoBean repo = SCMCommand.getRepository(projectKey, repositorySlug);
+
+                        if (repo == null) {
+                            logger.info("Skipping distribution of " + projectKey + ":" + repositorySlug
+                                    + " because the repository does not exist in the SCM system");
+                        } else {
+                                distribute(repo, MetadataUtil.getMetadata(repo), false);
                         }
+                    } catch (Exception e) {
+                        logger.info("Skipping distribution of " + projectKey + ":" + repositorySlug + " due to error: " + e.getMessage());
                     }
                 }
             }

@@ -18,13 +18,14 @@
 package com.surevine.gateway.scm.scmclient.stash;
 
 import com.surevine.gateway.scm.scmclient.GetProjectsCommand;
+import com.surevine.gateway.scm.scmclient.SCMCallException;
 import com.surevine.gateway.scm.util.PropertyUtil;
 import com.surevine.gateway.scm.util.SCMSystemProperties;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import java.util.Collection;
 import java.util.HashSet;
@@ -33,7 +34,7 @@ import java.util.List;
 /**
  * @author nick.leaver@surevine.com
  */
-public class StashGetProjectsCommand implements GetProjectsCommand {
+public class StashGetProjectsCommand extends AbstractStashCommand implements GetProjectsCommand {
     private static Logger logger = Logger.getLogger(StashGetProjectsCommand.class);
     private static final String ALL_RESOURCE = "/rest/api/1.0/projects?limit=10000";
     private SCMSystemProperties scmSystemProperties;
@@ -43,18 +44,24 @@ public class StashGetProjectsCommand implements GetProjectsCommand {
     }
 
     @Override
-    public Collection<String> getProjects() {
+    public Collection<String> getProjects() throws SCMCallException {
         HashSet<String> projectKeys = new HashSet<String>();
         String resource = scmSystemProperties.getHost() + ALL_RESOURCE;
-        Client client = ClientBuilder.newClient();
+        Client client = getClient();
         logger.debug("REST call to " + resource);
 
-        PagedProjectResult response = client.target(resource)
-                .request(MediaType.APPLICATION_JSON)
-                .header("Authorization", scmSystemProperties.getBasicAuthHeader())
-                .get(PagedProjectResult.class);
-        
-        client.close();
+        PagedProjectResult response = null;
+        try {
+            response = client.target(resource)
+                    .request(MediaType.APPLICATION_JSON)
+                    .header("Authorization", scmSystemProperties.getBasicAuthHeader())
+                    .get(PagedProjectResult.class);
+        } catch (ProcessingException pe) {
+            logger.error("Could not connect to REST service " + resource, pe);
+            throw new SCMCallException("getProjects", "Could not connect to REST service:" + pe.getMessage());
+        } finally {
+            client.close();
+        }
         
         for (StashProjectJSONBean stashProjectJSONBean:response.getValues()) {
             projectKeys.add(stashProjectJSONBean.getKey());

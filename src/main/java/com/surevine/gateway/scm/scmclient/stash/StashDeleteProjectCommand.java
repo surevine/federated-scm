@@ -23,14 +23,14 @@ import com.surevine.gateway.scm.util.PropertyUtil;
 import com.surevine.gateway.scm.util.SCMSystemProperties;
 import org.apache.log4j.Logger;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 
 /**
  * @author nick.leaver@surevine.com
  */
-public class StashDeleteProjectCommand implements DeleteProjectCommand {
+public class StashDeleteProjectCommand extends AbstractStashCommand implements DeleteProjectCommand {
     private static Logger logger = Logger.getLogger(StashCreateProjectCommand.class);
     private static final String RESOURCE = "/rest/api/1.0/projects/";
     private SCMSystemProperties scmSystemProperties;
@@ -45,15 +45,20 @@ public class StashDeleteProjectCommand implements DeleteProjectCommand {
             throw new SCMCallException("deleteProject", "No project key provided");
         }
 
-        Client client = ClientBuilder.newClient();
+        Client client = getClient();
         String resource = scmSystemProperties.getHost() + RESOURCE + projectKey;
         logger.debug("REST call to " + resource);
 
-        client.target(resource)
-            .request(MediaType.APPLICATION_JSON)
-            .header("Authorization", scmSystemProperties.getBasicAuthHeader())
-            .delete();
-
-        client.close();
+        try {
+            client.target(resource)
+                .request(MediaType.APPLICATION_JSON)
+                .header("Authorization", scmSystemProperties.getBasicAuthHeader())
+                .delete();
+        } catch (ProcessingException pe) {
+            logger.error("Could not connect to REST service " + resource, pe);
+            throw new SCMCallException("deleteProject", "Could not connect to REST service:" + pe.getMessage());
+        } finally {
+            client.close();
+        }
     }
 }

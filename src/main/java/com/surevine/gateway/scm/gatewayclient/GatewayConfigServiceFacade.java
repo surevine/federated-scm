@@ -18,9 +18,15 @@
 package com.surevine.gateway.scm.gatewayclient;
 
 import com.surevine.gateway.scm.util.PropertyUtil;
+import org.apache.log4j.Logger;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
+import javax.ws.rs.client.Client;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Facade over access to the configured shared repositories in the gateway management component
@@ -29,17 +35,33 @@ import java.util.List;
 public class GatewayConfigServiceFacade {
     private static final String USE_MOCK_KEY = "fedscm.mock.gatewayconfig";
     private static GatewayConfigServiceFacade instance;
+    private static Logger logger = Logger.getLogger(GatewayConfigServiceFacade.class);
     
     protected GatewayConfigServiceFacade() {
         // external instantiation protection
     }
     
     public List<SharedRepoIdentification> getSharedRepositories() {
+        String gatewayConfigServiceURL = PropertyUtil.getProjectConfigServiceURL();
         List<SharedRepoIdentification> sharedRepositories = new ArrayList<SharedRepoIdentification>();
-        // TODO
-        // connect to gateway configuration service
-        // retrieve list of shared repositories
-        // populate sharedRepositories list
+        Client client = new ResteasyClientBuilder()
+                .establishConnectionTimeout(6, TimeUnit.SECONDS)
+                .socketTimeout(6, TimeUnit.SECONDS)
+                .build();
+        logger.info("Attempting to retrieve project sharing configuration from " + gatewayConfigServiceURL);
+        String jsonResponse = client.target(gatewayConfigServiceURL).request().get(String.class);
+        if (jsonResponse != null && jsonResponse.length() > 0) {
+            JSONArray jsonArray = new JSONArray(jsonResponse);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject projectConfigurationObject = jsonArray.getJSONObject(i);
+                String projectKey = projectConfigurationObject.getString("projectKey");
+                String repositorySlug = projectConfigurationObject.getString("repositorySlug");
+                
+                logger.debug("Shared repository configuration loaded: " + projectKey + ":" + repositorySlug);
+                sharedRepositories.add(new SharedRepoIdentification(projectKey, repositorySlug));
+            }
+        }
+
         return sharedRepositories;
     }
     

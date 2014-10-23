@@ -23,15 +23,15 @@ import com.surevine.gateway.scm.util.PropertyUtil;
 import com.surevine.gateway.scm.util.SCMSystemProperties;
 import org.apache.log4j.Logger;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
 /**
  * @author nick.leaver@surevine.com
  */
-public class StashCreateProjectCommand implements CreateProjectCommand {
+public class StashCreateProjectCommand extends AbstractStashCommand implements CreateProjectCommand {
     private static Logger logger = Logger.getLogger(StashCreateProjectCommand.class);
     private static final String RESOURCE = "/rest/api/1.0/projects/";
     private SCMSystemProperties scmSystemProperties;
@@ -42,7 +42,7 @@ public class StashCreateProjectCommand implements CreateProjectCommand {
 
     @Override
     public void createProject(final String projectKey) throws SCMCallException {
-        Client client = ClientBuilder.newClient();
+        Client client = getClient();
         StashProjectJSONBean projectBean = new StashProjectJSONBean();
         projectBean.setName(projectKey);
         projectBean.setKey(projectKey);
@@ -51,11 +51,16 @@ public class StashCreateProjectCommand implements CreateProjectCommand {
         String resource = scmSystemProperties.getHost() + RESOURCE;
         logger.debug("REST call to " + resource);
 
+        try {
         client.target(resource)
                 .request(MediaType.APPLICATION_JSON)
                 .header("Authorization", scmSystemProperties.getBasicAuthHeader())
                 .post(Entity.json(projectBean), StashProjectJSONBean.class);
-
-        client.close();
+        } catch (ProcessingException pe) {
+            logger.error("Could not connect to REST service " + resource, pe);
+            throw new SCMCallException("createProject", "Could not connect to REST service:" + pe.getMessage());
+        } finally {
+            client.close();
+        }
     }
 }

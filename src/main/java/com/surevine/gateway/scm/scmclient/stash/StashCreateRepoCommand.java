@@ -24,15 +24,15 @@ import com.surevine.gateway.scm.util.PropertyUtil;
 import com.surevine.gateway.scm.util.SCMSystemProperties;
 import org.apache.log4j.Logger;
 
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
 /**
  * @author nick.leaver@surevine.com
  */
-public class StashCreateRepoCommand implements CreateRepoCommand {
+public class StashCreateRepoCommand extends AbstractStashCommand implements CreateRepoCommand {
     private static Logger logger = Logger.getLogger(StashCreateRepoCommand.class);
     private static final String RESOURCE = "/rest/api/1.0/projects/%s/repos";
     private SCMSystemProperties scmSystemProperties;
@@ -49,20 +49,26 @@ public class StashCreateRepoCommand implements CreateRepoCommand {
             throw new SCMCallException("createRepo", "No repo name was provided");
         }
 
-        Client client = ClientBuilder.newClient();
+        Client client = getClient();
         String resource = scmSystemProperties.getHost() + String.format(RESOURCE, projectKey);
         logger.debug("REST call to " + resource);
 
         StashRepoJSONBean args = new StashRepoJSONBean();
         args.setName(name);
 
-        StashRepoJSONBean response = client.target(resource)
-                .request(MediaType.APPLICATION_JSON)
-                .header("Authorization", scmSystemProperties.getBasicAuthHeader())
-                .post(Entity.json(args), StashRepoJSONBean.class);
-
-        client.close();
-
+        StashRepoJSONBean response = null;
+        try {
+            response = client.target(resource)
+                    .request(MediaType.APPLICATION_JSON)
+                    .header("Authorization", scmSystemProperties.getBasicAuthHeader())
+                    .post(Entity.json(args), StashRepoJSONBean.class);
+        } catch (ProcessingException pe) {
+            logger.error("Could not connect to REST service " + resource, pe);
+            throw new SCMCallException("createRepo", "Could not connect to REST service:" + pe.getMessage());
+        } finally {
+            client.close();
+        }
+        
         return response.asRepoBean();
     }
 }

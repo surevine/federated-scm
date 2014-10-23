@@ -91,7 +91,7 @@ public abstract class SCMCommand {
      * @return all repositories in the project
      * @throws SCMCallException
      */
-    public static Collection<LocalRepoBean> getRepositories(final String projectKey) {
+    public static Collection<LocalRepoBean> getRepositories(final String projectKey) throws SCMCallException {
         return getCommandFactory().getGetRepoCommandImpl().getRepositories(projectKey);
     }
 
@@ -102,7 +102,7 @@ public abstract class SCMCommand {
      * @return the repository info
      * @throws SCMCallException
      */
-    public static LocalRepoBean getRepository(final String projectKey, final String repositorySlug) {
+    public static LocalRepoBean getRepository(final String projectKey, final String repositorySlug) throws SCMCallException {
         return getCommandFactory().getGetRepoCommandImpl().getRepository(projectKey, repositorySlug);
     }
 

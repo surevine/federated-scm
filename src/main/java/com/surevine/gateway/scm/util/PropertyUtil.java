@@ -45,6 +45,7 @@ public final class PropertyUtil {
     private static final String PROP_PARTNER_PROJECT_KEY = "scm.import.project.key";
     private static final String PROP_PARTNER_FORK_PROJECT_KEY = "scm.import.project.fork";
     private static final String PROP_GATEWAY_RUN_AT_START = "fedscm.export.run_at_start";
+    private static final String PROP_GATEWAY_PROJECT_CONFIG_URL = "gateway.configurationServiceURL";
     private static ResourceBundle bundle;
 
     private PropertyUtil() {
@@ -57,6 +58,10 @@ public final class PropertyUtil {
     
     public static boolean getBooleanProperty(final String key) {
         return Boolean.parseBoolean(getProperty(key));
+    }
+    
+    public static String getProjectConfigServiceURL() {
+        return getProperty(PROP_GATEWAY_PROJECT_CONFIG_URL);
     }
     
     public static String getOrgName() {
@@ -84,7 +89,13 @@ public final class PropertyUtil {
     }
 
     public static String getGatewayImportDir() {
-        return getProperty(PROP_GATEWAY_IMPORT_DIR);
+        String gatewayImportDir = getProperty(PROP_GATEWAY_IMPORT_DIR);
+        try {
+            Files.createDirectories(Paths.get(gatewayImportDir));
+        } catch (Exception e) {
+            logger.error(e);
+        }
+        return gatewayImportDir;
     }
 
     public static String getTempDir() {

@@ -33,7 +33,7 @@ public interface GetRepoCommand {
      * @return all repositories in the project
      * @throws SCMCallException
      */
-    Collection<LocalRepoBean> getRepositories(String projectKey);
+    Collection<LocalRepoBean> getRepositories(String projectKey) throws SCMCallException;
 
     /**
      * Gets a single repo from a project
@@ -42,7 +42,7 @@ public interface GetRepoCommand {
      * @return the repository info
      * @throws SCMCallException
      */
-    LocalRepoBean getRepository(String projectKey, String repositorySlug);
+    LocalRepoBean getRepository(String projectKey, String repositorySlug) throws SCMCallException;
 
     /**
      * Gets all repositories in the SCM system.

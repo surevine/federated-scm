@@ -26,8 +26,8 @@ import org.apache.log4j.Logger;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import java.util.Collection;
 import java.util.HashMap;
@@ -38,7 +38,7 @@ import java.util.Map;
 /**
  * @author nick.leaver@surevine.com
  */
-public class StashGetRepoCommand implements GetRepoCommand {
+public class StashGetRepoCommand extends AbstractStashCommand implements GetRepoCommand {
     private static Logger logger = Logger.getLogger(StashGetRepoCommand.class);
     private static final String ALL_RESOURCE = "/rest/api/1.0/projects/%s/repos?limit=10000";
     private static final String SINGLE_RESOURCE = "/rest/api/1.0/projects/%s/repos/%s";
@@ -49,19 +49,25 @@ public class StashGetRepoCommand implements GetRepoCommand {
     }
     
     @Override
-    public Collection<LocalRepoBean> getRepositories(final String projectKey) {
+    public Collection<LocalRepoBean> getRepositories(final String projectKey) throws SCMCallException {
         HashSet<LocalRepoBean> repositories = new HashSet<LocalRepoBean>();
         
-        Client client = ClientBuilder.newClient();
+        Client client = getClient();
         String resource = scmSystemProperties.getHost() + String.format(ALL_RESOURCE, projectKey);
         logger.debug("REST call to " + resource);
 
-        PagedRepoResult response = client.target(resource)
-                .request(MediaType.APPLICATION_JSON)
-                .header("Authorization", scmSystemProperties.getBasicAuthHeader())
-                .get(PagedRepoResult.class);
-
-        client.close();
+        PagedRepoResult response = null;
+        try {
+            response = client.target(resource)
+                    .request(MediaType.APPLICATION_JSON)
+                    .header("Authorization", scmSystemProperties.getBasicAuthHeader())
+                    .get(PagedRepoResult.class);
+        } catch (ProcessingException pe) {
+            logger.error("Could not connect to REST service " + resource, pe);
+            throw new SCMCallException("createRepo", "Could not connect to REST service:" + pe.getMessage());
+        } finally {
+            client.close();
+        }
         
         for (StashRepoJSONBean stashRepoJSONBean:response.getValues()) {
             repositories.add(stashRepoJSONBean.asRepoBean());
@@ -71,8 +77,8 @@ public class StashGetRepoCommand implements GetRepoCommand {
     }
 
     @Override
-    public LocalRepoBean getRepository(final String projectKey, final String repositorySlug) {
-        Client client = ClientBuilder.newClient();
+    public LocalRepoBean getRepository(final String projectKey, final String repositorySlug) throws SCMCallException {
+        Client client = getClient();
         String resource = scmSystemProperties.getHost() + String.format(SINGLE_RESOURCE, projectKey, repositorySlug);
         logger.debug("REST call to " + resource);
 
@@ -85,9 +91,12 @@ public class StashGetRepoCommand implements GetRepoCommand {
                     .get(StashRepoJSONBean.class);
         } catch (NotFoundException nfe) {
             // no-op - acceptable response and will return a null object
-        }
-        
-        client.close();
+        } catch (ProcessingException pe) {
+            logger.error("Could not connect to REST service " + resource, pe);
+            throw new SCMCallException("createRepo", "Could not connect to REST service:" + pe.getMessage());
+        } finally {
+            client.close();
+        }        
 
         return (response != null) ? response.asRepoBean() : null;
     }

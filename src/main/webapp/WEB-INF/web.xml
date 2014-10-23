@@ -11,4 +11,8 @@
     <listener>
         <listener-class>com.surevine.gateway.scm.FederateSCMContextListener</listener-class>
     </listener>
+
+    <listener>
+        <listener-class>com.surevine.gateway.scm.IncomingFileContextListener</listener-class>
+    </listener>
 </web-app>

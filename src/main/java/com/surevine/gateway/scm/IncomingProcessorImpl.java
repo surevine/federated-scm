@@ -20,6 +20,7 @@ package com.surevine.gateway.scm;
 import com.surevine.gateway.scm.gatewayclient.MetadataUtil;
 import com.surevine.gateway.scm.git.GitFacade;
 import com.surevine.gateway.scm.model.LocalRepoBean;
+import com.surevine.gateway.scm.scmclient.SCMCallException;
 import com.surevine.gateway.scm.scmclient.SCMCommand;
 import com.surevine.gateway.scm.service.SCMFederatorServiceException;
 import com.surevine.gateway.scm.util.InputValidator;
@@ -79,13 +80,17 @@ public class IncomingProcessorImpl implements IncomingProcessor {
             String scmProjectKey = PropertyUtil.getPartnerProjectKeyString(partnerName, projectKey);
             String scmProjectForkKey = PropertyUtil.getPartnerForkProjectKeyString(partnerName, projectKey);
             
-            boolean mainRepoExists = SCMCommand.getRepository(scmProjectKey, repositorySlug) != null;
-            boolean forkRepoExists = SCMCommand.getRepository(scmProjectForkKey, repositorySlug) != null;
-            
-            if (mainRepoExists && forkRepoExists) {
-                processUpdate(bundleDestination, metadata);
-            } else {
-                processNewIncomingRepository(bundleDestination, metadata);
+            try {
+                boolean mainRepoExists = SCMCommand.getRepository(scmProjectKey, repositorySlug) != null;
+                boolean forkRepoExists = SCMCommand.getRepository(scmProjectForkKey, repositorySlug) != null;
+
+                if (mainRepoExists && forkRepoExists) {
+                    processUpdate(bundleDestination, metadata);
+                } else {
+                    processNewIncomingRepository(bundleDestination, metadata);
+                }
+            } catch (SCMCallException e) {
+                logger.error("Could not retrieve repository from SCM system", e);
             }
         }
     }

@@ -11,12 +11,13 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <default.properties.file>config/default.properties</default.properties.file>
-        <local.properties.file>config/local.properties</local.properties.file>
+        <custom.config.directory>custom-config</custom.config.directory>
+        <local.properties.file>${custom.config.directory}/local.properties</local.properties.file>
         <wildfly.hostname>127.0.0.1</wildfly.hostname>
         <wildfly.username>admin</wildfly.username>
         <wildfly.password>password</wildfly.password>
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
+        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.7</maven.compiler.target>
     </properties>
 
     <dependencies>
@@ -210,12 +211,21 @@
         </repository>
     </repositories>
 
-    
+    <scm>
+        <connection>scm:git:ssh://git@github.com/surevine/federated-scm.git</connection>
+    </scm>
+    <distributionManagement>
+        <repository>
+            <id>TPS</id>
+            <url>https://nexus.surevine.net/content/repositories/TPS/</url>
+        </repository>
+    </distributionManagement>
+
     <profiles>
         <!-- 
-        Filtering with default.properties by default. Primarily for CI builds that don't need real configuration values.
-        For a real build copy default.properties to local.properties and set correct properties there rather than 
-        changing default.properties as local.properties is ignored by Git.
+        Filtering with config/default.properties by default. Primarily for CI builds that don't need real configuration values.
+        For a real build copy default.properties to custom-config/local.properties and set correct properties there rather than 
+        changing config/default.properties as custom-config/local.properties is ignored by Git.
         -->
         <profile>
             <id>default-property-filter</id>
@@ -253,7 +263,7 @@
         </profile>
 
         <!-- 
-        If local.properties is present then it is used for property filtering.
+        If ${local.properties.file} is present then it is used for property filtering.
         -->
         <profile>
             <id>local-property-filter</id>
@@ -289,7 +299,46 @@
                 </plugins>
             </build>
         </profile>
-        
+
+        <!--
+        For deployment specific configuration store your config in ${custom.config.directory}/any_name.properties
+        and activate this profile with -DpropFile=any_name
+        -->
+        <profile>
+            <id>bespoke-property-filter</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+                <property>
+                    <name>propFile</name>
+                </property>
+            </activation>
+            <build>
+                <filters>
+                    <filter>${custom.config.directory}/${propFile}.properties</filter>
+                </filters>
+
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-war-plugin</artifactId>
+                        <version>2.4</version>
+                        <configuration>
+                            <filters>
+                                <filter>${custom.config.directory}/${propFile}.properties</filter>
+                            </filters>
+                            <webResources>
+                                <resource>
+                                    <directory>src/main/webapp/WEB-INF</directory>
+                                    <filtering>true</filtering>
+                                    <targetPath>WEB-INF</targetPath>
+                                </resource>
+                            </webResources>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
         <profile>
             <id>stash-integration-tests</id>
             <activation>

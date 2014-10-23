@@ -19,15 +19,16 @@ package com.surevine.gateway.scm.gatewayclient;
 
 import com.surevine.gateway.scm.util.PropertyUtil;
 import org.apache.log4j.Logger;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataOutput;
 
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author nick.leaver@surevine.com
@@ -43,7 +44,10 @@ public class GatewayClient {
     
     public void sendToGateway(final GatewayPackage gatewayPackage) {
         String gatewayServiceURL = PropertyUtil.getGatewayURL();
-        Client client = ClientBuilder.newClient();
+        Client client = new ResteasyClientBuilder()
+                .establishConnectionTimeout(6, TimeUnit.SECONDS)
+                .socketTimeout(6, TimeUnit.SECONDS)
+                .build();
         try {
             MultipartFormDataOutput mfdo = new MultipartFormDataOutput();
             mfdo.addFormData("filename", gatewayPackage.getDerivedFilename(), MediaType.TEXT_PLAIN_TYPE);

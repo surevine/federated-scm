@@ -15,31 +15,21 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-package com.surevine.gateway.scm.scmclient.gitlab;
+package com.surevine.gateway.scm.scmclient.stash;
 
-import com.surevine.gateway.scm.model.LocalRepoBean;
-import com.surevine.gateway.scm.scmclient.GetRepoCommand;
-import com.surevine.gateway.scm.scmclient.SCMCallException;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 
-import java.util.Collection;
-import java.util.Map;
+import javax.ws.rs.client.Client;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author nick.leaver@surevine.com
  */
-public class GitlabGetRepoCommand implements GetRepoCommand {
-    @Override
-    public Collection<LocalRepoBean> getRepositories(final String projectKey) throws SCMCallException {
-        return null;
-    }
-
-    @Override
-    public LocalRepoBean getRepository(final String projectKey, final String repositorySlug) throws SCMCallException {
-        return null;
-    }
-
-    @Override
-    public Map<String, Collection<LocalRepoBean>> getAllRepositories() throws SCMCallException {
-        return null;
+public abstract class AbstractStashCommand {
+    public Client getClient() {
+        return new ResteasyClientBuilder()
+                .establishConnectionTimeout(6, TimeUnit.SECONDS)
+                .socketTimeout(6, TimeUnit.SECONDS)
+                .build();
     }
 }

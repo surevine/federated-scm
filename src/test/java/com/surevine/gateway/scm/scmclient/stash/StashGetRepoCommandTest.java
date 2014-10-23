@@ -119,7 +119,7 @@ public class StashGetRepoCommandTest {
     }
 
     @Test
-    public void testGetRepoThatDoesntExist() {
+    public void testGetRepoThatDoesntExist() throws SCMCallException {
         StashGetRepoCommand getRepoCommand = new StashGetRepoCommand();
         LocalRepoBean repo = getRepoCommand.getRepository("" + new Random().nextInt(), "" + new Random().nextInt());
         assertNull(repo);
