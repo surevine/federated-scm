@@ -36,6 +36,7 @@ public class LocalRepoBean {
     private String projectKey;
     private String cloneSourceURI;
     private boolean localBare = true;
+    private RepoSecurityLabel repoSecurityLabel = new RepoSecurityLabel();
 
     /**
      * Returns true if this repo was, or should be, created bare
@@ -197,6 +198,22 @@ public class LocalRepoBean {
                 // drop the exception
             }
         }
+    }
+
+    /**
+     * Gets the security label for this repo
+     * @return the security label for this repo
+     */
+    public RepoSecurityLabel getRepoSecurityLabel() {
+        return repoSecurityLabel;
+    }
+
+    /**
+     * Sets a security label for this repo
+     * @param repoSecurityLabel a new security label
+     */
+    public void setRepoSecurityLabel(final RepoSecurityLabel repoSecurityLabel) {
+        this.repoSecurityLabel = repoSecurityLabel;
     }
 
     @Override

@@ -29,9 +29,8 @@ import java.util.Map;
 public interface IncomingProcessor {
     /**
      * Causes the SCM federator to process an incoming SCM update file
-     * @param path the path to the received file
-     * @param metadata the metadata associated with the file
+     * @param archivePath the path to the received file
      * @throws com.surevine.gateway.scm.service.SCMFederatorServiceException
      */
-    void processIncomingRepository(Path path, Map<String, String> metadata) throws SCMFederatorServiceException;
+    void processIncomingRepository(Path archivePath) throws SCMFederatorServiceException;
 }

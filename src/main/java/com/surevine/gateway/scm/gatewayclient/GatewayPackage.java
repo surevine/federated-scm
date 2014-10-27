@@ -18,7 +18,6 @@
 package com.surevine.gateway.scm.gatewayclient;
 
 import com.surevine.gateway.scm.util.PropertyUtil;
-import com.surevine.gateway.scm.util.StringUtil;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
@@ -52,15 +51,6 @@ public class GatewayPackage {
     
     public Path getArchive() {
         return archivePath;
-    }
-    
-    public String getDerivedFilename() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("scm_")
-                .append(metadata.get(MetadataUtil.KEY_ORGANISATION))
-                .append("_").append(metadata.get(MetadataUtil.KEY_PROJECT))
-                .append("_").append(metadata.get(MetadataUtil.KEY_REPO));
-        return StringUtil.cleanStringForFilePath(sb.toString()) + ".tar.gz";
     }
     
     public void createArchive() throws IOException, ArchiveException, CompressorException {
@@ -109,7 +99,11 @@ public class GatewayPackage {
             os.close();
         }
     }
-        
+
+    public Map<String, String> getMetadata() {
+        return metadata;
+    }
+
     void writeMetadata(final Path metadataPath) throws IOException {
         JSONObject metadataJSON = new JSONObject(metadata);
         Files.write(metadataPath, metadataJSON.toString().getBytes(Charset.forName("UTF-8")));

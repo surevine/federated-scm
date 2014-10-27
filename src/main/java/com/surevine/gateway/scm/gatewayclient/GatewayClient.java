@@ -49,13 +49,14 @@ public class GatewayClient {
                 .socketTimeout(6, TimeUnit.SECONDS)
                 .build();
         try {
+            String filename = gatewayPackage.getMetadata().get(MetadataUtil.KEY_FILENAME);
             MultipartFormDataOutput mfdo = new MultipartFormDataOutput();
-            mfdo.addFormData("filename", gatewayPackage.getDerivedFilename(), MediaType.TEXT_PLAIN_TYPE);
+            mfdo.addFormData("filename", filename, MediaType.TEXT_PLAIN_TYPE);
             mfdo.addFormData("file", Files.readAllBytes(gatewayPackage.getArchive()), MediaType.APPLICATION_OCTET_STREAM_TYPE);
             GenericEntity<MultipartFormDataOutput> entity = new GenericEntity<MultipartFormDataOutput>(mfdo) {
             };
             client.target(gatewayServiceURL).request().post(Entity.entity(entity, MediaType.MULTIPART_FORM_DATA_TYPE));
-            logger.info(gatewayPackage.getArchive().getFileName() + " sent to the gateway as " + gatewayPackage.getDerivedFilename());
+            logger.info(gatewayPackage.getArchive().getFileName() + " sent to the gateway as " + filename);
         } catch (IOException e) {
             logger.error("Failed to send " + gatewayPackage.getArchive().toString() + " to the gateway", e);
         }
