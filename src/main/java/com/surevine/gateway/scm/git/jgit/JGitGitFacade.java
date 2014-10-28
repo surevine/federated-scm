@@ -171,7 +171,7 @@ public class JGitGitFacade extends GitFacade {
             Git git = new org.eclipse.jgit.api.Git(repository);
             FetchCommand fetchCommand = git.fetch();
             fetchCommand.setRemote(remoteToPull);
-            fetchCommand.setRefSpecs(new RefSpec("refs/heads/*:refs/remotes/origin/*"));
+            fetchCommand.setRefSpecs(new RefSpec("+refs/heads/*:refs/heads/*"));
             result = fetchCommand.call();
             repository.close();
         } catch (GitAPIException | IOException e) {
