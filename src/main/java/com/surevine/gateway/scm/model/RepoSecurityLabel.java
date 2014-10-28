@@ -32,6 +32,12 @@ public class RepoSecurityLabel {
     
     public RepoSecurityLabel() {
         this.groups = new ArrayList<>();
+        
+        // TODO: Remove this once a proper security label service is in place
+        this.classification = "no_classification";
+        this.decorator = "no_decorator";
+        this.groups.add("group1");
+        this.groups.add("group2");
     }
     
     public RepoSecurityLabel(final String classification, final String decorator, final String ... groups) {
