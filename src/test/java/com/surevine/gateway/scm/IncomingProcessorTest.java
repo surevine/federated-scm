@@ -110,4 +110,9 @@ public class IncomingProcessorTest {
 		Path metadataPath = underTest.getMetadataFilePath(paths);
 		assertEquals(validPath, metadataPath);
 	}
+	
+	@Test
+	public void shouldCopyExtractedBundle() throws Exception {
+		//
+	}
 }

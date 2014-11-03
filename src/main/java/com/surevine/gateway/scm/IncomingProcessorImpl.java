@@ -87,7 +87,14 @@ public class IncomingProcessorImpl implements IncomingProcessor {
             return;
         }
         
-        Path extractedGitBundle = getGitBundleFilePath(extractedFilePaths, metadata);
+        Path extractedGitBundle;
+        try {
+        	extractedGitBundle = getGitBundleFilePath(extractedFilePaths, metadata);
+        } catch ( IOException e ) {
+            logger.debug("Error when moving bundle file: "+e.getMessage());
+            return;
+        }
+        
         if (!isAGitBundle(extractedGitBundle)) {
             logger.debug("Not processing " + archivePath + " as the .bundle file isn't an actual git bundle");
             return;
@@ -192,7 +199,6 @@ public class IncomingProcessorImpl implements IncomingProcessor {
         TarArchiveEntry entry = null;
         
         try {
-	
 	    	while ( (entry = archive.getNextTarEntry()) != null ) {
 	    		if ( entry.getName().equals(".metadata.json") ) {
 	    			hasMetaData = true;
