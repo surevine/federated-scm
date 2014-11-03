@@ -17,11 +17,14 @@
 */
 package com.surevine.gateway.scm;
 
+import com.surevine.gateway.scm.service.SCMFederatorServiceException;
 import com.surevine.gateway.scm.util.PropertyUtil;
+
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -69,11 +72,12 @@ public class IncomingFileContextListener implements ServletContextListener {
                                         if (Files.exists(newFilePath)) {
                                             // TODO examine, unpack, parse metadata, send to processor
                                             logger.debug("Processing file " + newFilePath);
+                                            incomingProcessor.processIncomingRepository(newFilePath);
                                         }
                                     }
                                 }
                             }
-                        } catch (InterruptedException ie) {
+                        } catch (InterruptedException | SCMFederatorServiceException ie) {
                             logger.debug("File watcher thread interrupted");
                         }
                     }

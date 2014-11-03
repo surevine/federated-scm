@@ -87,6 +87,10 @@ public final class PropertyUtil {
     public static boolean isExportAtStart() {
         return getBooleanProperty(PROP_GATEWAY_RUN_AT_START);
     }
+    
+    public static String getBundleDir() {
+    	return getProperty(PROP_REMOTE_BUNDLE_DIR);
+    }
 
     public static String getGatewayImportDir() {
         String gatewayImportDir = getProperty(PROP_GATEWAY_IMPORT_DIR);

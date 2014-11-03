@@ -25,13 +25,25 @@ import com.surevine.gateway.scm.scmclient.SCMCommand;
 import com.surevine.gateway.scm.service.SCMFederatorServiceException;
 import com.surevine.gateway.scm.util.InputValidator;
 import com.surevine.gateway.scm.util.PropertyUtil;
+
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
@@ -50,8 +62,16 @@ public class IncomingProcessorImpl implements IncomingProcessor {
             return;
         }
 
-        Collection<Path> extractedFilePaths = extractTarGz(archivePath);
-        Path metadataPath = getMetadataFilePath(extractedFilePaths);
+        Path metadataPath = null;
+        Collection<Path> extractedFilePaths = null;
+        try {
+        	extractedFilePaths = extractTarGz(archivePath);
+            getMetadataFilePath(extractedFilePaths);
+        } catch ( IOException e ) {
+            logger.debug("Error when expanding " + archivePath + ": "+e.getMessage());
+            return;
+        }
+        
         if (metadataPath == null) {
             logger.debug("Not processing " + archivePath + " as it does not contain a metadata file");
             return;
@@ -128,13 +148,101 @@ public class IncomingProcessorImpl implements IncomingProcessor {
             throw new SCMFederatorServiceException("\"Error while accessing local SCM system: " + e.getMessage());
         }
     }
-
-    private boolean isTarGz(final Path archivePath) {
-        return false;
+    
+    public TarArchiveInputStream openTarGz(final Path archivePath) throws FileNotFoundException, IOException {
+    	File file = archivePath.toFile();
+    	
+    	return new TarArchiveInputStream(
+    		new GzipCompressorInputStream(
+    			new BufferedInputStream(
+					new FileInputStream(file)
+    			)
+			)
+		);
     }
 
-    private Collection<Path> extractTarGz(final Path archivePath) {
-        return null;
+    public boolean isTarGz(final Path archivePath) {
+    	try {
+    		openTarGz(archivePath);
+	    	return true;
+    	} catch ( Exception e ) {
+    		logger.debug("Verification of "+archivePath.getName((archivePath.getNameCount() - 1))+" failed: "+e.getMessage());
+    		return false;
+    	}
+    }
+    
+    public boolean tarGzHasExpectedContents(final Path archivePath) {
+    	try {
+	    	TarArchiveInputStream archive = openTarGz(archivePath);
+	    	return tarGzHasExpectedContents(archive);
+    	} catch ( IOException e ) {
+    		return false;
+    	}
+    }
+
+    public boolean tarGzHasExpectedContents(final TarArchiveInputStream archive){
+    	Boolean hasMetaData = false;
+    	Boolean hasBundle = false;
+    	Integer fileCount = 0;
+    	
+        TarArchiveEntry entry = null;
+        
+        try {
+	
+	    	while ( (entry = archive.getNextTarEntry()) != null ) {
+	    		if ( entry.getName().equals(".metadata.json") ) {
+	    			hasMetaData = true;
+	    		} else if ( entry.getName().contains(".bundle") ) {
+	    			hasBundle = true;
+	    		}
+	    		fileCount++;
+	    	}
+	    	archive.reset();
+	    	return (hasMetaData && hasBundle && fileCount == 2);
+        } catch ( IOException e ) {
+        	return false;
+        }
+    }
+
+    public Collection<Path> extractTarGz(final Path archivePath) throws FileNotFoundException, IOException {
+    	TarArchiveInputStream archive = openTarGz(archivePath);
+    	
+    	if (!tarGzHasExpectedContents(archive)) {
+    		return null;
+    	}
+    	
+    	// We need to re-open the archive as the Iterator implementation
+    	// has #reset as a no-op
+    	archive.close();
+    	archive = openTarGz(archivePath);
+    	    	
+    	// Probably need to read in .metadata.json here, and create
+    	// subfolders for projects and repos
+    	String tmpDir = PropertyUtil.getTempDir();
+    	
+    	Collection<Path> extractedFiles = new ArrayList<Path>();
+		logger.debug("Extracting "+archivePath.toString()+" to "+tmpDir);
+
+		TarArchiveEntry entry = archive.getNextTarEntry();
+		while (entry != null) {
+			final File outputFile = new File(tmpDir, entry.getName());
+
+			if (!entry.isFile()) {
+				continue;
+			}
+			
+			logger.debug("Creating output file "+outputFile.getAbsolutePath());
+			
+			final OutputStream outputFileStream = new FileOutputStream(outputFile);
+			IOUtils.copy(archive, outputFileStream);
+			outputFileStream.close();
+			
+			extractedFiles.add(outputFile.toPath());
+			entry = archive.getNextTarEntry();
+		}
+	    archive.close();
+		return extractedFiles;
+    	
     }
 
     private Path getMetadataFilePath(final Collection<Path> paths) {
