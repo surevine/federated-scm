@@ -26,9 +26,11 @@ import com.surevine.gateway.scm.service.SCMFederatorServiceException;
 import com.surevine.gateway.scm.util.InputValidator;
 import com.surevine.gateway.scm.util.PropertyUtil;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
@@ -45,6 +47,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -66,7 +70,7 @@ public class IncomingProcessorImpl implements IncomingProcessor {
         Collection<Path> extractedFilePaths = null;
         try {
         	extractedFilePaths = extractTarGz(archivePath);
-            getMetadataFilePath(extractedFilePaths);
+            metadataPath = getMetadataFilePath(extractedFilePaths);
         } catch ( IOException e ) {
             logger.debug("Error when expanding " + archivePath + ": "+e.getMessage());
             return;
@@ -83,7 +87,7 @@ public class IncomingProcessorImpl implements IncomingProcessor {
             return;
         }
         
-        Path extractedGitBundle = getGitBundleFilePath(extractedFilePaths, metadataPath);
+        Path extractedGitBundle = getGitBundleFilePath(extractedFilePaths, metadata);
         if (!isAGitBundle(extractedGitBundle)) {
             logger.debug("Not processing " + archivePath + " as the .bundle file isn't an actual git bundle");
             return;
@@ -203,6 +207,13 @@ public class IncomingProcessorImpl implements IncomingProcessor {
         	return false;
         }
     }
+    
+    public Path getTmpExtractionPath(Path archivePath) {
+    	String tmpDir = PropertyUtil.getTempDir();
+    	String filename = archivePath.getName(archivePath.getNameCount() - 1).toString();
+    	tmpDir += "/"+filename.substring(0, filename.indexOf('.'));
+    	return new File(tmpDir).toPath();
+    }
 
     public Collection<Path> extractTarGz(final Path archivePath) throws FileNotFoundException, IOException {
     	TarArchiveInputStream archive = openTarGz(archivePath);
@@ -215,17 +226,19 @@ public class IncomingProcessorImpl implements IncomingProcessor {
     	// has #reset as a no-op
     	archive.close();
     	archive = openTarGz(archivePath);
-    	    	
-    	// Probably need to read in .metadata.json here, and create
-    	// subfolders for projects and repos
-    	String tmpDir = PropertyUtil.getTempDir();
+    	
+    	
+    	Path tmpDir = getTmpExtractionPath(archivePath);
+        Files.createDirectories(tmpDir);
     	
     	Collection<Path> extractedFiles = new ArrayList<Path>();
 		logger.debug("Extracting "+archivePath.toString()+" to "+tmpDir);
+		
+		File tmp = tmpDir.toFile();
 
 		TarArchiveEntry entry = archive.getNextTarEntry();
 		while (entry != null) {
-			final File outputFile = new File(tmpDir, entry.getName());
+			final File outputFile = new File(tmp, entry.getName());
 
 			if (!entry.isFile()) {
 				continue;
@@ -244,13 +257,44 @@ public class IncomingProcessorImpl implements IncomingProcessor {
 		return extractedFiles;
     	
     }
-
-    private Path getMetadataFilePath(final Collection<Path> paths) {
+    
+    private Path findFileEndsWith(final Collection<Path> paths, String endsWith) {
+    	Iterator<Path> it = paths.iterator();
+    	Path entry;
+    	while(it.hasNext()) {
+    		entry = it.next();
+    		if ( entry.endsWith(endsWith) ) {
+    			return entry;
+    		}
+    	}
         return null;
     }
 
-    private Path getGitBundleFilePath(final Collection<Path> extractedFilePaths, final Path metadataPath) {
-        return null;
+    public Path getMetadataFilePath(final Collection<Path> paths) {
+    	return findFileEndsWith(paths, ".metadata.json");
+    }
+
+    public Path getGitBundleFilePath(final Collection<Path> extractedFilePaths, final Map<String, String> metadata) throws IOException {
+    	Path tmpLocation = findFileEndsWith(extractedFilePaths, ".bundle");
+
+        String partnerName = metadata.get(MetadataUtil.KEY_ORGANISATION);
+        String projectKey = metadata.get(MetadataUtil.KEY_PROJECT);
+        String repositorySlug = metadata.get(MetadataUtil.KEY_REPO);
+    	
+        List<String> pathElements = new ArrayList<String>();
+        pathElements.add(PropertyUtil.getBundleDir());
+        pathElements.add(partnerName);
+        pathElements.add(projectKey);
+        pathElements.add(repositorySlug);
+        pathElements.add(".bundle");
+        
+        File repoLocation = new File(StringUtils.join(pathElements, '/'));
+        
+        logger.debug("Copying "+tmpLocation.toString()+" to "+repoLocation.toString());
+    	
+    	FileUtils.copyFile(tmpLocation.toFile(), repoLocation);
+    	
+    	return repoLocation.toPath();
     }
 
     private boolean isAGitBundle(final Path gitBundlePath) {
