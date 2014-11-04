@@ -5,11 +5,20 @@ import java.net.URL;
 import java.io.IOException;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.surevine.gateway.scm.gatewayclient.MetadataUtil;
+import com.surevine.gateway.scm.git.bundles.BundleProcessor;
+import com.surevine.gateway.scm.git.bundles.NoExistingRepoBundleProcessor;
+import com.surevine.gateway.scm.scmclient.SCMCommand;
 import com.surevine.gateway.scm.util.PropertyUtil;
 
 import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.instanceOf;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -18,6 +27,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(SCMCommand.class) 
 public class IncomingProcessorTest {
 
 	private IncomingProcessorImpl underTest = new IncomingProcessorImpl();
@@ -182,5 +193,37 @@ public class IncomingProcessorTest {
                 "test", "project", "repo" + ".bundle");
 		
 		assertEquals(true, expectedPath.toFile().exists());
+	}
+
+	@PrepareForTest(SCMCommand.class)
+	@Test
+	public void testShouldCreateCorrectProcessor() throws Exception {
+		Map<String, String> metadata = getTestMetadata();
+
+        String partnerName = metadata.get(MetadataUtil.KEY_ORGANISATION);
+        String projectKey = metadata.get(MetadataUtil.KEY_PROJECT);
+        String repositorySlug = metadata.get(MetadataUtil.KEY_REPO);
+        String partnerProjectKey = PropertyUtil.getPartnerProjectKeyString(partnerName, projectKey);
+        String partnerProjectForkKey = PropertyUtil.getPartnerForkProjectKeyString(partnerName, projectKey);
+		
+		PowerMockito.mockStatic(SCMCommand.class);
+		
+		Mockito.when(SCMCommand.getRepository(partnerProjectForkKey, repositorySlug)).thenReturn(null);
+		Mockito.when(SCMCommand.getRepository(projectKey, repositorySlug)).thenReturn(null);
+		Mockito.when(SCMCommand.getRepository(partnerProjectKey, repositorySlug)).thenReturn(null);
+		
+		BundleProcessor processor = underTest.getAppropriateBundleProcessor(getGoodBundle(), metadata);
+		
+		assertThat(processor, instanceOf(NoExistingRepoBundleProcessor.class));
+	}
+	
+	@Test
+	public void testShouldCreateGitlabGroup() throws Exception {
+		//
+	}
+	
+	@Test
+	public void testShouldCreateGitlabProject() throws Exception {
+		//
 	}
 }

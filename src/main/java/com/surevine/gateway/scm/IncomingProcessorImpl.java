@@ -19,6 +19,9 @@ package com.surevine.gateway.scm;
 
 import com.surevine.gateway.scm.gatewayclient.MetadataUtil;
 import com.surevine.gateway.scm.git.GitFacade;
+import com.surevine.gateway.scm.git.bundles.BundleProcessor;
+import com.surevine.gateway.scm.git.bundles.NoBundleProcessorAvailableException;
+import com.surevine.gateway.scm.git.bundles.NoExistingRepoBundleProcessor;
 import com.surevine.gateway.scm.model.LocalRepoBean;
 import com.surevine.gateway.scm.scmclient.SCMCallException;
 import com.surevine.gateway.scm.scmclient.SCMCommand;
@@ -86,60 +89,79 @@ public class IncomingProcessorImpl implements IncomingProcessor {
             logger.debug("Not processing " + archivePath + " as it does not contain all of the required metadata");
             return;
         }
+        
+        Path extractedGitBundle = getGitBundleFilePath(extractedFilePaths);
+        
+        Path bundleDestination;
+        try {
+        	bundleDestination = copyBundle(extractedGitBundle, metadata);
+        } catch ( IOException ioe ) {
+            throw new SCMFederatorServiceException("Internal error when copying bundle: " + ioe.getMessage());
+        }
+        
+        
+        // at this point we have a valid git bundle and some valid metadata so we can start processing
+        try {
+            BundleProcessor processor = getAppropriateBundleProcessor(bundleDestination, metadata);
+        	processor.processBundle();
+        } catch (SCMCallException e) {
+            logger.error("Error while accessing local SCM system", e);
+            throw new SCMFederatorServiceException("\"Error while accessing local SCM system: " + e.getMessage());
+        } catch (NoBundleProcessorAvailableException e) {
+            logger.error("No bundle processor available for the determined repository state", e);
+            throw new SCMFederatorServiceException("\"Error while unpacking bundle: No processor available");
+		}
+    }
 
+    // only the processing of new repositories is implemented so a simple check to see if a fork and main repo
+    // exist allow us to proceed.
+    // TODO: logic needs to be worked on here. Identifying whether it's an incoming shared repo, an update to a
+    // partner's copy on this site, or an update to a project originated here isn't easy to understand when using
+    // just these SCM repo locations and is pretty brittle. Probably need to add metadata to describe these things
+    // and simplify all this.
+    public BundleProcessor getAppropriateBundleProcessor(Path bundleDestination, Map<String, String> metadata) throws SCMCallException, NoBundleProcessorAvailableException {
+        
         String partnerName = metadata.get(MetadataUtil.KEY_ORGANISATION);
         String projectKey = metadata.get(MetadataUtil.KEY_PROJECT);
         String repositorySlug = metadata.get(MetadataUtil.KEY_REPO);
         String partnerProjectKey = PropertyUtil.getPartnerProjectKeyString(partnerName, projectKey);
         String partnerProjectForkKey = PropertyUtil.getPartnerForkProjectKeyString(partnerName, projectKey);
         
-        Path extractedGitBundle = getGitBundleFilePath(extractedFilePaths);
+        BundleProcessor rtn = null;
         
-        Path bundleDestination = buildBundleDestination(metadata);
+        // a fork exists which means we have received a bundle for this project from this partner previously
+        boolean forkRepoExists = SCMCommand.getRepository(partnerProjectForkKey, repositorySlug) != null;
         
-        try {
-        	copyBundle(extractedGitBundle, metadata);
-        } catch ( IOException ioe ) {
-            throw new SCMFederatorServiceException("Internal error when copying bundle: " + ioe.getMessage());
+        // a main repo exists in the raw project which means this is an incoming change to a repository sourced
+        // from this site as the project key should be passed back as-is
+        // TODO: What if they have a project and repo with the same name? Do we need metadata to identify the master repository?
+        boolean mainRepoExists = SCMCommand.getRepository(projectKey, repositorySlug) != null;
+        
+        // a partner repo exists which means the received file is an update to a project originating from them but previously shared
+        // with this site
+        boolean partnerRepoExists = SCMCommand.getRepository(partnerProjectKey, repositorySlug) != null;
+        
+        if (!forkRepoExists && !mainRepoExists) {
+            // newly shared project originating from this partner
+        	rtn = new NoExistingRepoBundleProcessor();
+        } else if (!forkRepoExists && mainRepoExists) {
+            // first update from this partner to a project shared from local SCM system
+//        	rtn = new NewPartnerForkBundleProcessor();
+        	throw new NoBundleProcessorAvailableException();
+        } else if (forkRepoExists && partnerRepoExists) {
+            // update to a project originating from this partner
+//        	rtn = new UpdatePartnerBundleProcessor();
+        	throw new NoBundleProcessorAvailableException();
+        } else if (forkRepoExists && mainRepoExists) {
+            // update to a project originating from local SCM system
+//        	rtn = new UpdateLocalBundleProcessor();
+        	throw new NoBundleProcessorAvailableException();
         }
         
-        // only the processing of new repositories is implemented so a simple check to see if a fork and main repo
-        // exist allow us to proceed.
-        // TODO: logic needs to be worked on here. Identifying whether it's an incoming shared repo, an update to a
-        // partner's copy on this site, or an update to a project originated here isn't easy to understand when using
-        // just these SCM repo locations and is pretty brittle. Probably need to add metadata to describe these things
-        // and simplify all this.
+        rtn.setBundleLocation(bundleDestination);
+        rtn.setBundleMetadata(metadata);
         
-        // at this point we have a valid git bundle and some valid metadata so we can start processing
-        
-        try {
-            // a fork exists which means we have received a bundle for this project from this partner previously
-            boolean forkRepoExists = SCMCommand.getRepository(partnerProjectForkKey, repositorySlug) != null;
-            
-            // a main repo exists in the raw project which means this is an incoming change to a repository sourced
-            // from this site as the project key should be passed back as-is
-            // TODO: What if they have a project and repo with the same name? Do we need metadata to identify the master repository?
-            boolean mainRepoExists = SCMCommand.getRepository(projectKey, repositorySlug) != null;
-            
-            // a partner repo exists which means the received file is an update to a project originating from them but previously shared
-            // with this site
-            boolean partnerRepoExists = SCMCommand.getRepository(partnerProjectKey, repositorySlug) != null;
-            
-            if (!forkRepoExists && !mainRepoExists) {
-                // newly shared project originating from this partner
-                processNewIncomingRepository(bundleDestination, metadata);
-            } else if (!forkRepoExists && mainRepoExists) {
-                // first update from this partner to a project shared from local SCM system
-            } else if (forkRepoExists && partnerRepoExists) {
-                // update to a project originating from this partner
-            } else if (forkRepoExists && mainRepoExists) {
-                // update to a project originating from local SCM system
-            }
-            
-        } catch (SCMCallException e) {
-            logger.error("Error while accessing local SCM system", e);
-            throw new SCMFederatorServiceException("\"Error while accessing local SCM system: " + e.getMessage());
-        }
+        return rtn;
     }
     
     public Path buildBundleDestination(Map<String, String> metadata) {
@@ -151,7 +173,7 @@ public class IncomingProcessorImpl implements IncomingProcessor {
                 partnerName, projectKey, repositorySlug + ".bundle");
     }
     
-    public void copyBundle(Path extractedGitBundle, Map<String, String> metadata ) throws IOException {
+    public Path copyBundle(Path extractedGitBundle, Map<String, String> metadata ) throws IOException {
         
         Path bundleDestination = buildBundleDestination(metadata);
 
@@ -162,6 +184,8 @@ public class IncomingProcessorImpl implements IncomingProcessor {
             Files.createDirectories(bundleDestination.getParent());
             Files.copy(extractedGitBundle, bundleDestination);
         }
+        
+        return bundleDestination;
     }
     
     public TarArchiveInputStream openTarGz(final Path archivePath) throws FileNotFoundException, IOException {
@@ -287,53 +311,5 @@ public class IncomingProcessorImpl implements IncomingProcessor {
 
     public Path getGitBundleFilePath(final Collection<Path> extractedFilePaths) {
     	return findFileEndsWith(extractedFilePaths, ".bundle");
-    }
-
-    private void processNewIncomingRepository(final Path bundleDestination, final Map<String, String> metadata) {
-        String partnerName = metadata.get(MetadataUtil.KEY_ORGANISATION);
-        String projectKey = metadata.get(MetadataUtil.KEY_PROJECT);
-        String repositorySlug = metadata.get(MetadataUtil.KEY_REPO);
-        String partnerProjectKey = PropertyUtil.getPartnerProjectKeyString(partnerName, projectKey);
-        String partnerProjectForkKey = PropertyUtil.getPartnerForkProjectKeyString(partnerName, projectKey);
-        LocalRepoBean repoBean = new LocalRepoBean();
-        repoBean.setProjectKey(partnerProjectKey);
-        repoBean.setSlug(repositorySlug);
-        repoBean.setCloneSourceURI(bundleDestination.toString());
-        
-        try {
-            // create local repository from bundle
-            GitFacade.getInstance().clone(repoBean);
-
-            // create project in the SCM system to hold repositories from this partner if it doesn't already exist
-            if (!SCMCommand.getProjects().contains(partnerProjectKey)) {
-                SCMCommand.createProject(partnerProjectKey);
-            }
-            
-            // check that a repository doesn't already exists where we are planning on creating one in the SCM system
-            if (SCMCommand.getRepository(partnerProjectKey, repositorySlug) != null) {
-                throw new SCMFederatorServiceException("Repository " + partnerProjectKey + ":"
-                        + repositorySlug + " already exists.");
-            }
-            
-            // create a new repository in the SCM system to hold the shared source
-            LocalRepoBean createdSCMRepository = SCMCommand.createRepo(partnerProjectKey, repositorySlug);
-            
-            // push the incoming repository into the new SCM repository
-            GitFacade.getInstance().addRemote(repoBean, "scm", createdSCMRepository.getCloneSourceURI());
-            GitFacade.getInstance().push(repoBean, "scm");
-
-            // create project in the SCM system to hold update forks from this partner if it doesn't already exist
-            if (!SCMCommand.getProjects().contains(partnerProjectForkKey)) {
-                SCMCommand.createProject(partnerProjectForkKey);
-            }
-                        
-            // fork the new repository to allow updates to pushed into the fork instead of the master copy in future
-            LocalRepoBean forkedRepo = SCMCommand.forkRepo(partnerProjectKey, repositorySlug, partnerProjectForkKey);
-            
-            // update local repository remote to point at the fork instead for its scm remote
-            GitFacade.getInstance().updateRemote(repoBean, "scm", forkedRepo.getCloneSourceURI());
-        } catch (Exception e) {
-            logger.error("Could not import new repository " + repoBean, e);
-        }
     }
 }
