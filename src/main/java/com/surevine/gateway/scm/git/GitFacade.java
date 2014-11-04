@@ -98,6 +98,15 @@ public abstract class GitFacade {
      */
     public abstract Path bundle(LocalRepoBean repoBean) throws GitException;
     
+    
+//    /**
+//     * Verifies a given Git bundle to check it will apply cleanly
+//     * @param bundlePath
+//     * @return boolean
+//     * @throws GitException
+//     */
+//    public abstract Boolean verifyBundle(Path bundlePath) throws GitException;
+    
     /**
      * Determines if a repo has already been cloned into the scm federator working directory
      * @param repoBean Information about the remote Repo

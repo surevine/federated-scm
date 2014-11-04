@@ -95,10 +95,12 @@ public class IncomingProcessorImpl implements IncomingProcessor {
             return;
         }
         
-        if (!isAGitBundle(extractedGitBundle)) {
-            logger.debug("Not processing " + archivePath + " as the .bundle file isn't an actual git bundle");
-            return;
-        }
+//        See note attached to placeholder method below
+//        
+//        if (!isAGitBundle(extractedGitBundle)) {
+//            logger.debug("Not processing " + archivePath + " as the .bundle file isn't an actual git bundle");
+//            return;
+//        }
 
         // at this point we have a valid git bundle and some valid metadata so we can start processing
         String partnerName = metadata.get(MetadataUtil.KEY_ORGANISATION);
@@ -281,31 +283,18 @@ public class IncomingProcessorImpl implements IncomingProcessor {
     }
 
     public Path getGitBundleFilePath(final Collection<Path> extractedFilePaths, final Map<String, String> metadata) throws IOException {
-    	Path tmpLocation = findFileEndsWith(extractedFilePaths, ".bundle");
-
-        String partnerName = metadata.get(MetadataUtil.KEY_ORGANISATION);
-        String projectKey = metadata.get(MetadataUtil.KEY_PROJECT);
-        String repositorySlug = metadata.get(MetadataUtil.KEY_REPO);
-    	
-        List<String> pathElements = new ArrayList<String>();
-        pathElements.add(PropertyUtil.getBundleDir());
-        pathElements.add(partnerName);
-        pathElements.add(projectKey);
-        pathElements.add(repositorySlug);
-        pathElements.add(".bundle");
-        
-        File repoLocation = new File(StringUtils.join(pathElements, '/'));
-        
-        logger.debug("Copying "+tmpLocation.toString()+" to "+repoLocation.toString());
-    	
-    	FileUtils.copyFile(tmpLocation.toFile(), repoLocation);
-    	
-    	return repoLocation.toPath();
+    	return findFileEndsWith(extractedFilePaths,".bundle");
     }
 
-    private boolean isAGitBundle(final Path gitBundlePath) {
-        return false;
-    }
+//    Deprecating this placeholder method as, short of replicating
+//    the entirety of the `git bundle verify` command in native Java
+//    we might as well just wait to try and clone it, and respond
+//    accordingly if we fail
+//    
+//    private boolean isAGitBundle(final Path gitBundlePath) {
+//    	// git bundle verify /path/to/git.bundle
+//        return false;
+//    }
 
     private void processNewIncomingRepository(final Path bundleDestination, final Map<String, String> metadata) {
         String partnerName = metadata.get(MetadataUtil.KEY_ORGANISATION);
