@@ -86,42 +86,20 @@ public class IncomingProcessorImpl implements IncomingProcessor {
             logger.debug("Not processing " + archivePath + " as it does not contain all of the required metadata");
             return;
         }
-        
-        Path extractedGitBundle;
-        try {
-        	extractedGitBundle = getGitBundleFilePath(extractedFilePaths, metadata);
-        } catch ( IOException e ) {
-            logger.debug("Error when moving bundle file: "+e.getMessage());
-            return;
-        }
-        
-//        See note attached to placeholder method below
-//        
-//        if (!isAGitBundle(extractedGitBundle)) {
-//            logger.debug("Not processing " + archivePath + " as the .bundle file isn't an actual git bundle");
-//            return;
-//        }
 
-        // at this point we have a valid git bundle and some valid metadata so we can start processing
         String partnerName = metadata.get(MetadataUtil.KEY_ORGANISATION);
         String projectKey = metadata.get(MetadataUtil.KEY_PROJECT);
         String repositorySlug = metadata.get(MetadataUtil.KEY_REPO);
         String partnerProjectKey = PropertyUtil.getPartnerProjectKeyString(partnerName, projectKey);
         String partnerProjectForkKey = PropertyUtil.getPartnerForkProjectKeyString(partnerName, projectKey);
         
-        // store the bundle in the bundle directory - potentially overwriting the previous version
-        Path bundleDestination = Paths.get(PropertyUtil.getRemoteBundleDir(),
-                partnerName, projectKey, repositorySlug + ".bundle");
-
+        Path extractedGitBundle = getGitBundleFilePath(extractedFilePaths);
+        
+        Path bundleDestination = buildBundleDestination(metadata);
+        
         try {
-            logger.debug("Copying received bundle from temporary location " + extractedGitBundle + " to " + bundleDestination);
-            if (Files.exists(bundleDestination)) {
-                Files.copy(extractedGitBundle, bundleDestination, StandardCopyOption.REPLACE_EXISTING);
-            } else {
-                Files.createDirectories(bundleDestination.getParent());
-                Files.copy(extractedGitBundle, bundleDestination);
-            }
-        } catch (IOException ioe) {
+        	copyBundle(extractedGitBundle, metadata);
+        } catch ( IOException ioe ) {
             throw new SCMFederatorServiceException("Internal error when copying bundle: " + ioe.getMessage());
         }
         
@@ -131,6 +109,8 @@ public class IncomingProcessorImpl implements IncomingProcessor {
         // partner's copy on this site, or an update to a project originated here isn't easy to understand when using
         // just these SCM repo locations and is pretty brittle. Probably need to add metadata to describe these things
         // and simplify all this.
+        
+        // at this point we have a valid git bundle and some valid metadata so we can start processing
         
         try {
             // a fork exists which means we have received a bundle for this project from this partner previously
@@ -159,6 +139,28 @@ public class IncomingProcessorImpl implements IncomingProcessor {
         } catch (SCMCallException e) {
             logger.error("Error while accessing local SCM system", e);
             throw new SCMFederatorServiceException("\"Error while accessing local SCM system: " + e.getMessage());
+        }
+    }
+    
+    public Path buildBundleDestination(Map<String, String> metadata) {
+        String partnerName = metadata.get(MetadataUtil.KEY_ORGANISATION);
+        String projectKey = metadata.get(MetadataUtil.KEY_PROJECT);
+        String repositorySlug = metadata.get(MetadataUtil.KEY_REPO);
+        
+        return Paths.get(PropertyUtil.getRemoteBundleDir(),
+                partnerName, projectKey, repositorySlug + ".bundle");
+    }
+    
+    public void copyBundle(Path extractedGitBundle, Map<String, String> metadata ) throws IOException {
+        
+        Path bundleDestination = buildBundleDestination(metadata);
+
+        logger.debug("Copying received bundle from temporary location " + extractedGitBundle + " to " + bundleDestination);
+        if (Files.exists(bundleDestination)) {
+            Files.copy(extractedGitBundle, bundleDestination, StandardCopyOption.REPLACE_EXISTING);
+        } else {
+            Files.createDirectories(bundleDestination.getParent());
+            Files.copy(extractedGitBundle, bundleDestination);
         }
     }
     
@@ -271,7 +273,8 @@ public class IncomingProcessorImpl implements IncomingProcessor {
     	Path entry;
     	while(it.hasNext()) {
     		entry = it.next();
-    		if ( entry.endsWith(endsWith) ) {
+    		String lastPath = entry.getName(entry.getNameCount() - 1).toString();
+    		if ( StringUtils.endsWith(lastPath, endsWith) ) {
     			return entry;
     		}
     	}
@@ -282,19 +285,9 @@ public class IncomingProcessorImpl implements IncomingProcessor {
     	return findFileEndsWith(paths, ".metadata.json");
     }
 
-    public Path getGitBundleFilePath(final Collection<Path> extractedFilePaths, final Map<String, String> metadata) throws IOException {
-    	return findFileEndsWith(extractedFilePaths,".bundle");
+    public Path getGitBundleFilePath(final Collection<Path> extractedFilePaths) {
+    	return findFileEndsWith(extractedFilePaths, ".bundle");
     }
-
-//    Deprecating this placeholder method as, short of replicating
-//    the entirety of the `git bundle verify` command in native Java
-//    we might as well just wait to try and clone it, and respond
-//    accordingly if we fail
-//    
-//    private boolean isAGitBundle(final Path gitBundlePath) {
-//    	// git bundle verify /path/to/git.bundle
-//        return false;
-//    }
 
     private void processNewIncomingRepository(final Path bundleDestination, final Map<String, String> metadata) {
         String partnerName = metadata.get(MetadataUtil.KEY_ORGANISATION);

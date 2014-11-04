@@ -6,13 +6,17 @@ import java.io.IOException;
 
 import org.junit.Test;
 
+import com.surevine.gateway.scm.gatewayclient.MetadataUtil;
 import com.surevine.gateway.scm.util.PropertyUtil;
 
 import static org.junit.Assert.*;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class IncomingProcessorTest {
 
@@ -28,6 +32,26 @@ public class IncomingProcessorTest {
 		String path = getClass().getResource("/bad.tar.gz").getPath();
 		File archiveFile = new File(path);
 		return archiveFile.toPath();
+	}
+	
+	private Path getGoodBundle() {
+		String path = getClass().getResource("/good.bundle").getPath();
+		File archiveFile = new File(path);
+		return archiveFile.toPath();
+	}
+	
+	private Path getBadBundle() {
+		String path = getClass().getResource("/bad.bundle").getPath();
+		File archiveFile = new File(path);
+		return archiveFile.toPath();
+	}
+	
+	private Map<String, String> getTestMetadata() {
+		Map<String, String> metadata = new HashMap<String, String>();
+		metadata.put(MetadataUtil.KEY_ORGANISATION, "test");
+		metadata.put(MetadataUtil.KEY_PROJECT, "project");
+		metadata.put(MetadataUtil.KEY_REPO, "repo");
+		return metadata;
 	}
 	
 	@Test(expected=IOException.class)
@@ -112,7 +136,51 @@ public class IncomingProcessorTest {
 	}
 	
 	@Test
-	public void shouldCopyExtractedBundle() throws Exception {
-		//
+	public void testShouldNotPickOutBundlePath() throws Exception {
+		Collection<Path> paths = new ArrayList<Path>();
+		paths.add(new File("file://something/but/not/a/bundle").toPath());
+		paths.add(new File("file://another/junk/path").toPath());
+		paths.add(new File("file://more/junk/paths/metadata.json").toPath());
+		
+		Path bundlePath = underTest.getGitBundleFilePath(paths);
+		assertEquals(null, bundlePath);
+	}
+	
+	@Test
+	public void testShouldPickOutBundlePath() throws Exception {
+		Path validPath = new File("file://the/file/path/with/git.bundle").toPath();
+		
+		Collection<Path> paths = new ArrayList<Path>();
+		paths.add(new File("file://something/but/not/metadata").toPath());
+		paths.add(validPath);
+		paths.add(new File("file://another/junk/path").toPath());
+		
+		Path bundlePath = underTest.getGitBundleFilePath(paths);
+		assertEquals(validPath, bundlePath);
+	}
+	
+	@Test
+	public void testShouldBuildCorrectBundlePath() throws Exception {
+		Map<String, String> metadata = getTestMetadata();
+		
+		Path bundlePath = underTest.buildBundleDestination(metadata);
+		
+		Path expectedPath = Paths.get(PropertyUtil.getRemoteBundleDir(),
+                "test", "project", "repo" + ".bundle");
+		
+		assertEquals(expectedPath.toString(), bundlePath.toString());
+	}
+	
+	@Test
+	public void testShouldCopyBundleCorrectly() throws Exception {
+		Path goodBundle = getGoodBundle();
+		Map<String, String> metadata = getTestMetadata();
+		
+		underTest.copyBundle(goodBundle, metadata);
+
+		Path expectedPath = Paths.get(PropertyUtil.getRemoteBundleDir(),
+                "test", "project", "repo" + ".bundle");
+		
+		assertEquals(true, expectedPath.toFile().exists());
 	}
 }
