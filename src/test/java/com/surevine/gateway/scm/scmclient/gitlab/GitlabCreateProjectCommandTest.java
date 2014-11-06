@@ -18,13 +18,13 @@ public class GitlabCreateProjectCommandTest {
 
 		createProjectCommand.createProject(randomProjectKey);
 
-//		GitlabGetProjectsCommand getProjectsCommand = new GitlabGetProjectsCommand();
-//		assertTrue(getProjectsCommand.getProjects().contains(randomProjectKey));
-//
-//		GitlabDeleteProjectCommand deleteProjectCommand = new GitlabDeleteProjectCommand();
-//		deleteProjectCommand.deleteProject(randomProjectKey);
-//
-//		assertFalse(getProjectsCommand.getProjects().contains(randomProjectKey));
+		GitlabGetProjectsCommand getProjectsCommand = new GitlabGetProjectsCommand();
+		assertTrue(getProjectsCommand.getProjects().contains(randomProjectKey));
+
+		GitlabDeleteProjectCommand deleteProjectCommand = new GitlabDeleteProjectCommand();
+		deleteProjectCommand.deleteProject(randomProjectKey);
+
+		assertFalse(getProjectsCommand.getProjects().contains(randomProjectKey));
 	}
 
 }

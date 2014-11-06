@@ -17,11 +17,8 @@
 */
 package com.surevine.gateway.scm.scmclient.gitlab;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
-import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MultivaluedMap;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
@@ -36,13 +33,22 @@ import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GitlabProjectJSONBean {
+	
     private String id;
     private String name;
     private String path;
     private String ownerId;
+    
+    public GitlabProjectJSONBean() {
+    	//
+    }
 
     public String getId() {
         return id;
+    }
+    
+    public Integer getIdInt() {
+    	return Integer.parseInt(getId());
     }
 
     void setId(final String id) {

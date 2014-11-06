@@ -55,7 +55,6 @@ public class GitlabCreateProjectCommand extends AbstractGitlabCommand implements
     public void createProject(final String projectKey) throws SCMCallException {
         String resource = scmSystemProperties.getHost() + RESOURCE;
         String privateToken = scmSystemProperties.getAuthToken();
-        resource += "?private_token="+privateToken;
         Client client = getClient();
         logger.debug("REST call to " + resource);
 

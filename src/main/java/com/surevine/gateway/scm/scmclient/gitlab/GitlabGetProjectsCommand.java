@@ -24,8 +24,9 @@ import com.surevine.gateway.scm.util.SCMSystemProperties;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
@@ -45,7 +46,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
  */
 public class GitlabGetProjectsCommand extends AbstractGitlabCommand implements GetProjectsCommand {
     private static Logger logger = Logger.getLogger(GitlabGetProjectsCommand.class);
-    private static final String ALL_RESOURCE = "/api/v3/groups/";
+    private static final String ALL_RESOURCE = "/api/v3/groups";
     private SCMSystemProperties scmSystemProperties;
 
     GitlabGetProjectsCommand() {
@@ -54,7 +55,19 @@ public class GitlabGetProjectsCommand extends AbstractGitlabCommand implements G
     
     @Override
     public Collection<String> getProjects() throws SCMCallException {
+    	List<GitlabProjectJSONBean> projects = getProjectObjects();
         ArrayList<String> projectKeys = new ArrayList<String>();
+        
+        if ( projects.size() > 0 ) {
+        	for ( GitlabProjectJSONBean projectBean : projects ) {
+	            projectKeys.add(projectBean.getPath());
+	        }
+        }
+               
+        return projectKeys;
+    }
+    
+    public List<GitlabProjectJSONBean> getProjectObjects() throws SCMCallException {
         String resource = scmSystemProperties.getHost() + ALL_RESOURCE;
         String privateToken = scmSystemProperties.getAuthToken();
         Client client = getClient();
@@ -73,26 +86,14 @@ public class GitlabGetProjectsCommand extends AbstractGitlabCommand implements G
             client.close();
         }
         
-        for (GitlabProjectJSONBean projectBean : response.getValues()) {
-            projectKeys.add(projectBean.getPath());
-        }
-               
-        return projectKeys;
+        return response;
     }
 
     /**
-     * Private wrapper for holding paging results
+     * Private wrapper for typing response results
      */
     @JsonIgnoreProperties(ignoreUnknown = true)
-    private static class PagedProjectResult {
-        private List<GitlabProjectJSONBean> values;
-
-        public List<GitlabProjectJSONBean> getValues() {
-            return values;
-        }
-
-        public void setValues(final List<GitlabProjectJSONBean> values) {
-            this.values = values;
-        }
+    private static class PagedProjectResult
+    	extends ArrayList<GitlabProjectJSONBean> {
     }
 }
