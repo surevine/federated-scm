@@ -26,9 +26,13 @@ import com.surevine.gateway.scm.scmclient.GetProjectsCommand;
 import com.surevine.gateway.scm.scmclient.GetRepoCommand;
 import com.surevine.gateway.scm.scmclient.SCMCommandFactory;
 
+
 /**
  * Gitlab SCM command factory
- * @author nick.leaver@surevine.com
+ * 
+ * This being Gitlab, the terms are different.
+ * A Gitlab 'group' is a Stash 'project'
+ * A Gitlab 'project' is a Stash 'repo'
  */
 public class GitlabCommandFactory implements SCMCommandFactory {
     @Override
@@ -38,31 +42,31 @@ public class GitlabCommandFactory implements SCMCommandFactory {
 
     @Override
     public GetProjectsCommand getGetProjectsCommandImpl() {
-        return new GitlabGetProjectsCommand();
+        return new GitlabGetGroupsCommand();
     }
 
     @Override
     public CreateProjectCommand getCreateProjectCommandImpl() {
-        return new GitlabCreateProjectCommand();
+        return new GitlabCreateGroupCommand();
     }
 
     @Override
     public DeleteProjectCommand getDeleteProjectCommandImpl() {
-        return new GitlabDeleteProjectCommand();
+        return new GitlabDeleteGroupCommand();
     }
 
     @Override
     public GetRepoCommand getGetRepoCommandImpl() {
-        return new GitlabGetRepoCommand();
+        return new GitlabGetProjectCommand();
     }
 
     @Override
     public CreateRepoCommand getCreateRepoCommandImpl() {
-        return new GitlabCreateRepoCommand();
+        return new GitlabCreateProjectCommand();
     }
 
     @Override
     public DeleteRepoCommand getDeleteRepoCommandImpl() {
-        return new GitlabDeleteRepoCommand();
+        return new GitlabDeleteProjectCommand();
     }
 }

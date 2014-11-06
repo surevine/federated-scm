@@ -44,22 +44,22 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
  * 
  * @author martin.hewitt@surevine.com
  */
-public class GitlabGetProjectsCommand extends AbstractGitlabCommand implements GetProjectsCommand {
-    private static Logger logger = Logger.getLogger(GitlabGetProjectsCommand.class);
+public class GitlabGetGroupsCommand extends AbstractGitlabCommand implements GetProjectsCommand {
+    private static Logger logger = Logger.getLogger(GitlabGetGroupsCommand.class);
     private static final String ALL_RESOURCE = "/api/v3/groups";
     private SCMSystemProperties scmSystemProperties;
 
-    GitlabGetProjectsCommand() {
+    GitlabGetGroupsCommand() {
         scmSystemProperties = PropertyUtil.getSCMSystemProperties();
     }
     
     @Override
     public Collection<String> getProjects() throws SCMCallException {
-    	List<GitlabProjectJSONBean> projects = getProjectObjects();
+    	List<GitlabGroupJSONBean> projects = getProjectObjects();
         ArrayList<String> projectKeys = new ArrayList<String>();
         
         if ( projects.size() > 0 ) {
-        	for ( GitlabProjectJSONBean projectBean : projects ) {
+        	for ( GitlabGroupJSONBean projectBean : projects ) {
 	            projectKeys.add(projectBean.getPath());
 	        }
         }
@@ -67,7 +67,7 @@ public class GitlabGetProjectsCommand extends AbstractGitlabCommand implements G
         return projectKeys;
     }
     
-    public List<GitlabProjectJSONBean> getProjectObjects() throws SCMCallException {
+    public List<GitlabGroupJSONBean> getProjectObjects() throws SCMCallException {
         String resource = scmSystemProperties.getHost() + ALL_RESOURCE;
         String privateToken = scmSystemProperties.getAuthToken();
         Client client = getClient();
@@ -94,6 +94,6 @@ public class GitlabGetProjectsCommand extends AbstractGitlabCommand implements G
      */
     @JsonIgnoreProperties(ignoreUnknown = true)
     private static class PagedProjectResult
-    	extends ArrayList<GitlabProjectJSONBean> {
+    	extends ArrayList<GitlabGroupJSONBean> {
     }
 }

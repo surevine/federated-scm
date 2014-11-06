@@ -26,82 +26,71 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.log4j.Logger;
 
-import com.surevine.gateway.scm.model.LocalRepoBean;
 import com.surevine.gateway.scm.scmclient.CreateProjectCommand;
-import com.surevine.gateway.scm.scmclient.CreateRepoCommand;
+import com.surevine.gateway.scm.scmclient.DeleteProjectCommand;
 import com.surevine.gateway.scm.scmclient.SCMCallException;
 import com.surevine.gateway.scm.util.PropertyUtil;
 import com.surevine.gateway.scm.util.SCMSystemProperties;
 
-
 /**
  * This being Gitlab, what we're actually doing is creating a
- * project, not a repo. A Gitlab 'group' is a Stash 'project',
+ * group, not a project. A Gitlab 'group' is a Stash 'project',
  * and a Gitlab 'project' is a Stash 'repo'
  * 
- * API documentation for this entity's endpoint is here: http://doc.gitlab.com/ce/api/projects.html
+ * API documentation for this entity's endpoint is here: http://doc.gitlab.com/ce/api/groups.html
  * 
  * @author martin.hewitt@surevine.com
  */
-public class GitlabCreateProjectCommand extends AbstractGitlabCommand implements CreateRepoCommand {
+public class GitlabDeleteGroupCommand extends AbstractGitlabCommand implements DeleteProjectCommand {
 
-    private static Logger logger = Logger.getLogger(GitlabCreateProjectCommand.class);
-    private static final String RESOURCE = "/api/v3/projects";
+    private static Logger logger = Logger.getLogger(GitlabDeleteGroupCommand.class);
+    private static final String RESOURCE = "/api/v3/groups/";
     private SCMSystemProperties scmSystemProperties;
 
-    GitlabCreateProjectCommand() {
+    GitlabDeleteGroupCommand() {
         scmSystemProperties = PropertyUtil.getSCMSystemProperties();
     }
-	
-	public LocalRepoBean createRepo(String projectKey, String name) throws SCMCallException {
+
+    @Override
+    public void deleteProject (final String projectKey) throws SCMCallException {
         if (projectKey == null || projectKey.isEmpty()) {
-            throw new SCMCallException("createRepo", "No project key provided");
+            throw new SCMCallException("deleteProject", "No project key provided");
         }
-        
         GitlabGetGroupsCommand projectCmd = new GitlabGetGroupsCommand();
         List<GitlabGroupJSONBean> projects = projectCmd.getProjectObjects();
         
-        GitlabGroupJSONBean project = null;
+        Integer projectId = null;
         
-        for ( GitlabGroupJSONBean projectEntry : projects ) {
-        	if ( projectEntry.getName().equals(projectKey) ) {
-        		project = projectEntry;
+        for ( GitlabGroupJSONBean project : projects ) {
+        	if ( project.getName().equals(projectKey) ) {
+        		projectId = project.getIdInt();
         	}
         }
         
-        if ( project == null ) {
-        	throw new SCMCallException("createRepo", "No project found with the key provided");
+        if ( projectId == null ) {
+        	throw new SCMCallException("deleteProject", "No project found with the key provided");
         }
         
-        return createRepo(project, name);
-	}
+        deleteProject(projectId);
+    }
 
-	public LocalRepoBean createRepo(GitlabGroupJSONBean project, String name) throws SCMCallException {
-        String resource = scmSystemProperties.getHost() + RESOURCE;
+    public void deleteProject (int projectId) throws SCMCallException {
+        String resource = scmSystemProperties.getHost() + RESOURCE + projectId;
+        
         String privateToken = scmSystemProperties.getAuthToken();
         Client client = getClient();
         logger.debug("REST call to " + resource);
 
-        GitlabProjectJSONBean projectBean = new GitlabProjectJSONBean();
-        projectBean.setName(name);
-        projectBean.setNamespaceId(project.getId());
-        
-        GitlabProjectJSONBean createdBean = null;
-//        String rtn = null;
         try {
-        	createdBean = client.target(resource)
+        	client.target(resource)
         		.queryParam("private_token", privateToken)
                 .request(MediaType.APPLICATION_JSON)
-                .post(Entity.form(projectBean.toMap()), GitlabProjectJSONBean.class);
+                .delete();
         } catch (ProcessingException pe) {
             logger.error("Could not connect to REST service " + resource, pe);
             throw new SCMCallException("createProject", "Could not connect to REST service:" + pe.getMessage());
         } finally {
             client.close();
         }
-        
-        logger.debug(createdBean.toString());
-        logger.debug(createdBean.asRepoBean());
-        return createdBean.asRepoBean();
-	}
+    }
 }

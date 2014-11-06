@@ -21,16 +21,16 @@ public class GitlabCreateProjectCommandTest {
 	@PrepareForTest(PropertyUtil.class)
 	@Test
 	public void testCreateAndDeleteProject() throws Exception {
-		GitlabCreateProjectCommand createProjectCommand = new GitlabCreateProjectCommand();
+		GitlabCreateGroupCommand createProjectCommand = new GitlabCreateGroupCommand();
 
 		String randomProjectKey = "PRJ" + new Random().nextInt();
 
 		createProjectCommand.createProject(randomProjectKey);
 
-		GitlabGetProjectsCommand getProjectsCommand = new GitlabGetProjectsCommand();
+		GitlabGetGroupsCommand getProjectsCommand = new GitlabGetGroupsCommand();
 		assertTrue(getProjectsCommand.getProjects().contains(randomProjectKey));
 
-		GitlabDeleteProjectCommand deleteProjectCommand = new GitlabDeleteProjectCommand();
+		GitlabDeleteGroupCommand deleteProjectCommand = new GitlabDeleteGroupCommand();
 		deleteProjectCommand.deleteProject(randomProjectKey);
 
 		assertFalse(getProjectsCommand.getProjects().contains(randomProjectKey));
