@@ -139,6 +139,10 @@ public final class PropertyUtil {
         }
         return gitDir;
     }
+    
+    public static SCMSystemProperties getSCMSystemProperties(String type, String username, String password, String hostname, String authToken) {
+        return new SCMSystemProperties(type, username, password, hostname, authToken);
+    }
 
     public static SCMSystemProperties getSCMSystemProperties() {
         String scmType = getProperty(PROP_SCM_TYPE);
@@ -146,7 +150,8 @@ public final class PropertyUtil {
         String scmPassword = getProperty(PROP_SCM_PASSWORD);
         String scmHostname = getProperty(PROP_SCM_HOSTNAME);
         String scmAuthToken = getProperty(PROP_SCM_AUTH_TOKEN);
-        return new SCMSystemProperties(scmType, scmUsername, scmPassword, scmHostname, scmAuthToken);
+        
+        return getSCMSystemProperties(scmType, scmUsername, scmPassword, scmHostname, scmAuthToken);
     }
 
     public static SCMSystemProperties.SCMType getSCMType() {
