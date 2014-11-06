@@ -38,6 +38,7 @@ public final class PropertyUtil {
     private static final String PROP_SCM_TYPE = "scm.type";
     private static final String PROP_SCM_USERNAME = "scm.auth.username";
     private static final String PROP_SCM_PASSWORD = "scm.auth.password";
+    private static final String PROP_SCM_AUTH_TOKEN = "scm.auth.token";
     private static final String PROP_SCM_HOSTNAME = "scm.hostname";
     private static final String PROP_GIT_REPODIR = "fedscm.git.dir";
     private static final String PROP_GATEWAY_SERVICE_URL = "gateway.serviceURL";
@@ -144,7 +145,8 @@ public final class PropertyUtil {
         String scmUsername = getProperty(PROP_SCM_USERNAME);
         String scmPassword = getProperty(PROP_SCM_PASSWORD);
         String scmHostname = getProperty(PROP_SCM_HOSTNAME);
-        return new SCMSystemProperties(scmType, scmUsername, scmPassword, scmHostname);
+        String scmAuthToken = getProperty(PROP_SCM_AUTH_TOKEN);
+        return new SCMSystemProperties(scmType, scmUsername, scmPassword, scmHostname, scmAuthToken);
     }
 
     public static SCMSystemProperties.SCMType getSCMType() {

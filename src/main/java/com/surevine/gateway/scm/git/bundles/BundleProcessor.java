@@ -7,8 +7,8 @@ import com.surevine.gateway.scm.scmclient.SCMCallException;
 
 public abstract class BundleProcessor {
 	
-	private Path bundle;
-	private Map<String, String> metadata;
+	protected Path bundle;
+	protected Map<String, String> metadata;
 	
 	public BundleProcessor() {
 		//
@@ -30,5 +30,5 @@ public abstract class BundleProcessor {
 		return bundle;
 	}
 	
-	public abstract void processBundle() throws SCMCallException;
+	public abstract void processBundle() throws SCMCallException, BundleProcessingException;
 }

@@ -19,6 +19,7 @@ package com.surevine.gateway.scm;
 
 import com.surevine.gateway.scm.gatewayclient.MetadataUtil;
 import com.surevine.gateway.scm.git.GitFacade;
+import com.surevine.gateway.scm.git.bundles.BundleProcessingException;
 import com.surevine.gateway.scm.git.bundles.BundleProcessor;
 import com.surevine.gateway.scm.git.bundles.NoBundleProcessorAvailableException;
 import com.surevine.gateway.scm.git.bundles.NoExistingRepoBundleProcessor;
@@ -110,6 +111,9 @@ public class IncomingProcessorImpl implements IncomingProcessor {
         } catch (NoBundleProcessorAvailableException e) {
             logger.error("No bundle processor available for the determined repository state", e);
             throw new SCMFederatorServiceException("\"Error while unpacking bundle: No processor available");
+		} catch (BundleProcessingException e) {
+			logger.error("Error while processing bundle: "+e.getMessage());
+            throw new SCMFederatorServiceException("\"Error while unpacking bundle: "+e.getMessage());
 		}
     }
 

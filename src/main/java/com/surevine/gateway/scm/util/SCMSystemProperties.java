@@ -45,6 +45,7 @@ public class SCMSystemProperties {
     private String password;
     private String host;
     private String encodedAuth;
+    private String authToken;
 
     SCMSystemProperties(final String type, final String username, final String password, final String host) {
         this.type = SCMType.getType(type);
@@ -52,6 +53,11 @@ public class SCMSystemProperties {
         this.password = password;
         this.host = host;
         this.encodedAuth = "Basic " + Base64.encodeBase64String((username + ":" + password).getBytes());
+    }
+    
+    SCMSystemProperties(final String type, final String username, final String password, final String host, final String authToken) {
+    	this(type, username, password, host);
+    	this.authToken = authToken;
     }
 
     public SCMType getType() {
@@ -72,5 +78,9 @@ public class SCMSystemProperties {
 
     public String getBasicAuthHeader() {
         return encodedAuth;
+    }
+    
+    public String getAuthToken() {
+    	return authToken;
     }
 }

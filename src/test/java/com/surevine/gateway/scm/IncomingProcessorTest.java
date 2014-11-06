@@ -216,14 +216,4 @@ public class IncomingProcessorTest {
 		
 		assertThat(processor, instanceOf(NoExistingRepoBundleProcessor.class));
 	}
-	
-	@Test
-	public void testShouldCreateGitlabGroup() throws Exception {
-		//
-	}
-	
-	@Test
-	public void testShouldCreateGitlabProject() throws Exception {
-		//
-	}
 }

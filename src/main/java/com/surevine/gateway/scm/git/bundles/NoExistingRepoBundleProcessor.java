@@ -21,11 +21,30 @@ public class NoExistingRepoBundleProcessor extends BundleProcessor {
 	public NoExistingRepoBundleProcessor() {
 		super();
 	}
+	
+	public LocalRepoBean getRepoForBundle() {
+		String partnerName = metadata.get(MetadataUtil.KEY_ORGANISATION);
+		String projectKey = metadata.get(MetadataUtil.KEY_PROJECT);
+		String repositorySlug = metadata.get(MetadataUtil.KEY_REPO);
+		
+		String partnerProjectKey = PropertyUtil.getPartnerProjectKeyString(partnerName, projectKey);
+
+        LocalRepoBean repoBean = new LocalRepoBean();
+        repoBean.setProjectKey(partnerProjectKey);
+        repoBean.setSlug(repositorySlug);
+        repoBean.setCloneSourceURI(bundle.toString());
+        
+        return repoBean;
+	}
 
 	@Override
-	public void processBundle() throws SCMCallException {
+	public void processBundle() throws SCMCallException, BundleProcessingException {
 		Map<String, String> metadata = getMetadata();
 		Path bundleDestination = getBundleLocation();
+		
+		if ( metadata == null || bundleDestination == null ){
+			throw new BundleProcessingException("Bundle path and metadata both required");
+		}
 		
         String partnerName = metadata.get(MetadataUtil.KEY_ORGANISATION);
         String projectKey = metadata.get(MetadataUtil.KEY_PROJECT);
@@ -34,25 +53,13 @@ public class NoExistingRepoBundleProcessor extends BundleProcessor {
         String partnerProjectKey = PropertyUtil.getPartnerProjectKeyString(partnerName, projectKey);
         String partnerProjectForkKey = PropertyUtil.getPartnerForkProjectKeyString(partnerName, projectKey);
         
-        LocalRepoBean repoBean = new LocalRepoBean();
-        repoBean.setProjectKey(partnerProjectKey);
-        repoBean.setSlug(repositorySlug);
-        repoBean.setCloneSourceURI(bundleDestination.toString());
+        LocalRepoBean repoBean = getRepoForBundle();
         
         try {
             // create local repository from bundle
             GitFacade.getInstance().clone(repoBean);
-
-            // create project in the SCM system to hold repositories from this partner if it doesn't already exist
-            if (!SCMCommand.getProjects().contains(partnerProjectKey)) {
-                SCMCommand.createProject(partnerProjectKey);
-            }
             
-            // check that a repository doesn't already exists where we are planning on creating one in the SCM system
-            if (SCMCommand.getRepository(partnerProjectKey, repositorySlug) != null) {
-                throw new SCMFederatorServiceException("Repository " + partnerProjectKey + ":"
-                        + repositorySlug + " already exists.");
-            }
+            createProjectAndVerifyRepo(partnerProjectKey, repositorySlug);
             
             // create a new repository in the SCM system to hold the shared source
             LocalRepoBean createdSCMRepository = SCMCommand.createRepo(partnerProjectKey, repositorySlug);
@@ -75,4 +82,18 @@ public class NoExistingRepoBundleProcessor extends BundleProcessor {
             logger.error("Could not import new repository " + repoBean, e);
         }
 	}
+	
+	public void createProjectAndVerifyRepo(String partnerProjectKey, String repositorySlug) throws SCMFederatorServiceException, SCMCallException {
+        // create project in the SCM system to hold repositories from this partner if it doesn't already exist
+        if (!SCMCommand.getProjects().contains(partnerProjectKey)) {
+            SCMCommand.createProject(partnerProjectKey);
+        }
+        
+        // check that a repository doesn't already exists where we are planning on creating one in the SCM system
+        if (SCMCommand.getRepository(partnerProjectKey, repositorySlug) != null) {
+            throw new SCMFederatorServiceException("Repository " + partnerProjectKey + ":"
+                    + repositorySlug + " already exists.");
+        }
+	}
+	
 }
