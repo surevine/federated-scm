@@ -37,7 +37,7 @@ import com.surevine.gateway.scm.scmclient.SCMCommandFactory;
 public class GitlabCommandFactory implements SCMCommandFactory {
     @Override
     public ForkRepoCommand getForkRepoCommandImpl() {
-        return new GitlabForkRepoCommand();
+        return new GitlabForkProjectCommand();
     }
 
     @Override

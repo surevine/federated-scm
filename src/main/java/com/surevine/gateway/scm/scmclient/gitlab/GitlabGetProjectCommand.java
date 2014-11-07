@@ -91,7 +91,7 @@ public class GitlabGetProjectCommand extends AbstractGitlabCommand implements Ge
         
         String privateToken = scmSystemProperties.getAuthToken();
         Client client = getClient();
-        logger.debug("REST call to " + resource);
+        logger.debug("REST GET call to " + resource);
 
         GitlabProjectJSONBean response = null;
         try {

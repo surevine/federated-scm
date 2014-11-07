@@ -24,6 +24,7 @@ public class GitlabProjectJSONBean {
 	private String name;
 	@JsonProperty("namespace_id")
 	private String namespaceId;
+	@JsonProperty("id")
 	private String id;
 	
 	@JsonProperty("namespace")
@@ -37,6 +38,10 @@ public class GitlabProjectJSONBean {
 	
 	@JsonProperty("path")
 	private String path;
+	
+	public String getId() {
+		return id;
+	}
 
 	public void setName(String name) {
 		this.name = name;

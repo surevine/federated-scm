@@ -80,7 +80,7 @@ public class GitlabCreateProjectCommand extends AbstractGitlabCommand implements
         String resource = scmSystemProperties.getHost() + RESOURCE;
         String privateToken = scmSystemProperties.getAuthToken();
         Client client = getClient();
-        logger.debug("REST call to " + resource);
+        logger.debug("REST POST call to " + resource);
 
         GitlabProjectJSONBean projectBean = new GitlabProjectJSONBean();
         projectBean.setName(name);
@@ -100,8 +100,6 @@ public class GitlabCreateProjectCommand extends AbstractGitlabCommand implements
             client.close();
         }
         
-        logger.debug(createdBean.toString());
-        logger.debug(createdBean.asRepoBean());
         return createdBean.asRepoBean();
 	}
 }

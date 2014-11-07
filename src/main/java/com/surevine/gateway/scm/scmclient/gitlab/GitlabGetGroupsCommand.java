@@ -24,6 +24,7 @@ import com.surevine.gateway.scm.util.SCMSystemProperties;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +66,19 @@ public class GitlabGetGroupsCommand extends AbstractGitlabCommand implements Get
         }
                
         return projectKeys;
+    }
+    
+    public Map<String, Integer> getProjectsWithIds() throws SCMCallException {
+    	Map<String, Integer> rtn = new HashMap<String, Integer>();
+    	List<GitlabGroupJSONBean> projects = getProjectObjects();
+        
+        if ( projects.size() > 0 ) {
+        	for ( GitlabGroupJSONBean projectBean : projects ) {
+        		rtn.put(projectBean.getPath(), projectBean.getIdInt());
+	        }
+        }
+               
+        return rtn;
     }
     
     public List<GitlabGroupJSONBean> getProjectObjects() throws SCMCallException {
