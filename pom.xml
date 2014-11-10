@@ -161,6 +161,7 @@
                 <configuration>
                     <excludes>
                         <excludes>**/stash/*</excludes>
+                        <excludes>**/gitlab/*</excludes>
                     </excludes>
                 </configuration>
             </plugin>
@@ -390,6 +391,38 @@
                         <configuration>
                             <includes>
                                 <include>**/stash/*.java</include>
+                            </includes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>gitlab-integration-tests</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+                <property>
+                    <name>gitlab-tests</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.16</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <includes>
+                                <include>**/gitlab/*.java</include>
                             </includes>
                         </configuration>
                     </plugin>
