@@ -70,11 +70,11 @@ public final class PropertyUtil {
     }
     
     public static String getPartnerProjectKeyString(final String partnerName, final String partnerKey) {
-        return getProperty(String.format(PROP_PARTNER_PROJECT_KEY, partnerName, partnerKey));
+        return String.format(getProperty(PROP_PARTNER_PROJECT_KEY), partnerName, partnerKey);
     }
 
     public static String getPartnerForkProjectKeyString(final String partnerName, final String partnerKey) {
-        return getProperty(String.format(PROP_PARTNER_FORK_PROJECT_KEY, partnerName, partnerKey));
+        return String.format(getProperty(PROP_PARTNER_FORK_PROJECT_KEY), partnerName, partnerKey);
     }
     
     public static String getGatewayURL() {

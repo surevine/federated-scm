@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.core.MediaType;
@@ -78,6 +79,11 @@ public class GitlabGetProjectCommand extends AbstractGitlabCommand implements Ge
     	if ( projectKey == null || repositorySlug == null ) {
     		throw new SCMCallException("getRepository", "Project key and repo slug required");
     	}
+    	
+    	if ( projectKey.contains("%s")) {
+    		throw new SCMCallException("getProjects", "Project key has arrived without replacement");
+    	}
+    	
     	// try loading with urlEncode(projectKey/repositorySlug)
     	String urlKey = projectKey+"/"+repositorySlug;
     	
@@ -102,6 +108,8 @@ public class GitlabGetProjectCommand extends AbstractGitlabCommand implements Ge
         } catch (ProcessingException pe) {
             logger.error("Could not connect to REST service " + resource, pe);
             throw new SCMCallException("getProjects", "Could not connect to REST service:" + pe.getMessage());
+        } catch ( NotFoundException e ) {
+        	return null;
         } finally {
             client.close();
         }
