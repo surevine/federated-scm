@@ -39,6 +39,9 @@ public class GitlabProjectJSONBean {
 	@JsonProperty("path")
 	private String path;
 	
+	@JsonProperty("path_with_namespace")
+	private String pathWithNamespace;
+	
 	public String getId() {
 		return id;
 	}
@@ -75,7 +78,7 @@ public class GitlabProjectJSONBean {
 		this.httpUrl = sshUrl;
 	}
 	
-	public void setPathWithNamespace(String path) {
+	public void setPath(String path) {
 		this.path = path;
 	}
 
@@ -98,5 +101,13 @@ public class GitlabProjectJSONBean {
 	
 	public String getNamespacePath() {
 		return (String) namespace.get("path");
+	}
+	
+	public void setPathWithNamespace(String pathWithNamespace) {
+		this.pathWithNamespace = pathWithNamespace;
+	}
+	
+	public String getPathWithNamespace() {
+		return pathWithNamespace;
 	}
 }

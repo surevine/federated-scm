@@ -87,7 +87,6 @@ public class GitlabCreateProjectCommand extends AbstractGitlabCommand implements
         projectBean.setNamespaceId(project.getId());
         
         GitlabProjectJSONBean createdBean = null;
-//        String rtn = null;
         try {
         	createdBean = client.target(resource)
         		.queryParam("private_token", privateToken)

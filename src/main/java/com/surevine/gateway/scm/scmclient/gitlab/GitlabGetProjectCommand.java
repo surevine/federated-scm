@@ -76,45 +76,32 @@ public class GitlabGetProjectCommand extends AbstractGitlabCommand implements Ge
     @Override
     // 					 getProject(String namespace, String projectName) throws SCMCallException {
     public LocalRepoBean getRepository(final String projectKey, final String repositorySlug) throws SCMCallException {
+    	GitlabProjectJSONBean rtn = getProject(projectKey, repositorySlug);
+    	if ( rtn == null ) {
+    		return null;
+    	}
+    	
+    	return rtn.asRepoBean();
+    }
+    
+    public GitlabProjectJSONBean getProject(final String projectKey, final String repositorySlug) throws SCMCallException {
+    	
     	if ( projectKey == null || repositorySlug == null ) {
-    		throw new SCMCallException("getRepository", "Project key and repo slug required");
+    		throw new SCMCallException("getProject", "Project key and repo slug required");
     	}
     	
     	if ( projectKey.contains("%s")) {
-    		throw new SCMCallException("getProjects", "Project key has arrived without replacement");
+    		throw new SCMCallException("getProject", "Project key has arrived without replacement");
     	}
     	
-    	// try loading with urlEncode(projectKey/repositorySlug)
-    	String urlKey = projectKey+"/"+repositorySlug;
+    	String projectPath = projectKey+"/"+repositorySlug;
+    	for ( GitlabProjectJSONBean bean : getAllProjects() ) {
+    		if ( bean.getPathWithNamespace().equals(projectPath) ) {
+    			return bean;
+    		}
+    	}
     	
-        String resource = scmSystemProperties.getHost() + RESOURCE;
-        try {
-        resource += "/"+URLEncoder.encode(urlKey, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            logger.error("Could not connect to REST service " + resource, e);
-            throw new SCMCallException("getRepository", "Could not build URL - UTF-8 encoding is unsupported");
-        }
-        
-        String privateToken = scmSystemProperties.getAuthToken();
-        Client client = getClient();
-        logger.debug("REST GET call to " + resource);
-
-        GitlabProjectJSONBean response = null;
-        try {
-            response = client.target(resource)
-            		.queryParam("private_token", privateToken)
-                    .request(MediaType.APPLICATION_JSON)
-                    .get(GitlabProjectJSONBean.class);
-        } catch (ProcessingException pe) {
-            logger.error("Could not connect to REST service " + resource, pe);
-            throw new SCMCallException("getProjects", "Could not connect to REST service:" + pe.getMessage());
-        } catch ( NotFoundException e ) {
-        	return null;
-        } finally {
-            client.close();
-        }
-        
-        return response.asRepoBean();
+    	return null;
     }
 
     @Override
@@ -141,7 +128,7 @@ public class GitlabGetProjectCommand extends AbstractGitlabCommand implements Ge
         String resource = scmSystemProperties.getHost() + RESOURCE;
         String privateToken = scmSystemProperties.getAuthToken();
         Client client = getClient();
-        logger.debug("REST call to " + resource);
+        logger.debug("REST GET call to " + resource);
 
         PagedProjectResult response = null;
         try {

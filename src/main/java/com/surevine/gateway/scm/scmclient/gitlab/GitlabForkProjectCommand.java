@@ -65,12 +65,15 @@ public class GitlabForkProjectCommand extends AbstractGitlabCommand implements F
         String resource = scmSystemProperties.getHost() + PROJECT_RESOURCE;
         String privateToken = scmSystemProperties.getAuthToken();
         Client client = getClient();
-
-        try {
-            resource += "/fork/"+URLEncoder.encode(groupName+"/"+projectName, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-            throw new SCMCallException("forkRepo", "Could not build POST URL, UTF-8 encoding not supported");
-		}
+        
+        GitlabGetProjectCommand getProject = new GitlabGetProjectCommand();
+        GitlabProjectJSONBean project = getProject.getProject(groupName, projectName);
+        
+        if (project == null) {
+        	throw new SCMCallException("forkProject", "Should have project "+groupName+"/"+projectName+", but don't");
+        }
+        
+        resource += "/fork/"+project.getId();
         
         logger.debug("REST POST call to " + resource);
         
@@ -115,6 +118,5 @@ public class GitlabForkProjectCommand extends AbstractGitlabCommand implements F
         } finally {
             client.close();
         }
-        logger.debug(rtn);
 	}
 }

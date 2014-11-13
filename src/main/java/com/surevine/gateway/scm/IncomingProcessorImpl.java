@@ -22,7 +22,7 @@ import com.surevine.gateway.scm.git.GitFacade;
 import com.surevine.gateway.scm.git.bundles.BundleProcessingException;
 import com.surevine.gateway.scm.git.bundles.BundleProcessor;
 import com.surevine.gateway.scm.git.bundles.NoBundleProcessorAvailableException;
-import com.surevine.gateway.scm.git.bundles.NoExistingRepoBundleProcessor;
+import com.surevine.gateway.scm.git.bundles.PartnerOwnedProjectBundleProcessor;
 import com.surevine.gateway.scm.model.LocalRepoBean;
 import com.surevine.gateway.scm.scmclient.SCMCallException;
 import com.surevine.gateway.scm.scmclient.SCMCommand;
@@ -145,20 +145,39 @@ public class IncomingProcessorImpl implements IncomingProcessor {
         // with this site
         boolean partnerRepoExists = SCMCommand.getRepository(partnerProjectKey, repositorySlug) != null;
         
+        /**
+         * For a given repo: `project/repo` and a partner `partner`
+         */
         if (!forkRepoExists && !mainRepoExists) {
             // newly shared project originating from this partner
-        	rtn = new NoExistingRepoBundleProcessor();
+        	/**
+        	 * Should end up with `partner_project/repo` and `partner_project/repo_sync`
+        	 */
+        	// rtn = new PartnerRepoBundleProcessor();
+        	rtn = new PartnerOwnedProjectBundleProcessor();
         } else if (!forkRepoExists && mainRepoExists) {
             // first update from this partner to a project shared from local SCM system
-//        	rtn = new NewPartnerForkBundleProcessor();
+        	/**
+        	 * Should already have `project/repo`
+        	 * Should end up with `project/repo` and `partner_project/repo`
+        	 */
+        	// rtn = new LocalRepoBundleProcessor();
         	throw new NoBundleProcessorAvailableException();
         } else if (forkRepoExists && partnerRepoExists) {
             // update to a project originating from this partner
-//        	rtn = new UpdatePartnerBundleProcessor();
+        	/**
+        	 * Should already have `partner_project/repo` and `partner_project/repo_sync` 
+        	 * Should end up with `partner_project/repo` and `partner_project/repo_sync`
+        	 */
+        	// rtn = new PartnerRepoBundleProcessor();
         	throw new NoBundleProcessorAvailableException();
         } else if (forkRepoExists && mainRepoExists) {
             // update to a project originating from local SCM system
-//        	rtn = new UpdateLocalBundleProcessor();
+        	/**
+        	 * Should already have `project/repo`
+        	 * Should end up with `project/repo` and `partner_project/repo`
+        	 */
+        	// rtn = new LocalRepoBundleProcessor();
         	throw new NoBundleProcessorAvailableException();
         }
         
