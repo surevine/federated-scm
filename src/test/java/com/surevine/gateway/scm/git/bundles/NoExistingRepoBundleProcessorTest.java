@@ -95,6 +95,8 @@ public class NoExistingRepoBundleProcessorTest {
         repoBean.setProjectKey(partnerProjectKey);
         repoBean.setSlug(repositorySlug);
         repoBean.setCloneSourceURI(bundle.toString());
+        repoBean.setFromGateway(true);
+        repoBean.setSourcePartner(partnerName);
         
         assertEquals(repoBean.toString(), underTest.getRepoForBundle().toString());
 	}

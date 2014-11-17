@@ -100,7 +100,6 @@ public class IncomingProcessorImpl implements IncomingProcessor {
             throw new SCMFederatorServiceException("Internal error when copying bundle: " + ioe.getMessage());
         }
         
-        
         // at this point we have a valid git bundle and some valid metadata so we can start processing
         try {
             BundleProcessor processor = getAppropriateBundleProcessor(bundleDestination, metadata);
@@ -169,8 +168,7 @@ public class IncomingProcessorImpl implements IncomingProcessor {
         	 * Should already have `partner_project/repo` and `partner_project/repo_sync` 
         	 * Should end up with `partner_project/repo` and `partner_project/repo_sync`
         	 */
-        	// rtn = new PartnerRepoBundleProcessor();
-        	throw new NoBundleProcessorAvailableException();
+        	rtn = new PartnerOwnedProjectBundleProcessor();
         } else if (forkRepoExists && mainRepoExists) {
             // update to a project originating from local SCM system
         	/**

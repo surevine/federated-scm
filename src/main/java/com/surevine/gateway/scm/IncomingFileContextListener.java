@@ -76,6 +76,7 @@ public class IncomingFileContextListener implements ServletContextListener {
                                         }
                                     }
                                 }
+                                key.reset();
                             }
                         } catch (InterruptedException | SCMFederatorServiceException ie) {
                             logger.debug("File watcher thread interrupted");

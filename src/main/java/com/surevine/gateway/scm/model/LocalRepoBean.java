@@ -199,6 +199,15 @@ public class LocalRepoBean {
             }
         }
     }
+    
+    public void emptyRepoDirectory() {
+        Path localDirectory = getRepoDirectory();
+        try {
+        	FileUtils.cleanDirectory(localDirectory.toFile());
+        } catch ( IOException e ) {
+            // drop the exception
+        }
+    }
 
     /**
      * Gets the security label for this repo
