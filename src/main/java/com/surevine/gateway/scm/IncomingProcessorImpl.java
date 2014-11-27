@@ -69,16 +69,27 @@ public class IncomingProcessorImpl implements IncomingProcessor {
             logger.debug("Not processing " + archivePath + " as it is not a .tar.gz");
             return;
         }
+        
+        logger.debug(archivePath+" being processed as a potential git bundle");
 
         Path metadataPath = null;
         Collection<Path> extractedFilePaths = null;
         try {
+        	logger.debug("Extracting "+archivePath);
         	extractedFilePaths = extractTarGz(archivePath);
+        	if ( extractedFilePaths == null ) {
+        		logger.debug(archivePath+" did not have the right contents");
+        		return;
+        	}
+        	
             metadataPath = getMetadataFilePath(extractedFilePaths);
+        	logger.debug("Extracted "+archivePath+", metadata path is "+metadataPath);
         } catch ( IOException e ) {
             logger.debug("Error when expanding " + archivePath + ": "+e.getMessage());
             return;
         }
+        
+        logger.debug(archivePath+" expanded, reading metadata");
         
         if (metadataPath == null) {
             logger.debug("Not processing " + archivePath + " as it does not contain a metadata file");
@@ -91,6 +102,8 @@ public class IncomingProcessorImpl implements IncomingProcessor {
             return;
         }
         
+        logger.debug(archivePath+" metadata read");
+        
         Path extractedGitBundle = getGitBundleFilePath(extractedFilePaths);
         
         Path bundleDestination;
@@ -99,6 +112,8 @@ public class IncomingProcessorImpl implements IncomingProcessor {
         } catch ( IOException ioe ) {
             throw new SCMFederatorServiceException("Internal error when copying bundle: " + ioe.getMessage());
         }
+        
+        logger.debug(archivePath+" bundle copied, sending for processing");
         
         // at this point we have a valid git bundle and some valid metadata so we can start processing
         try {
@@ -274,6 +289,7 @@ public class IncomingProcessorImpl implements IncomingProcessor {
     	TarArchiveInputStream archive = openTarGz(archivePath);
     	
     	if (!tarGzHasExpectedContents(archive)) {
+    		logger.debug(archivePath.toString()+" does not have the correct contents - exactly one .bundle and exactly one .metadata.json");
     		return null;
     	}
     	
@@ -281,7 +297,6 @@ public class IncomingProcessorImpl implements IncomingProcessor {
     	// has #reset as a no-op
     	archive.close();
     	archive = openTarGz(archivePath);
-    	
     	
     	Path tmpDir = getTmpExtractionPath(archivePath);
         Files.createDirectories(tmpDir);
@@ -314,10 +329,7 @@ public class IncomingProcessorImpl implements IncomingProcessor {
     }
     
     private Path findFileEndsWith(final Collection<Path> paths, String endsWith) {
-    	Iterator<Path> it = paths.iterator();
-    	Path entry;
-    	while(it.hasNext()) {
-    		entry = it.next();
+    	for ( Path entry : paths ) {
     		String lastPath = entry.getName(entry.getNameCount() - 1).toString();
     		if ( StringUtils.endsWith(lastPath, endsWith) ) {
     			return entry;

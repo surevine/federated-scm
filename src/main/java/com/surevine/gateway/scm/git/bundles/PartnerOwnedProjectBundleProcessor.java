@@ -59,6 +59,7 @@ public class PartnerOwnedProjectBundleProcessor extends BundleProcessor {
 	
 	private LocalRepoBean getForkedRepo() throws SCMCallException {
         if (!SCMCommand.getProjects().contains(partnerProjectForkKey)) {
+        	logger.debug("Creating fork "+partnerProjectForkKey);
             SCMCommand.createProject(partnerProjectForkKey);
             forkWasCreated = true;
         }
@@ -66,7 +67,7 @@ public class PartnerOwnedProjectBundleProcessor extends BundleProcessor {
         LocalRepoBean forkedRepo = SCMCommand.getRepository(partnerProjectForkKey, repositorySlug);
         if ( forkedRepo == null ) {
 	        // fork the new repository to allow updates to pushed into the fork instead of the master copy in future
-	        logger.debug(partnerProjectKey+" "+repositorySlug+" "+partnerProjectForkKey);
+	        logger.debug("Creating forked repo: "+partnerProjectKey+" "+repositorySlug+" "+partnerProjectForkKey);
 	        forkedRepo = SCMCommand.forkRepo(partnerProjectKey, repositorySlug, partnerProjectForkKey);
         }
         
@@ -76,14 +77,20 @@ public class PartnerOwnedProjectBundleProcessor extends BundleProcessor {
 	public LocalRepoBean getPartnerRepo() throws SCMCallException {
         // create project in the SCM system to hold repositories from this partner if it doesn't already exist
         if (!SCMCommand.getProjects().contains(partnerProjectKey)) {
+        	logger.debug("Creating repo "+partnerProjectKey);
             SCMCommand.createProject(partnerProjectKey);
             repoWasCreated = true;
+        } else {
+        	logger.debug(partnerProjectKey+" exists, not creating");
         }
         
         // check that a repository doesn't already exists where we are planning on creating one in the SCM system
         LocalRepoBean partnerRepository = SCMCommand.getRepository(partnerProjectKey, repositorySlug);
         if (partnerRepository == null) {
+        	logger.debug("Creating parter repo "+partnerProjectKey+", "+repositorySlug);
         	partnerRepository = SCMCommand.createRepo(partnerProjectKey, repositorySlug);
+        } else {
+        	logger.debug(partnerRepository+" exists, not creating");
         }
         
         return partnerRepository;
@@ -91,24 +98,19 @@ public class PartnerOwnedProjectBundleProcessor extends BundleProcessor {
 
 	@Override
 	public void processBundle() throws SCMCallException, BundleProcessingException {
-		
-		String something = "nothing";
-		something += "hello";
-		
 		Map<String, String> metadata = getMetadata();
 		Path bundleDestination = getBundleLocation();
 		
 		if ( metadata == null || bundleDestination == null ){
 			throw new BundleProcessingException("Bundle path and metadata both required");
 		}
-		
-		logger.debug(something);
         
         LocalRepoBean repoBean = getRepoForBundle();
         
         try {
         	repoBean.emptyRepoDirectory();
         	
+        	logger.debug("Cloning from localRepoBean");
             // create local repository from bundle
             GitFacade.getInstance().clone(repoBean);
             
@@ -116,25 +118,25 @@ public class PartnerOwnedProjectBundleProcessor extends BundleProcessor {
             LocalRepoBean parterRepo = getPartnerRepo();
             
             if ( repoWasCreated ) {
+            	logger.debug("Repo was created, so pushing");
 	            // push the incoming repository into the new SCM repository
 	            GitFacade.getInstance().addRemote(repoBean, "scm", parterRepo.getCloneSourceURI());
 	            GitFacade.getInstance().push(repoBean, "scm");
+            } else {
+            	logger.debug("Repo not created, not doing anything");
             }
 
             // create project in the SCM system to hold update forks from this partner if it doesn't already exist
             LocalRepoBean forkedRepo = getForkedRepo();
-            
-            if ( !repoWasCreated && !forkWasCreated ) {
-	            // push the incoming repository into the sync repository
-	            GitFacade.getInstance().addRemote(repoBean, "scm", forkedRepo.getCloneSourceURI());
-	            GitFacade.getInstance().push(repoBean, "scm");
-            }
+            logger.debug("Got forked repo");
             
             // update local repository remote to point at the fork instead for its scm remote
-            logger.debug(GitFacade.getInstance().getRemotes(repoBean).toString());
             GitFacade.getInstance().updateRemote(repoBean, "scm", forkedRepo.getCloneSourceURI());
+            logger.debug("Updated remote to "+forkedRepo.getCloneSourceURI().toString());
             
             if ( !repoWasCreated && !forkWasCreated) {
+            	logger.debug("Repo existing, as did fork, so pushing and creating MR");
+	            GitFacade.getInstance().push(repoBean, "scm");
             	createMergeRequest();
             }
             
