@@ -105,15 +105,21 @@ public class IncomingProcessorImpl implements IncomingProcessor {
         logger.debug(archivePath+" metadata read");
         
         Path extractedGitBundle = getGitBundleFilePath(extractedFilePaths);
+
+        logger.debug(archivePath+" bundle copied, sending for processing");
         
+        processIncomingRepository(extractedGitBundle, metadata);
+    }
+    
+    @Override
+    public void processIncomingRepository(final Path extractedGitBundle, final Map<String, String> metadata) throws SCMFederatorServiceException {
+    	
         Path bundleDestination;
         try {
         	bundleDestination = copyBundle(extractedGitBundle, metadata);
         } catch ( IOException ioe ) {
             throw new SCMFederatorServiceException("Internal error when copying bundle: " + ioe.getMessage());
         }
-        
-        logger.debug(archivePath+" bundle copied, sending for processing");
         
         // at this point we have a valid git bundle and some valid metadata so we can start processing
         try {

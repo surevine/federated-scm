@@ -133,6 +133,12 @@
        		<artifactId>powermock-api-mockito</artifactId>
        		<version>${powermock.version}</version>
      	</dependency>
+     	<dependency>
+     		<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-multipart-provider</artifactId>
+			<version>3.0.4.Final</version>
+		</dependency>
+     	
     </dependencies>
 
     <build>

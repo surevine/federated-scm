@@ -79,7 +79,6 @@ public class PartnerOwnedProjectBundleProcessor extends BundleProcessor {
         if (!SCMCommand.getProjects().contains(partnerProjectKey)) {
         	logger.debug("Creating repo "+partnerProjectKey);
             SCMCommand.createProject(partnerProjectKey);
-            repoWasCreated = true;
         } else {
         	logger.debug(partnerProjectKey+" exists, not creating");
         }
@@ -89,6 +88,7 @@ public class PartnerOwnedProjectBundleProcessor extends BundleProcessor {
         if (partnerRepository == null) {
         	logger.debug("Creating parter repo "+partnerProjectKey+", "+repositorySlug);
         	partnerRepository = SCMCommand.createRepo(partnerProjectKey, repositorySlug);
+            repoWasCreated = true;
         } else {
         	logger.debug(partnerRepository+" exists, not creating");
         }

@@ -33,4 +33,12 @@ public interface IncomingProcessor {
      * @throws com.surevine.gateway.scm.service.SCMFederatorServiceException
      */
     void processIncomingRepository(Path archivePath) throws SCMFederatorServiceException;
+    
+    /**
+     * Causes the SCM federator to process an incoming SCM update file
+     * @param bundlePath the path to the received file
+     * @param metadata A map of parsed/extracted metadata, contents of .metadata.json from the gateway bundle
+     * @throws com.surevine.gateway.scm.service.SCMFederatorServiceException
+     */
+    void processIncomingRepository(Path bundlePath, Map<String, String> metadata) throws SCMFederatorServiceException;
 }
