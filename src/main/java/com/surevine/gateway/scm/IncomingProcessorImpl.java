@@ -62,6 +62,7 @@ import java.util.Map;
  */
 public class IncomingProcessorImpl implements IncomingProcessor {
     private Logger logger = Logger.getLogger(IncomingProcessorImpl.class);
+    private List<File> createdFiles = new ArrayList<File>();
 
     @Override
     public void processIncomingRepository(final Path archivePath) throws SCMFederatorServiceException {
@@ -69,6 +70,8 @@ public class IncomingProcessorImpl implements IncomingProcessor {
             logger.debug("Not processing " + archivePath + " as it is not a .tar.gz");
             return;
         }
+        
+        registerCreatedFile(archivePath.toFile());
         
         logger.debug(archivePath+" being processed as a potential git bundle");
 
@@ -134,6 +137,8 @@ public class IncomingProcessorImpl implements IncomingProcessor {
 		} catch (BundleProcessingException e) {
 			logger.error("Error while processing bundle: "+e.getMessage());
             throw new SCMFederatorServiceException("\"Error while unpacking bundle: "+e.getMessage());
+		} finally {
+			clearCreatedFiles();
 		}
     }
 
@@ -226,6 +231,9 @@ public class IncomingProcessorImpl implements IncomingProcessor {
             Files.createDirectories(bundleDestination.getParent());
             Files.copy(extractedGitBundle, bundleDestination);
         }
+        
+        registerCreatedFile(extractedGitBundle.toFile());
+        registerCreatedFile(bundleDestination.toFile());
         
         return bundleDestination;
     }
@@ -321,6 +329,7 @@ public class IncomingProcessorImpl implements IncomingProcessor {
 			}
 			
 			logger.debug("Creating output file "+outputFile.getAbsolutePath());
+			registerCreatedFile(outputFile);
 			
 			final OutputStream outputFileStream = new FileOutputStream(outputFile);
 			IOUtils.copy(archive, outputFileStream);
@@ -330,11 +339,26 @@ public class IncomingProcessorImpl implements IncomingProcessor {
 			entry = archive.getNextTarEntry();
 		}
 	    archive.close();
+	    
 		return extractedFiles;
-    	
     }
     
-    private Path findFileEndsWith(final Collection<Path> paths, String endsWith) {
+    private void registerCreatedFile(File outputFile) {
+    	logger.debug("Registering "+outputFile.getAbsolutePath()+" for eventual cleanup");
+    	createdFiles.add(outputFile);
+	}
+    
+    private void clearCreatedFiles() {
+    	logger.debug("Cleaning up "+createdFiles.size()+" created file(s)");
+    	for ( File file : createdFiles ) {
+    		if ( file.exists() ) {
+    	    	logger.debug("Deleting "+file.getAbsolutePath());
+    			file.delete();
+    		}
+    	}
+    }
+
+	private Path findFileEndsWith(final Collection<Path> paths, String endsWith) {
     	for ( Path entry : paths ) {
     		String lastPath = entry.getName(entry.getNameCount() - 1).toString();
     		if ( StringUtils.endsWith(lastPath, endsWith) ) {
