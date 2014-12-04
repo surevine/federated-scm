@@ -34,12 +34,17 @@ public class PartnerOwnedProjectBundleProcessor extends BundleProcessor {
 	public void setBundleMetadata(Map<String, String> metadata) {
 		super.setBundleMetadata(metadata);
 		
-		partnerName = metadata.get(MetadataUtil.KEY_ORGANISATION);
-		projectKey = metadata.get(MetadataUtil.KEY_PROJECT);
-		repositorySlug = metadata.get(MetadataUtil.KEY_REPO);
+		partnerName = metadata.get(MetadataUtil.KEY_ORGANISATION).toLowerCase();
+		projectKey = metadata.get(MetadataUtil.KEY_PROJECT).toLowerCase();
+		repositorySlug = metadata.get(MetadataUtil.KEY_REPO).toLowerCase();
 		
-		partnerProjectKey = PropertyUtil.getPartnerProjectKeyString(partnerName, projectKey);
-		partnerProjectForkKey = PropertyUtil.getPartnerForkProjectKeyString(partnerName, projectKey);
+		partnerProjectKey = PropertyUtil
+				.getPartnerProjectKeyString(partnerName, projectKey)
+				.toLowerCase();
+		
+		partnerProjectForkKey = PropertyUtil
+				.getPartnerForkProjectKeyString(partnerName, projectKey)
+				.toLowerCase();
 	}
 	
 	public LocalRepoBean getRepoForBundle() {

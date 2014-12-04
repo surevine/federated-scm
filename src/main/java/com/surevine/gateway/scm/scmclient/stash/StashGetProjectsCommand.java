@@ -64,7 +64,7 @@ public class StashGetProjectsCommand extends AbstractStashCommand implements Get
         }
         
         for (StashProjectJSONBean stashProjectJSONBean:response.getValues()) {
-            projectKeys.add(stashProjectJSONBean.getKey());
+            projectKeys.add(stashProjectJSONBean.getKey().toLowerCase());
         }
                
         return projectKeys;

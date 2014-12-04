@@ -61,7 +61,7 @@ public class GitlabGetGroupsCommand extends AbstractGitlabCommand implements Get
         
         if ( projects.size() > 0 ) {
         	for ( GitlabGroupJSONBean projectBean : projects ) {
-	            projectKeys.add(projectBean.getPath());
+	            projectKeys.add(projectBean.getPath().toLowerCase());
 	        }
         }
                
