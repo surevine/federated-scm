@@ -42,12 +42,15 @@ public class StashCreateRepoCommand extends AbstractStashCommand implements Crea
     }
 
     @Override
-    public LocalRepoBean createRepo(final String projectKey, final String name) throws SCMCallException {
+    public LocalRepoBean createRepo(String projectKey, String name) throws SCMCallException {
         if (projectKey == null || projectKey.isEmpty()) {
             throw new SCMCallException("createRepo", "No project key was provided");
         } else if (name == null || name.isEmpty()) {
             throw new SCMCallException("createRepo", "No repo name was provided");
         }
+        
+        projectKey = projectKey.toUpperCase();
+        name = name.toLowerCase();
 
         Client client = getClient();
         String resource = scmSystemProperties.getHost() + String.format(RESOURCE, projectKey);

@@ -67,6 +67,8 @@ public class GitlabCreateGroupCommand extends AbstractGitlabCommand implements C
         String privateToken = scmSystemProperties.getAuthToken();
         Client client = getClient();
         logger.debug("REST POST call to " + resource);
+        
+        projectKey = projectKey.toLowerCase();
 
         GitlabGroupJSONBean projectBean = new GitlabGroupJSONBean();
         projectBean.setName(projectKey);

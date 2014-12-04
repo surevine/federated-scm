@@ -40,10 +40,12 @@ public class StashDeleteProjectCommand extends AbstractStashCommand implements D
     }
 
     @Override
-    public void deleteProject(final String projectKey) throws SCMCallException {
+    public void deleteProject(String projectKey) throws SCMCallException {
         if (projectKey == null || projectKey.isEmpty()) {
             throw new SCMCallException("deleteProject", "No project key provided");
         }
+        
+        projectKey = projectKey.toUpperCase();
 
         Client client = getClient();
         String resource = scmSystemProperties.getHost() + RESOURCE + projectKey;

@@ -52,10 +52,11 @@ public class GitlabDeleteGroupCommand extends AbstractGitlabCommand implements D
     }
 
     @Override
-    public void deleteProject (final String projectKey) throws SCMCallException {
+    public void deleteProject (String projectKey) throws SCMCallException {
         if (projectKey == null || projectKey.isEmpty()) {
             throw new SCMCallException("deleteProject", "No project key provided");
         }
+        projectKey = projectKey.toLowerCase();
         GitlabGetGroupsCommand projectCmd = new GitlabGetGroupsCommand();
         List<GitlabGroupJSONBean> projects = projectCmd.getProjectObjects();
         

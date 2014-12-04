@@ -95,6 +95,7 @@ public class GitlabGetProjectCommand extends AbstractGitlabCommand implements Ge
     	}
     	
     	String projectPath = projectKey+"/"+repositorySlug;
+    	projectPath = projectPath.toLowerCase();
     	for ( GitlabProjectJSONBean bean : getAllProjects() ) {
     		if ( bean.getPathWithNamespace().equals(projectPath) ) {
     			return bean;

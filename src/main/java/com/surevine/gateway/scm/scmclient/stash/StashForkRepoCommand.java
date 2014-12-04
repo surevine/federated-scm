@@ -44,8 +44,12 @@ public class StashForkRepoCommand extends AbstractStashCommand implements ForkRe
     }
     
     @Override
-    public LocalRepoBean forkRepo(final String projectKey, final String repositorySlug, final String forkProjectKey)
+    public LocalRepoBean forkRepo(String projectKey, String repositorySlug, String forkProjectKey)
             throws SCMCallException {
+    	projectKey = projectKey.toUpperCase();
+        repositorySlug = repositorySlug.toLowerCase();
+        forkProjectKey = forkProjectKey.toUpperCase();
+        
         HashMap<String, String> projectMap = new HashMap<String, String>();
         projectMap.put("key", forkProjectKey);
         JSONObject payload = new JSONObject().put("project", projectMap);

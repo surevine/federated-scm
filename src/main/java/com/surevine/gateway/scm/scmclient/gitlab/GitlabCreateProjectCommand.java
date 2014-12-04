@@ -58,6 +58,9 @@ public class GitlabCreateProjectCommand extends AbstractGitlabCommand implements
             throw new SCMCallException("createRepo", "No project key provided");
         }
         
+        projectKey = projectKey.toLowerCase();
+        name = name.toLowerCase();
+        
         GitlabGetGroupsCommand projectCmd = new GitlabGetGroupsCommand();
         List<GitlabGroupJSONBean> projects = projectCmd.getProjectObjects();
         
@@ -77,6 +80,7 @@ public class GitlabCreateProjectCommand extends AbstractGitlabCommand implements
 	}
 
 	public LocalRepoBean createRepo(GitlabGroupJSONBean project, String name) throws SCMCallException {
+		name = name.toLowerCase();
         String resource = scmSystemProperties.getHost() + RESOURCE;
         String privateToken = scmSystemProperties.getAuthToken();
         Client client = getClient();

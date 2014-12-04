@@ -37,6 +37,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.xml.ws.WebServiceException;
 
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
@@ -154,6 +155,11 @@ public class RestFederatorService {
     	
     	// Process the file first
 		List<InputPart> inputParts = uploadForm.get(BUNDLE_FORM_FIELD);
+		if ( inputParts == null ) {
+			throw new WebApplicationException(Response.status(HttpURLConnection.HTTP_BAD_REQUEST)
+                .entity("Received input was invalid")
+                .type(MediaType.TEXT_PLAIN).build());
+		}
     	java.nio.file.Path file;
  
 		for (InputPart inputPart : inputParts) {

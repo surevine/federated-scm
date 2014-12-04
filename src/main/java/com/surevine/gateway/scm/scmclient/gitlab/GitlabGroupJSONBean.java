@@ -61,7 +61,7 @@ public class GitlabGroupJSONBean {
     }
 
     void setName(final String name) {
-        this.name = name;
+        this.name = name.toLowerCase();
     }
     
     public String getPath() {

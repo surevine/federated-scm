@@ -40,12 +40,15 @@ public class StashDeleteRepoCommand extends AbstractStashCommand implements Dele
     }
 
     @Override
-    public void deleteRepo(final String projectKey, final String repoSlug) throws SCMCallException {
+    public void deleteRepo(String projectKey, String repoSlug) throws SCMCallException {
         if (projectKey == null || projectKey.isEmpty()) {
             throw new SCMCallException("deleteProject", "No project key provided");
         } else if (repoSlug == null || repoSlug.isEmpty()) {
             throw new SCMCallException("deleteProject", "No repo slug provided");
         }
+        
+        projectKey = projectKey.toUpperCase();
+        repoSlug = repoSlug.toLowerCase();
 
         Client client = getClient();
         String resource = scmSystemProperties.getHost() + String.format(RESOURCE, projectKey, repoSlug);

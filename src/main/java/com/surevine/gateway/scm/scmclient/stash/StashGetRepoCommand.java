@@ -49,7 +49,8 @@ public class StashGetRepoCommand extends AbstractStashCommand implements GetRepo
     }
     
     @Override
-    public Collection<LocalRepoBean> getRepositories(final String projectKey) throws SCMCallException {
+    public Collection<LocalRepoBean> getRepositories(String projectKey) throws SCMCallException {
+    	projectKey = projectKey.toUpperCase();
         HashSet<LocalRepoBean> repositories = new HashSet<LocalRepoBean>();
         
         Client client = getClient();
@@ -77,7 +78,9 @@ public class StashGetRepoCommand extends AbstractStashCommand implements GetRepo
     }
 
     @Override
-    public LocalRepoBean getRepository(final String projectKey, final String repositorySlug) throws SCMCallException {
+    public LocalRepoBean getRepository(String projectKey, String repositorySlug) throws SCMCallException {
+    	projectKey = projectKey.toUpperCase();
+    	repositorySlug = repositorySlug.toLowerCase();
         Client client = getClient();
         String resource = scmSystemProperties.getHost() + String.format(SINGLE_RESOURCE, projectKey, repositorySlug);
         logger.debug("REST call to " + resource);

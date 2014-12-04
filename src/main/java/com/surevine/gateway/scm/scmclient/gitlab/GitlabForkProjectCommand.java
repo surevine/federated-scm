@@ -49,7 +49,7 @@ public class GitlabForkProjectCommand extends AbstractGitlabCommand implements F
 	}
 	
     @Override
-    public LocalRepoBean forkRepo(final String projectKey, final String repositorySlug, final String forkProjectKey) throws SCMCallException {
+    public LocalRepoBean forkRepo(String projectKey, String repositorySlug, String forkProjectKey) throws SCMCallException {
         // This is going to need to be a two-stage process:
         // 1. Fork the project using POST /projects/fork/:id
         GitlabProjectJSONBean forked = forkProject(projectKey, repositorySlug);
@@ -94,8 +94,8 @@ public class GitlabForkProjectCommand extends AbstractGitlabCommand implements F
     }
     
     private void changeProjectOwnership(GitlabProjectJSONBean forked, String forkGroupName) throws SCMCallException {
-    	logger.debug(forkGroupName);
     	GitlabGetGroupsCommand getGroup = new GitlabGetGroupsCommand();
+    	forkGroupName = forkGroupName.toLowerCase();
     	Integer groupId = getGroup.getProjectsWithIds().get(forkGroupName);
     	
         String resource = scmSystemProperties.getHost() + GROUP_RESOURCE;
