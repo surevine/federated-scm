@@ -17,6 +17,7 @@
 */
 package com.surevine.gateway.scm.scmclient.stash;
 
+import com.surevine.gateway.scm.scmclient.CreateMergeRequestCommand;
 import com.surevine.gateway.scm.scmclient.CreateProjectCommand;
 import com.surevine.gateway.scm.scmclient.CreateRepoCommand;
 import com.surevine.gateway.scm.scmclient.DeleteProjectCommand;
@@ -65,4 +66,9 @@ public class StashCommandFactory implements SCMCommandFactory {
     public DeleteRepoCommand getDeleteRepoCommandImpl() {
         return new StashDeleteRepoCommand();
     }
+
+	@Override
+	public CreateMergeRequestCommand getMergeRequestCommandImpl() {
+		return null;
+	}
 }

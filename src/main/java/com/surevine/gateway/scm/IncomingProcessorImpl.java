@@ -174,11 +174,11 @@ public class IncomingProcessorImpl implements IncomingProcessor {
          * For a given repo: `project/repo` and a partner `partner`
          */
         if (!forkRepoExists && !mainRepoExists) {
-            // newly shared project originating from this partner
         	/**
+        	 * Newly shared project originating from a partner
+        	 * 
         	 * Should end up with `partner_project/repo` and `partner_project/repo_sync`
         	 */
-        	// rtn = new PartnerRepoBundleProcessor();
         	rtn = new PartnerOwnedProjectBundleProcessor();
         } else if (!forkRepoExists && mainRepoExists) {
             // first update from this partner to a project shared from local SCM system
@@ -189,8 +189,9 @@ public class IncomingProcessorImpl implements IncomingProcessor {
         	// rtn = new LocalRepoBundleProcessor();
         	throw new NoBundleProcessorAvailableException();
         } else if (forkRepoExists && partnerRepoExists) {
-            // update to a project originating from this partner
         	/**
+        	 * Update to a project originating from a partner
+        	 * 
         	 * Should already have `partner_project/repo` and `partner_project/repo_sync` 
         	 * Should end up with `partner_project/repo` and `partner_project/repo_sync`
         	 */

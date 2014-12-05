@@ -17,6 +17,7 @@
 */
 package com.surevine.gateway.scm.scmclient.gitlab;
 
+import com.surevine.gateway.scm.scmclient.CreateMergeRequestCommand;
 import com.surevine.gateway.scm.scmclient.CreateProjectCommand;
 import com.surevine.gateway.scm.scmclient.CreateRepoCommand;
 import com.surevine.gateway.scm.scmclient.DeleteProjectCommand;
@@ -69,4 +70,9 @@ public class GitlabCommandFactory implements SCMCommandFactory {
     public DeleteRepoCommand getDeleteRepoCommandImpl() {
         return new GitlabDeleteProjectCommand();
     }
+
+	@Override
+	public CreateMergeRequestCommand getMergeRequestCommandImpl() {
+		return new GitlabCreateMergeRequestCommand();
+	}
 }

@@ -120,12 +120,13 @@ public class PartnerOwnedProjectBundleProcessor extends BundleProcessor {
             GitFacade.getInstance().clone(repoBean);
             
             // create a new repository in the SCM system to hold the shared source
-            LocalRepoBean parterRepo = getPartnerRepo();
+            LocalRepoBean partnerRepo = getPartnerRepo();
+
+            GitFacade.getInstance().addRemote(repoBean, "scm", partnerRepo.getCloneSourceURI());
             
             if ( repoWasCreated ) {
             	logger.debug("Repo was created, so pushing");
 	            // push the incoming repository into the new SCM repository
-	            GitFacade.getInstance().addRemote(repoBean, "scm", parterRepo.getCloneSourceURI());
 	            GitFacade.getInstance().push(repoBean, "scm");
             } else {
             	logger.debug("Repo not created, not doing anything");
@@ -140,19 +141,13 @@ public class PartnerOwnedProjectBundleProcessor extends BundleProcessor {
             logger.debug("Updated remote to "+forkedRepo.getCloneSourceURI().toString());
             
             if ( !repoWasCreated && !forkWasCreated) {
-            	logger.debug("Repo existing, as did fork, so pushing and creating MR");
+            	logger.debug("Repo existing, as did fork, so pushing to fork and creating MR");
 	            GitFacade.getInstance().push(repoBean, "scm");
-            	createMergeRequest();
+	    		SCMCommand.createMergeRequest(forkedRepo, partnerRepo);
             }
             
         } catch (Exception e) {
             logger.error("Could not import new repository " + repoBean, e);
         }
-	}
-	
-	private void createMergeRequest() {
-		// look to see if tips of partnerRepo and partnerForkRepo are different
-		
-		// if they are, create a MR between the two
 	}
 }

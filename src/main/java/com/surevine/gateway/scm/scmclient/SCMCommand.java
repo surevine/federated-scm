@@ -138,6 +138,16 @@ public abstract class SCMCommand {
     }
 
     /**
+     * Deletes a repository from a project
+     * @param LocalRepoBean The source repository
+     * @param LocalRepoBean The destination repository
+     * @throws SCMCallException
+     */
+    public static void createMergeRequest(final LocalRepoBean source, final LocalRepoBean destination) throws SCMCallException {
+    	getCommandFactory().getMergeRequestCommandImpl().createMergeRequest(source, destination);
+    }
+
+    /**
      * Set a command factory implementation ignoring the configured type in system properties.
      * It's mostly for injecting a mock for testing but may be useful elsewhere.
      * @param commandFactory the command factory implementation.

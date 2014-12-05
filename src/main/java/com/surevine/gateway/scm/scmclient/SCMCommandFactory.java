@@ -64,4 +64,10 @@ public interface SCMCommandFactory {
      * @return SCM system specific DeleteRepoCommand implementation
      */
     DeleteRepoCommand getDeleteRepoCommandImpl();
+
+    /**
+     * SCM system specific MergeRequestCommand implementation.
+     * @return SCM system specific MergeRequestCommand implementation
+     */
+	CreateMergeRequestCommand getMergeRequestCommandImpl();
 }

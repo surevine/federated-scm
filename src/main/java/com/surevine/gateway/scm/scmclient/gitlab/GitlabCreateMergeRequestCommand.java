@@ -11,11 +11,12 @@ import org.apache.log4j.Logger;
 import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
 
 import com.surevine.gateway.scm.model.LocalRepoBean;
+import com.surevine.gateway.scm.scmclient.CreateMergeRequestCommand;
 import com.surevine.gateway.scm.scmclient.SCMCallException;
 import com.surevine.gateway.scm.util.PropertyUtil;
 import com.surevine.gateway.scm.util.SCMSystemProperties;
 
-public class GitlabCreateMergeRequestCommand extends AbstractGitlabCommand {
+public class GitlabCreateMergeRequestCommand extends AbstractGitlabCommand implements CreateMergeRequestCommand {
 
     private static Logger logger = Logger.getLogger(GitlabCreateMergeRequestCommand.class);
     private static final String PROJECT_RESOURCE = "/api/v3/projects";
@@ -47,16 +48,17 @@ public class GitlabCreateMergeRequestCommand extends AbstractGitlabCommand {
 //        #   assignee_id              - Assignee user ID
 //        #   title (required)         - Title of MR
         
-        resource += destProject.getId()+"/merge_requests";
+        resource += "/"+srcProject.getId()+"/merge_requests";
         
         MultivaluedMap<String, String> payload = new MultivaluedMapImpl<String, String>();
         payload.putSingle("id", srcProject.getId());
         payload.putSingle("source_branch", "master");
         payload.putSingle("target_branch", "master");
-        payload.putSingle("target_project", destProject.getId());
+        payload.putSingle("target_project_id", destProject.getId());
         payload.putSingle("title", "Automated Gateway merge request");
         
         logger.debug("REST POST call to " + resource);
+        logger.debug(payload.toString());
         
         String rtn = null;
         try {
