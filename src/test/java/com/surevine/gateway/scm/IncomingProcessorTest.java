@@ -13,7 +13,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.surevine.gateway.scm.gatewayclient.MetadataUtil;
 import com.surevine.gateway.scm.git.bundles.BundleProcessor;
-import com.surevine.gateway.scm.git.bundles.PartnerOwnedProjectBundleProcessor;
+import com.surevine.gateway.scm.git.bundles.PartnerProjectBundleProcessor;
 import com.surevine.gateway.scm.scmclient.SCMCommand;
 import com.surevine.gateway.scm.util.PropertyUtil;
 
@@ -214,6 +214,6 @@ public class IncomingProcessorTest {
 		
 		BundleProcessor processor = underTest.getAppropriateBundleProcessor(getGoodBundle(), metadata);
 		
-		assertThat(processor, instanceOf(PartnerOwnedProjectBundleProcessor.class));
+		assertThat(processor, instanceOf(PartnerProjectBundleProcessor.class));
 	}
 }

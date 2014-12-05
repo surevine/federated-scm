@@ -22,7 +22,7 @@ import com.surevine.gateway.scm.git.GitFacade;
 import com.surevine.gateway.scm.git.bundles.BundleProcessingException;
 import com.surevine.gateway.scm.git.bundles.BundleProcessor;
 import com.surevine.gateway.scm.git.bundles.NoBundleProcessorAvailableException;
-import com.surevine.gateway.scm.git.bundles.PartnerOwnedProjectBundleProcessor;
+import com.surevine.gateway.scm.git.bundles.PartnerProjectBundleProcessor;
 import com.surevine.gateway.scm.model.LocalRepoBean;
 import com.surevine.gateway.scm.scmclient.SCMCallException;
 import com.surevine.gateway.scm.scmclient.SCMCommand;
@@ -173,37 +173,10 @@ public class IncomingProcessorImpl implements IncomingProcessor {
         /**
          * For a given repo: `project/repo` and a partner `partner`
          */
-        if (!forkRepoExists && !mainRepoExists) {
-        	/**
-        	 * Newly shared project originating from a partner
-        	 * 
-        	 * Should end up with `partner_project/repo` and `partner_project/repo_sync`
-        	 */
-        	rtn = new PartnerOwnedProjectBundleProcessor();
-        } else if (!forkRepoExists && mainRepoExists) {
-            // first update from this partner to a project shared from local SCM system
-        	/**
-        	 * Should already have `project/repo`
-        	 * Should end up with `project/repo` and `partner_project/repo`
-        	 */
-        	// rtn = new LocalRepoBundleProcessor();
-        	throw new NoBundleProcessorAvailableException();
-        } else if (forkRepoExists && partnerRepoExists) {
-        	/**
-        	 * Update to a project originating from a partner
-        	 * 
-        	 * Should already have `partner_project/repo` and `partner_project/repo_sync` 
-        	 * Should end up with `partner_project/repo` and `partner_project/repo_sync`
-        	 */
-        	rtn = new PartnerOwnedProjectBundleProcessor();
-        } else if (forkRepoExists && mainRepoExists) {
-            // update to a project originating from local SCM system
-        	/**
-        	 * Should already have `project/repo`
-        	 * Should end up with `project/repo` and `partner_project/repo`
-        	 */
-        	// rtn = new LocalRepoBundleProcessor();
-        	throw new NoBundleProcessorAvailableException();
+        if ( !mainRepoExists ) {
+        	rtn = new PartnerProjectBundleProcessor();
+        } else {
+        	rtn = new LocalProjectBundleProcessor();
         }
         
         rtn.setBundleLocation(bundleDestination);

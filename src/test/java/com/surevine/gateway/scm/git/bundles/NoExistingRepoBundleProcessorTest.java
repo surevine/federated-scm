@@ -43,7 +43,7 @@ public class NoExistingRepoBundleProcessorTest {
 	
 	@Test()
 	public void testShouldThrowExceptionIfNothingProvided() {
-		PartnerOwnedProjectBundleProcessor underTest = new PartnerOwnedProjectBundleProcessor();
+		PartnerProjectBundleProcessor underTest = new PartnerProjectBundleProcessor();
 		
 		try {
 			underTest.processBundle();
@@ -54,7 +54,7 @@ public class NoExistingRepoBundleProcessorTest {
 	
 	@Test
 	public void testShouldThrowExceptionIfNoBundleProvided() {
-		PartnerOwnedProjectBundleProcessor underTest = new PartnerOwnedProjectBundleProcessor();
+		PartnerProjectBundleProcessor underTest = new PartnerProjectBundleProcessor();
 		underTest.setBundleMetadata(getTestMetadata());
 		
 		try {
@@ -66,7 +66,7 @@ public class NoExistingRepoBundleProcessorTest {
 	
 	@Test
 	public void testShouldThrowExceptionIfNoMetadataProvided() {
-		PartnerOwnedProjectBundleProcessor underTest = new PartnerOwnedProjectBundleProcessor();
+		PartnerProjectBundleProcessor underTest = new PartnerProjectBundleProcessor();
 		underTest.setBundleLocation(getGoodBundle());
 		
 		try {
@@ -81,7 +81,7 @@ public class NoExistingRepoBundleProcessorTest {
 		Map<String, String> metadata = getTestMetadata();
 		Path bundle = getGoodBundle();
 		
-		PartnerOwnedProjectBundleProcessor underTest = new PartnerOwnedProjectBundleProcessor();
+		PartnerProjectBundleProcessor underTest = new PartnerProjectBundleProcessor();
 		underTest.setBundleLocation(bundle);
 		underTest.setBundleMetadata(metadata);
 		
@@ -105,7 +105,7 @@ public class NoExistingRepoBundleProcessorTest {
 	public void testShouldCreateProjectIfNoPartnerProject() throws Exception {
 		Map<String, String> metadata = getTestMetadata();
 		
-		PartnerOwnedProjectBundleProcessor underTest = new PartnerOwnedProjectBundleProcessor();
+		PartnerProjectBundleProcessor underTest = new PartnerProjectBundleProcessor();
 		underTest.setBundleLocation(getGoodBundle());
 		underTest.setBundleMetadata(metadata);
 
@@ -119,7 +119,7 @@ public class NoExistingRepoBundleProcessorTest {
         Mockito.when(SCMCommand.getProjects()).thenReturn(new ArrayList<String>());
 		Mockito.when(SCMCommand.getRepository(projectKey, repositorySlug)).thenReturn(new LocalRepoBean());
 		
-		underTest.getPartnerRepo();
+		underTest.getPrimaryRepo();
 		
 		PowerMockito.verifyStatic(Mockito.times(1));
 		SCMCommand.createProject(partnerProjectKey);
@@ -129,7 +129,7 @@ public class NoExistingRepoBundleProcessorTest {
 	public void testShouldThrowExceptionIfRepoExists() throws Exception {
 		Map<String, String> metadata = getTestMetadata();
 		
-		PartnerOwnedProjectBundleProcessor underTest = new PartnerOwnedProjectBundleProcessor();
+		PartnerProjectBundleProcessor underTest = new PartnerProjectBundleProcessor();
 		underTest.setBundleLocation(getGoodBundle());
 		underTest.setBundleMetadata(metadata);
 
@@ -142,7 +142,7 @@ public class NoExistingRepoBundleProcessorTest {
 		Mockito.when(SCMCommand.getRepository(projectKey, repositorySlug)).thenReturn(new LocalRepoBean());
 		
 		try {
-			underTest.getPartnerRepo();
+			underTest.getPrimaryRepo();
 		} catch ( Exception e ) {
 			assertThat(e, instanceOf(SCMFederatorServiceException.class));
 		}
