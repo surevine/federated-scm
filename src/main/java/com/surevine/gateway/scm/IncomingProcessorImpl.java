@@ -21,6 +21,7 @@ import com.surevine.gateway.scm.gatewayclient.MetadataUtil;
 import com.surevine.gateway.scm.git.GitFacade;
 import com.surevine.gateway.scm.git.bundles.BundleProcessingException;
 import com.surevine.gateway.scm.git.bundles.BundleProcessor;
+import com.surevine.gateway.scm.git.bundles.LocalProjectBundleProcessor;
 import com.surevine.gateway.scm.git.bundles.NoBundleProcessorAvailableException;
 import com.surevine.gateway.scm.git.bundles.PartnerProjectBundleProcessor;
 import com.surevine.gateway.scm.model.LocalRepoBean;
@@ -150,25 +151,15 @@ public class IncomingProcessorImpl implements IncomingProcessor {
     // and simplify all this.
     public BundleProcessor getAppropriateBundleProcessor(Path bundleDestination, Map<String, String> metadata) throws SCMCallException, NoBundleProcessorAvailableException {
         
-        String partnerName = metadata.get(MetadataUtil.KEY_ORGANISATION);
         String projectKey = metadata.get(MetadataUtil.KEY_PROJECT);
         String repositorySlug = metadata.get(MetadataUtil.KEY_REPO);
-        String partnerProjectKey = PropertyUtil.getPartnerProjectKeyString(partnerName, projectKey);
-        String partnerProjectForkKey = PropertyUtil.getPartnerForkProjectKeyString(partnerName, projectKey);
         
         BundleProcessor rtn = null;
-        
-        // a fork exists which means we have received a bundle for this project from this partner previously
-        boolean forkRepoExists = SCMCommand.getRepository(partnerProjectForkKey, repositorySlug) != null;
         
         // a main repo exists in the raw project which means this is an incoming change to a repository sourced
         // from this site as the project key should be passed back as-is
         // TODO: What if they have a project and repo with the same name? Do we need metadata to identify the master repository?
         boolean mainRepoExists = SCMCommand.getRepository(projectKey, repositorySlug) != null;
-        
-        // a partner repo exists which means the received file is an update to a project originating from them but previously shared
-        // with this site
-        boolean partnerRepoExists = SCMCommand.getRepository(partnerProjectKey, repositorySlug) != null;
         
         /**
          * For a given repo: `project/repo` and a partner `partner`
