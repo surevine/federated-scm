@@ -69,6 +69,6 @@ public class StashCommandFactory implements SCMCommandFactory {
 
 	@Override
 	public CreateMergeRequestCommand getMergeRequestCommandImpl() {
-		return null;
+		return new StashCreateMergeRequestCommand();
 	}
 }

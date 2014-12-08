@@ -24,9 +24,11 @@ public abstract class BundleProcessor {
 	protected String repositorySlug;
 	protected String partnerProjectKey;
 	protected String partnerProjectForkKey;
+	protected String localForkKey;
 	
 	protected boolean repoWasCreated = false;
 	protected boolean forkWasCreated = false;
+
 	
 	public BundleProcessor() {
 		//
@@ -58,6 +60,8 @@ public abstract class BundleProcessor {
 		partnerProjectForkKey = PropertyUtil
 				.getPartnerForkProjectKeyString(partnerName, projectKey)
 				.toLowerCase();
+		
+		localForkKey = projectKey+"_sync";
 	}
 	
 	public LocalRepoBean getRepoForBundle() {
@@ -112,12 +116,10 @@ public abstract class BundleProcessor {
             GitFacade.getInstance().updateRemote(repoBean, "scm", forkedRepo.getCloneSourceURI());
             logger.debug("Updated remote to "+forkedRepo.getCloneSourceURI().toString());
             
-            if (!repoWasCreated && !forkWasCreated) {
-            	logger.debug("Repo existing, as did fork, so pushing to fork and creating MR");
-	            GitFacade.getInstance().push(repoBean, "scm");
-	    		SCMCommand.createMergeRequest(forkedRepo, primaryRepo);
-            }
-            
+        	logger.debug("Pushing to fork and creating MR");
+            GitFacade.getInstance().push(repoBean, "scm");
+    		SCMCommand.createMergeRequest(forkedRepo, primaryRepo);
+    		
         } catch (Exception e) {
             logger.error("Could not import new repository " + repoBean, e);
         }
