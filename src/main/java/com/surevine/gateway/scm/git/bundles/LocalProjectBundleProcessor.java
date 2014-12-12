@@ -16,6 +16,7 @@ public class LocalProjectBundleProcessor extends BundleProcessor {
 	}
 	
 	public LocalRepoBean getForkedRepo() throws SCMCallException {
+		logger.debug("Checking if "+partnerProjectForkKey+" exists");
         if (!SCMCommand.getProjects().contains(partnerProjectForkKey)) {
         	logger.debug("Creating fork "+partnerProjectForkKey);
             SCMCommand.createProject(partnerProjectForkKey);

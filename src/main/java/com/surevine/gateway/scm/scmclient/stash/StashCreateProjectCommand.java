@@ -42,11 +42,10 @@ public class StashCreateProjectCommand extends AbstractStashCommand implements C
 
     @Override
     public void createProject(String projectKey) throws SCMCallException {
-    	projectKey = projectKey.toUpperCase();
         Client client = getClient();
         StashProjectJSONBean projectBean = new StashProjectJSONBean();
         projectBean.setName(projectKey);
-        projectBean.setKey(projectKey);
+        projectBean.setKey(projectKey.toUpperCase());
         projectBean.setDescription(projectKey);
 
         String resource = scmSystemProperties.getHost() + RESOURCE;

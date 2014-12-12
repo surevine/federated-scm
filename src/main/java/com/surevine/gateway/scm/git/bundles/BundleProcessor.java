@@ -24,7 +24,6 @@ public abstract class BundleProcessor {
 	protected String repositorySlug;
 	protected String partnerProjectKey;
 	protected String partnerProjectForkKey;
-	protected String localForkKey;
 	
 	protected boolean repoWasCreated = false;
 	protected boolean forkWasCreated = false;
@@ -48,10 +47,13 @@ public abstract class BundleProcessor {
 	
 	public void setBundleMetadata(Map<String, String> metadata) {
 		this.metadata = metadata;
+		logger.debug(metadata.toString());
 		
 		partnerName = metadata.get(MetadataUtil.KEY_ORGANISATION).toLowerCase();
 		projectKey = metadata.get(MetadataUtil.KEY_PROJECT).toLowerCase();
 		repositorySlug = metadata.get(MetadataUtil.KEY_REPO).toLowerCase();
+		
+		logger.debug(partnerName+" - "+projectKey+" - "+repositorySlug);
 		
 		partnerProjectKey = PropertyUtil
 				.getPartnerProjectKeyString(partnerName, projectKey)
@@ -60,8 +62,6 @@ public abstract class BundleProcessor {
 		partnerProjectForkKey = PropertyUtil
 				.getPartnerForkProjectKeyString(partnerName, projectKey)
 				.toLowerCase();
-		
-		localForkKey = projectKey+"_sync";
 	}
 	
 	public LocalRepoBean getRepoForBundle() {
@@ -98,6 +98,7 @@ public abstract class BundleProcessor {
             // create a new repository in the SCM system to hold the shared source
             LocalRepoBean primaryRepo = getPrimaryRepo();
 
+            logger.debug("Adding `scm` remote at "+primaryRepo.getCloneSourceURI());
             GitFacade.getInstance().addRemote(repoBean, "scm", primaryRepo.getCloneSourceURI());
             
             if ( repoWasCreated ) {
@@ -111,7 +112,8 @@ public abstract class BundleProcessor {
             // create project in the SCM system to hold update forks from this partner if it doesn't already exist
             LocalRepoBean forkedRepo = getForkedRepo();
             logger.debug("Got forked repo");
-            
+
+            logger.debug("Updating `scm` remote to "+forkedRepo.getCloneSourceURI());
             // update local repository remote to point at the fork instead for its scm remote
             GitFacade.getInstance().updateRemote(repoBean, "scm", forkedRepo.getCloneSourceURI());
             logger.debug("Updated remote to "+forkedRepo.getCloneSourceURI().toString());

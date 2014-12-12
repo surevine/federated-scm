@@ -22,6 +22,8 @@ import com.surevine.gateway.scm.service.SCMFederatorServiceException;
 import com.surevine.gateway.scm.util.InputValidator;
 import com.surevine.gateway.scm.util.PropertyUtil;
 import com.surevine.gateway.scm.util.StringUtil;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -77,11 +79,17 @@ public final class MetadataUtil {
     
     private static Map<String, String> generateMetadata(final LocalRepoBean repoBean, final String distributionType) {
         Map<String, String> metadataMap = new HashMap<>();
+        String organisationName = PropertyUtil.getOrgName().toLowerCase();
+        String projectKey = repoBean.getProjectKey().toLowerCase();
+    	projectKey = projectKey.replace(organisationName+"_", "");
+        
+        logger.debug(organisationName+", "+projectKey+", "+repoBean.getProjectKey()+", "+PropertyUtil.getOrgName());
+        
         metadataMap.put(KEY_SOURCE, VALUE_SOURCE);
-        metadataMap.put(KEY_PROJECT, repoBean.getProjectKey());
+        metadataMap.put(KEY_PROJECT, projectKey);
         metadataMap.put(KEY_REPO, repoBean.getSlug());
         metadataMap.put(KEY_DISTRIBUTION_TYPE, distributionType);
-        metadataMap.put(KEY_ORGANISATION, PropertyUtil.getOrgName());
+        metadataMap.put(KEY_ORGANISATION, organisationName);
         metadataMap.put(KEY_CLASSIFICATION, repoBean.getRepoSecurityLabel().getClassification());
         metadataMap.put(KEY_DECORATOR, repoBean.getRepoSecurityLabel().getDecorator());
         metadataMap.put(KEY_GROUPS, repoBean.getRepoSecurityLabel().getGroupString());

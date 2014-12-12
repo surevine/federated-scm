@@ -57,7 +57,8 @@ public class GitlabForkProjectCommand extends AbstractGitlabCommand implements F
         // 2. Transfer the ownership of the project to the group using POST  /groups/:id/projects/:project_id
         changeProjectOwnership(forked, forkProjectKey);
         
-        return forked.asRepoBean();
+        GitlabGetProjectCommand getProject = new GitlabGetProjectCommand();
+        return getProject.getProject(forkProjectKey, repositorySlug).asRepoBean();
     }
 
     // Fork the project using POST /projects/fork/:id
