@@ -53,21 +53,21 @@ public final class MetadataUtil {
     public static final String KEY_CLASSIFICATION = "classification";
     public static final String KEY_DECORATOR = "decorator";
     public static final String KEY_GROUPS = "groups";
-    
+
     private MetadataUtil() {
         // no-op
     }
-        
+
     public static Map<String, String> getSinglePartnerMetadata(final LocalRepoBean repoBean, final String partner) {
         Map<String, String> metadataMap = generateMetadata(repoBean, VALUE_SINGLE_DISTRIBUTION);
         metadataMap.put(KEY_LIMIT_DISTRIBUTION_TO, partner);
         return metadataMap;
     }
-    
+
     public static Map<String, String> getMetadata(final LocalRepoBean repoBean) {
         return generateMetadata(repoBean, VALUE_DISTRIBUTE_TO_ALL_PERMITTED);
     }
-    
+
     public static String deriveFilenameFromMetadata(final Map<String, String> metadata) {
         StringBuilder sb = new StringBuilder();
         sb.append("scm_")
@@ -76,15 +76,15 @@ public final class MetadataUtil {
                 .append("_").append(metadata.get(MetadataUtil.KEY_REPO));
         return StringUtil.cleanStringForFilePath(sb.toString()) + ".tar.gz";
     }
-    
+
     private static Map<String, String> generateMetadata(final LocalRepoBean repoBean, final String distributionType) {
         Map<String, String> metadataMap = new HashMap<>();
         String organisationName = PropertyUtil.getOrgName().toLowerCase();
         String projectKey = repoBean.getProjectKey().toLowerCase();
     	projectKey = projectKey.replace(organisationName+"_", "");
-        
+
         logger.debug(organisationName+", "+projectKey+", "+repoBean.getProjectKey()+", "+PropertyUtil.getOrgName());
-        
+
         metadataMap.put(KEY_SOURCE, VALUE_SOURCE);
         metadataMap.put(KEY_PROJECT, projectKey);
         metadataMap.put(KEY_REPO, repoBean.getSlug());
@@ -93,7 +93,7 @@ public final class MetadataUtil {
         metadataMap.put(KEY_CLASSIFICATION, repoBean.getRepoSecurityLabel().getClassification());
         metadataMap.put(KEY_DECORATOR, repoBean.getRepoSecurityLabel().getDecorator());
         metadataMap.put(KEY_GROUPS, repoBean.getRepoSecurityLabel().getGroupString());
-        
+
         String filename = deriveFilenameFromMetadata(metadataMap);
         metadataMap.put(KEY_FILENAME, filename);
         return metadataMap;
@@ -130,11 +130,11 @@ public final class MetadataUtil {
                 && metadata.containsKey(KEY_DECORATOR)
                 && metadata.containsKey(KEY_GROUPS)
                 && metadata.containsKey(KEY_FILENAME);
-        
+
         boolean valuesAreValid = InputValidator.partnerNameIsValid(metadata.get(MetadataUtil.KEY_ORGANISATION))
                 && InputValidator.projectKeyIsValid(metadata.get(MetadataUtil.KEY_PROJECT))
                 && InputValidator.repoSlugIsValid(metadata.get(MetadataUtil.KEY_REPO));
-        
+
         return containsRequiredKeys && valuesAreValid;
     }
 }
