@@ -58,7 +58,7 @@ import java.util.Map;
 
 /**
  * @author nick.leaver@surevine.com
- * 
+ *
  * TODO: Framework code only
  */
 public class IncomingProcessorImpl implements IncomingProcessor {
@@ -71,9 +71,9 @@ public class IncomingProcessorImpl implements IncomingProcessor {
             logger.debug("Not processing " + archivePath + " as it is not a .tar.gz");
             return;
         }
-        
+
         registerCreatedFile(archivePath.toFile());
-        
+
         logger.debug(archivePath+" being processed as a potential git bundle");
 
         Path metadataPath = null;
@@ -85,46 +85,49 @@ public class IncomingProcessorImpl implements IncomingProcessor {
         		logger.debug(archivePath+" did not have the right contents");
         		return;
         	}
-        	
+
             metadataPath = getMetadataFilePath(extractedFilePaths);
         	logger.debug("Extracted "+archivePath+", metadata path is "+metadataPath);
         } catch ( IOException e ) {
             logger.debug("Error when expanding " + archivePath + ": "+e.getMessage());
             return;
         }
-        
+
         logger.debug(archivePath+" expanded, reading metadata");
-        
+
         if (metadataPath == null) {
             logger.debug("Not processing " + archivePath + " as it does not contain a metadata file");
             return;
         }
-        
+
         Map<String, String> metadata = MetadataUtil.getMetadataFromPath(metadataPath);
         if (!MetadataUtil.metadataValid(metadata)) {
             logger.debug("Not processing " + archivePath + " as it does not contain all of the required metadata");
             return;
         }
-        
+
         logger.debug(archivePath+" metadata read");
-        
+
         Path extractedGitBundle = getGitBundleFilePath(extractedFilePaths);
 
         logger.debug(archivePath+" bundle copied, sending for processing");
-        
+
         processIncomingRepository(extractedGitBundle, metadata);
     }
-    
+
     @Override
     public void processIncomingRepository(final Path extractedGitBundle, final Map<String, String> metadata) throws SCMFederatorServiceException {
-    	
+
+    	// Strip local organisation name from projectKey to prevent duplicate repository from being created
+    	sanitiseProjectKey(metadata);
+
         Path bundleDestination;
         try {
         	bundleDestination = copyBundle(extractedGitBundle, metadata);
         } catch ( IOException ioe ) {
             throw new SCMFederatorServiceException("Internal error when copying bundle: " + ioe.getMessage());
         }
-        
+
         // at this point we have a valid git bundle and some valid metadata so we can start processing
         try {
             BundleProcessor processor = getAppropriateBundleProcessor(bundleDestination, metadata);
@@ -150,17 +153,17 @@ public class IncomingProcessorImpl implements IncomingProcessor {
     // just these SCM repo locations and is pretty brittle. Probably need to add metadata to describe these things
     // and simplify all this.
     public BundleProcessor getAppropriateBundleProcessor(Path bundleDestination, Map<String, String> metadata) throws SCMCallException, NoBundleProcessorAvailableException {
-        
+
         String projectKey = metadata.get(MetadataUtil.KEY_PROJECT);
         String repositorySlug = metadata.get(MetadataUtil.KEY_REPO);
-        
+
         BundleProcessor rtn = null;
-        
+
         // a main repo exists in the raw project which means this is an incoming change to a repository sourced
         // from this site as the project key should be passed back as-is
         // TODO: What if they have a project and repo with the same name? Do we need metadata to identify the master repository?
         boolean mainRepoExists = SCMCommand.getRepository(projectKey, repositorySlug) != null;
-        
+
         /**
          * For a given repo: `project/repo` and a partner `partner`
          */
@@ -169,24 +172,24 @@ public class IncomingProcessorImpl implements IncomingProcessor {
         } else {
         	rtn = new LocalProjectBundleProcessor();
         }
-        
+
         rtn.setBundleLocation(bundleDestination);
         rtn.setBundleMetadata(metadata);
-        
+
         return rtn;
     }
-    
+
     public Path buildBundleDestination(Map<String, String> metadata) {
         String partnerName = metadata.get(MetadataUtil.KEY_ORGANISATION);
         String projectKey = metadata.get(MetadataUtil.KEY_PROJECT);
         String repositorySlug = metadata.get(MetadataUtil.KEY_REPO);
-        
+
         return Paths.get(PropertyUtil.getRemoteBundleDir(),
                 partnerName, projectKey, repositorySlug + ".bundle");
     }
-    
+
     public Path copyBundle(Path extractedGitBundle, Map<String, String> metadata ) throws IOException {
-        
+
         Path bundleDestination = buildBundleDestination(metadata);
 
         logger.debug("Copying received bundle from temporary location " + extractedGitBundle + " to " + bundleDestination);
@@ -196,16 +199,16 @@ public class IncomingProcessorImpl implements IncomingProcessor {
             Files.createDirectories(bundleDestination.getParent());
             Files.copy(extractedGitBundle, bundleDestination);
         }
-        
+
         registerCreatedFile(extractedGitBundle.toFile());
         registerCreatedFile(bundleDestination.toFile());
-        
+
         return bundleDestination;
     }
-    
+
     public TarArchiveInputStream openTarGz(final Path archivePath) throws FileNotFoundException, IOException {
     	File file = archivePath.toFile();
-    	
+
     	return new TarArchiveInputStream(
     		new GzipCompressorInputStream(
     			new BufferedInputStream(
@@ -224,7 +227,7 @@ public class IncomingProcessorImpl implements IncomingProcessor {
     		return false;
     	}
     }
-    
+
     public boolean tarGzHasExpectedContents(final Path archivePath) {
     	try {
 	    	TarArchiveInputStream archive = openTarGz(archivePath);
@@ -238,9 +241,9 @@ public class IncomingProcessorImpl implements IncomingProcessor {
     	Boolean hasMetaData = false;
     	Boolean hasBundle = false;
     	Integer fileCount = 0;
-    	
+
         TarArchiveEntry entry = null;
-        
+
         try {
 	    	while ( (entry = archive.getNextTarEntry()) != null ) {
 	    		if ( entry.getName().equals(".metadata.json") ) {
@@ -256,7 +259,7 @@ public class IncomingProcessorImpl implements IncomingProcessor {
         	return false;
         }
     }
-    
+
     public Path getTmpExtractionPath(Path archivePath) {
     	String tmpDir = PropertyUtil.getTempDir();
     	String filename = archivePath.getName(archivePath.getNameCount() - 1).toString();
@@ -266,23 +269,23 @@ public class IncomingProcessorImpl implements IncomingProcessor {
 
     public Collection<Path> extractTarGz(final Path archivePath) throws FileNotFoundException, IOException {
     	TarArchiveInputStream archive = openTarGz(archivePath);
-    	
+
     	if (!tarGzHasExpectedContents(archive)) {
     		logger.debug(archivePath.toString()+" does not have the correct contents - exactly one .bundle and exactly one .metadata.json");
     		return null;
     	}
-    	
+
     	// We need to re-open the archive as the Iterator implementation
     	// has #reset as a no-op
     	archive.close();
     	archive = openTarGz(archivePath);
-    	
+
     	Path tmpDir = getTmpExtractionPath(archivePath);
         Files.createDirectories(tmpDir);
-    	
+
     	Collection<Path> extractedFiles = new ArrayList<Path>();
 		logger.debug("Extracting "+archivePath.toString()+" to "+tmpDir);
-		
+
 		File tmp = tmpDir.toFile();
 
 		TarArchiveEntry entry = archive.getNextTarEntry();
@@ -292,27 +295,27 @@ public class IncomingProcessorImpl implements IncomingProcessor {
 			if (!entry.isFile()) {
 				continue;
 			}
-			
+
 			logger.debug("Creating output file "+outputFile.getAbsolutePath());
 			registerCreatedFile(outputFile);
-			
+
 			final OutputStream outputFileStream = new FileOutputStream(outputFile);
 			IOUtils.copy(archive, outputFileStream);
 			outputFileStream.close();
-			
+
 			extractedFiles.add(outputFile.toPath());
 			entry = archive.getNextTarEntry();
 		}
 	    archive.close();
-	    
+
 		return extractedFiles;
     }
-    
+
     private void registerCreatedFile(File outputFile) {
     	logger.debug("Registering "+outputFile.getAbsolutePath()+" for eventual cleanup");
     	createdFiles.add(outputFile);
 	}
-    
+
     private void clearCreatedFiles() {
     	logger.debug("Cleaning up "+createdFiles.size()+" created file(s)");
     	for ( File file : createdFiles ) {
@@ -332,6 +335,24 @@ public class IncomingProcessorImpl implements IncomingProcessor {
     	}
         return null;
     }
+
+	/**
+	 * Strips local organisation name from projectKey of incoming repo (if present).
+	 * Prevents duplicates of local repo's being produced following shares back
+	 * from partner.
+	 *
+	 * @param metadata Sanitised metadata
+	 */
+	private void sanitiseProjectKey(final Map<String, String> metadata) {
+		String organisationName = PropertyUtil.getOrgName().toLowerCase();
+    	String projectKey = metadata.get(MetadataUtil.KEY_PROJECT);
+
+    	// If local organisation name is present it indicates that the project is mastered locally
+    	// (and this is a share back from partner)
+    	if(projectKey.startsWith(organisationName+"_")) {
+    		metadata.put(MetadataUtil.KEY_PROJECT, projectKey.replace(organisationName+"_", ""));
+    	}
+	}
 
     public Path getMetadataFilePath(final Collection<Path> paths) {
     	return findFileEndsWith(paths, ".metadata.json");
