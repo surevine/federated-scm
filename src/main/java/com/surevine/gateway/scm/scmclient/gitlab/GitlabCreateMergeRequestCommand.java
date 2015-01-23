@@ -74,7 +74,10 @@ public class GitlabCreateMergeRequestCommand extends AbstractGitlabCommand imple
         	logger.error("Exception when connecting to rest service: "+e.getMessage());
         	Response response = e.getResponse();
         	if ( response != null ) {
-	        	logger.error(response.getEntity().toString());
+        		logger.error(response.toString());
+        		if ( response.getEntity() != null ) {
+        			logger.error(response.getEntity().toString());
+        		}
 	        	StatusType t = response.getStatusInfo();
 	        	if ( t != null ) {
 	        		logger.error(t.getStatusCode()+": "+t.getReasonPhrase());
