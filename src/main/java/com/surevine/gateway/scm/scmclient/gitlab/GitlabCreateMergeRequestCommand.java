@@ -73,8 +73,13 @@ public class GitlabCreateMergeRequestCommand extends AbstractGitlabCommand imple
         } catch (ClientErrorException e ) {
         	logger.error("Exception when connecting to rest service: "+e.getMessage());
         	Response response = e.getResponse();
-        	StatusType t = response.getStatusInfo();
-        	logger.error(t.getStatusCode()+": "+t.getReasonPhrase()+", "+response.getEntity().toString());
+        	if ( response != null ) {
+	        	logger.error(response.getEntity().toString());
+	        	StatusType t = response.getStatusInfo();
+	        	if ( t != null ) {
+	        		logger.error(t.getStatusCode()+": "+t.getReasonPhrase());
+	        	}
+        	}
             throw new SCMCallException("createProject", "Error received from REST service: " + e.getMessage());
         } catch (ProcessingException pe) {
             logger.error("Could not connect to REST service " + resource, pe);
