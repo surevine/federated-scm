@@ -64,7 +64,12 @@ public class GatewayClient {
     
     public static GatewayClient getInstance() {
         if (instance == null) {
-            boolean useMock = PropertyUtil.getBooleanProperty(USE_MOCK_KEY);
+            boolean useMock;
+            try {
+            	useMock = PropertyUtil.getBooleanProperty(USE_MOCK_KEY);
+            } catch ( Exception e ) {
+            	useMock = false;
+            }
             instance = (useMock) ? new MockFileWriterGatewayClient() : new GatewayClient();
         }
         return instance;
