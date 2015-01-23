@@ -9,8 +9,8 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 public abstract class AbstractGitlabCommand {
     public Client getClient() {
         return new ResteasyClientBuilder()
-                .establishConnectionTimeout(6, TimeUnit.SECONDS)
-                .socketTimeout(6, TimeUnit.SECONDS)
+                .establishConnectionTimeout(30, TimeUnit.SECONDS)
+                .socketTimeout(30, TimeUnit.SECONDS)
                 .build();
     }
 }
