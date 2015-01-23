@@ -1,11 +1,14 @@
 package com.surevine.gateway.scm.scmclient.gitlab;
 
+import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.StatusType;
 
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
@@ -67,9 +70,15 @@ public class GitlabCreateMergeRequestCommand extends AbstractGitlabCommand imple
                 .request(MediaType.APPLICATION_JSON)
                 .post(Entity.form(payload), String.class);
         	logger.debug(rtn);
+        } catch (ClientErrorException e ) {
+        	logger.error("Exception when connecting to rest service: "+e.getMessage());
+        	Response response = e.getResponse();
+        	StatusType t = response.getStatusInfo();
+        	logger.error(t.getStatusCode()+": "+t.getReasonPhrase()+", "+response.getEntity().toString());
+            throw new SCMCallException("createProject", "Error received from REST service: " + e.getMessage());
         } catch (ProcessingException pe) {
             logger.error("Could not connect to REST service " + resource, pe);
-            throw new SCMCallException("createProject", "Could not connect to REST service:" + pe.getMessage());
+            throw new SCMCallException("createProject", "Could not connect to REST service: " + pe.getMessage());
         } finally {
             client.close();
         }
