@@ -37,16 +37,16 @@ public class GatewayClient {
     private static Logger logger = Logger.getLogger(GatewayClient.class);
     private static final String USE_MOCK_KEY = "fedscm.mock.gatewayclient";
     private static GatewayClient instance;
-    
+
     protected GatewayClient() {
         // no-op
     }
-    
+
     public void sendToGateway(final GatewayPackage gatewayPackage) {
         String gatewayServiceURL = PropertyUtil.getGatewayURL();
         Client client = new ResteasyClientBuilder()
-                .establishConnectionTimeout(6, TimeUnit.SECONDS)
-                .socketTimeout(6, TimeUnit.SECONDS)
+                .establishConnectionTimeout(30, TimeUnit.SECONDS)
+                .socketTimeout(30, TimeUnit.SECONDS)
                 .build();
         try {
             String filename = gatewayPackage.getMetadata().get(MetadataUtil.KEY_FILENAME);
@@ -61,7 +61,7 @@ public class GatewayClient {
             logger.error("Failed to send " + gatewayPackage.getArchive().toString() + " to the gateway", e);
         }
     }
-    
+
     public static GatewayClient getInstance() {
         if (instance == null) {
             boolean useMock;
