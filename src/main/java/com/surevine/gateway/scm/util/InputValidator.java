@@ -21,19 +21,22 @@ package com.surevine.gateway.scm.util;
  * @author nick.leaver@surevine.com
  */
 public final class InputValidator {
+
+	private static final String VALID_CHARACTERS = "[^-_a-zA-Z0-9]+$";
+
     private InputValidator() {
         // no-op
     }
-    
+
     public static boolean partnerNameIsValid(final String partnerName) {
-        return partnerName != null && StringUtil.isClean(partnerName);
+    	return partnerName != null && partnerName.matches(VALID_CHARACTERS);
     }
-    
+
     public static boolean projectKeyIsValid(final String projectKey) {
-        return projectKey != null && StringUtil.isClean(projectKey);
+        return projectKey != null && projectKey.matches(VALID_CHARACTERS);
     }
-    
+
     public static boolean repoSlugIsValid(final String repoSlug) {
-        return repoSlug != null && StringUtil.isClean(repoSlug);
+        return repoSlug != null && repoSlug.matches(VALID_CHARACTERS);
     }
 }
