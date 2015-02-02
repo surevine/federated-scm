@@ -22,8 +22,7 @@ package com.surevine.gateway.scm.util;
  */
 public final class InputValidator {
 
-	private static final String VALID_CHARACTERS = "[^-_a-zA-Z0-9]+$";
-
+	private static final String VALID_CHARACTERS = "^[-_a-zA-Z0-9]+$";
     private InputValidator() {
         // no-op
     }
