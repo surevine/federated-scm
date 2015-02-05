@@ -19,6 +19,7 @@ package com.surevine.gateway.scm.model;
 
 import com.surevine.gateway.scm.util.PropertyUtil;
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -30,6 +31,9 @@ import java.nio.file.Paths;
  * @author nick.leaver@surevine.com
  */
 public class LocalRepoBean {
+
+	private Logger logger = Logger.getLogger(LocalRepoBean.class);
+
     private String slug;
     private boolean fromGateway;
     private String sourcePartner;
@@ -88,7 +92,7 @@ public class LocalRepoBean {
 
     /**
      * Gets the repository slug for this repository. Should relate to the SCM system slug of this repository,
-     * which should be the same on both the partner and local SCM systems. Forms part of the filesystem location of 
+     * which should be the same on both the partner and local SCM systems. Forms part of the filesystem location of
      * the local repo.
      * @return the repository slug
      */
@@ -122,7 +126,7 @@ public class LocalRepoBean {
 
     /**
      * Gets the project / group / namespace key for this repository. Should relate to the SCM system project of this repository,
-     * which should be the same on both the partner and local SCM systems. Forms part of the filesystem location of 
+     * which should be the same on both the partner and local SCM systems. Forms part of the filesystem location of
      * the local repo.
      * @return the projecty / group / namespace of this repository
      */
@@ -151,7 +155,7 @@ public class LocalRepoBean {
      * Gets the root directory of this repoBean.
      * Repos related to repositories cloned from the local SCM are stored at ${fedscm.git.dir}/local_scm/{projectKey}/{slug}
      * Repos related to repositories cloned from incoming partner bundles are stored at ${fedscm.git.dir}/from_gateway/{sourcePartner}/{projectKey}/{slug}
-     * 
+     *
      * @return a Path to the correct location for this repo's working directory - may or may not exist
      */
     public Path getRepoDirectory() {
@@ -167,7 +171,7 @@ public class LocalRepoBean {
         try {
             Files.createDirectories(repoDir);
         } catch (IOException e) {
-            e.printStackTrace();
+        	logger.error("Failed to create repository directory.", e);
         }
         return repoDir;
     }
@@ -185,7 +189,7 @@ public class LocalRepoBean {
     }
 
     /**
-     * Attempts to delete the local repository directory. Fails silently as there's nothing the system can do to 
+     * Attempts to delete the local repository directory. Fails silently as there's nothing the system can do to
      * recover and not deleting the directory shouldn't affect the usual operation of the system.
      */
     public void deleteRepoDirectory() {
@@ -199,7 +203,7 @@ public class LocalRepoBean {
             }
         }
     }
-    
+
     public void emptyRepoDirectory() {
         Path localDirectory = getRepoDirectory();
         try {
@@ -227,7 +231,7 @@ public class LocalRepoBean {
 
     @Override
     public String toString() {
-        return "RepoBean{" 
+        return "RepoBean{"
                 + "slug='" + slug + '\''
                 + ", fromGateway=" + fromGateway
                 + ", sourcePartner='" + sourcePartner + '\''
