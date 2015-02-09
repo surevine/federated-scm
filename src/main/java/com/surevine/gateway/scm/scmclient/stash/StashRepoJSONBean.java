@@ -107,7 +107,7 @@ public class StashRepoJSONBean {
         public void setHref(final String href) {
             this.href = href;
         }
-    };
+    }
 
     public LocalRepoBean asRepoBean() {
         LocalRepoBean repoBean = new LocalRepoBean();

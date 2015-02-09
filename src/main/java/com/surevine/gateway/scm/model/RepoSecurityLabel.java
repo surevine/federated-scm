@@ -29,17 +29,17 @@ public class RepoSecurityLabel {
     private String classification;
     private String decorator;
     private List<String> groups;
-    
+
     public RepoSecurityLabel() {
         this.groups = new ArrayList<>();
-        
+
         // TODO: Remove this once a proper security label service is in place
         this.classification = "no_classification";
         this.decorator = "no_decorator";
         this.groups.add("group1");
         this.groups.add("group2");
     }
-    
+
     public RepoSecurityLabel(final String classification, final String decorator, final String ... groups) {
         this.groups = new ArrayList<>();
         this.classification = classification;
@@ -78,17 +78,17 @@ public class RepoSecurityLabel {
     public String getGroupString() {
         String groupString = null;
         if (groups != null && groups.size() > 0) {
-            StringBuffer groupBuffer = new StringBuffer();
+        	StringBuilder groupBuilder = new StringBuilder();
             Iterator<String> groupIterator = groups.iterator();
             if (groupIterator.hasNext()) {
-                groupBuffer.append(groupIterator.next());
+                groupBuilder.append(groupIterator.next());
             }
-            
+
             while (groupIterator.hasNext()) {
-                groupBuffer.append(",").append(groupIterator.next());
+                groupBuilder.append(",").append(groupIterator.next());
             }
-            
-            groupString = groupBuffer.toString();
+
+            groupString = groupBuilder.toString();
         }
         return groupString;
     }

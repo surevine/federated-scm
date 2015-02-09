@@ -161,8 +161,7 @@ public class LocalRepoBean {
     public Path getRepoDirectory() {
         Path repoDir;
         if (isFromGateway()) {
-            String sourcePartner = getSourcePartner();
-            repoDir = Paths.get(PropertyUtil.getGitDir(), "from_gateway", sourcePartner,
+            repoDir = Paths.get(PropertyUtil.getGitDir(), "from_gateway", getSourcePartner(),
                     projectKey, getSlug());
         } else {
             repoDir = Paths.get(PropertyUtil.getGitDir(), "local_scm", projectKey, getSlug());

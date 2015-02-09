@@ -22,8 +22,11 @@ package com.surevine.gateway.scm.service;
  * @author nick.leaver@surevine.com
  */
 public class SCMFederatorServiceException extends Exception {
-    private String userMessage;
-    
+
+	private static final long serialVersionUID = 1L;
+
+	private final String userMessage;
+
     public SCMFederatorServiceException(final String userMessage) {
         this.userMessage = userMessage;
     }

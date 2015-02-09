@@ -30,7 +30,9 @@ import java.util.Map;
  * @author nick.leaver@surevine.com
  */
 public abstract class SCMCommand {
+
     private static SCMCommandFactory commandFactoryImplementation;
+
     private static SCMCommandFactory getCommandFactory() {
         if (commandFactoryImplementation == null) {
             switch (PropertyUtil.getSCMType()) {
