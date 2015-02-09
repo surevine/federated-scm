@@ -50,38 +50,40 @@ public class StashMergeRequestJSONBean {
 
 }
 
-//{
-//    "title": "Talking Nerdy",
-//    "description": "It’s a kludge, but put the tuple from the database in the cache.",
-//    "state": "OPEN",
-//    "open": true,
-//    "closed": false,
-//    "fromRef": {
-//        "id": "refs/heads/feature-ABC-123",
-//        "repository": {
-//            "slug": "my-repo",
-//            "name": null,
-//            "project": {
-//                "key": "PRJ"
-//            }
-//        }
-//    },
-//    "toRef": {
-//        "id": "refs/heads/master",
-//        "repository": {
-//            "slug": "my-repo",
-//            "name": null,
-//            "project": {
-//                "key": "PRJ"
-//            }
-//        }
-//    },
-//    "locked": false,
-//    "reviewers": [
-//        {
-//            "user": {
-//                "name": "charlie"
-//            }
-//        }
-//    ]
-//}
+/*
+{
+    "title": "Talking Nerdy",
+    "description": "It’s a kludge, but put the tuple from the database in the cache.",
+    "state": "OPEN",
+    "open": true,
+    "closed": false,
+    "fromRef": {
+        "id": "refs/heads/feature-ABC-123",
+        "repository": {
+            "slug": "my-repo",
+            "name": null,
+            "project": {
+                "key": "PRJ"
+            }
+        }
+    },
+    "toRef": {
+        "id": "refs/heads/master",
+        "repository": {
+            "slug": "my-repo",
+            "name": null,
+            "project": {
+                "key": "PRJ"
+            }
+        }
+    },
+    "locked": false,
+    "reviewers": [
+        {
+            "user": {
+                "name": "charlie"
+            }
+        }
+    ]
+}
+*/
