@@ -39,7 +39,7 @@ import java.util.Map;
  * @author nick.leaver@surevine.com
  */
 public class StashGetRepoCommand extends AbstractStashCommand implements GetRepoCommand {
-    private static Logger logger = Logger.getLogger(StashGetRepoCommand.class);
+    private static final Logger LOGGER = Logger.getLogger(StashGetRepoCommand.class);
     private static final String ALL_RESOURCE = "/rest/api/1.0/projects/%s/repos?limit=10000";
     private static final String SINGLE_RESOURCE = "/rest/api/1.0/projects/%s/repos/%s";
     private SCMSystemProperties scmSystemProperties;
@@ -47,15 +47,15 @@ public class StashGetRepoCommand extends AbstractStashCommand implements GetRepo
     StashGetRepoCommand() {
         scmSystemProperties = PropertyUtil.getSCMSystemProperties();
     }
-    
+
     @Override
     public Collection<LocalRepoBean> getRepositories(String projectKey) throws SCMCallException {
     	projectKey = projectKey.toUpperCase();
         HashSet<LocalRepoBean> repositories = new HashSet<LocalRepoBean>();
-        
+
         Client client = getClient();
         String resource = scmSystemProperties.getHost() + String.format(ALL_RESOURCE, projectKey);
-        logger.debug("REST call to " + resource);
+        LOGGER.debug("REST call to " + resource);
 
         PagedRepoResult response = null;
         try {
@@ -64,16 +64,16 @@ public class StashGetRepoCommand extends AbstractStashCommand implements GetRepo
                     .header("Authorization", scmSystemProperties.getBasicAuthHeader())
                     .get(PagedRepoResult.class);
         } catch (ProcessingException pe) {
-            logger.error("Could not connect to REST service " + resource, pe);
+            LOGGER.error("Could not connect to REST service " + resource, pe);
             throw new SCMCallException("createRepo", "Could not connect to REST service:" + pe.getMessage());
         } finally {
             client.close();
         }
-        
+
         for (StashRepoJSONBean stashRepoJSONBean:response.getValues()) {
             repositories.add(stashRepoJSONBean.asRepoBean());
         }
-        
+
         return repositories;
     }
 
@@ -83,7 +83,7 @@ public class StashGetRepoCommand extends AbstractStashCommand implements GetRepo
     	repositorySlug = repositorySlug.toLowerCase();
         Client client = getClient();
         String resource = scmSystemProperties.getHost() + String.format(SINGLE_RESOURCE, projectKey, repositorySlug);
-        logger.debug("REST call to " + resource);
+        LOGGER.debug("REST call to " + resource);
 
         StashRepoJSONBean response = null;
 
@@ -95,11 +95,11 @@ public class StashGetRepoCommand extends AbstractStashCommand implements GetRepo
         } catch (NotFoundException nfe) {
             // no-op - acceptable response and will return a null object
         } catch (ProcessingException pe) {
-            logger.error("Could not connect to REST service " + resource, pe);
+            LOGGER.error("Could not connect to REST service " + resource, pe);
             throw new SCMCallException("createRepo", "Could not connect to REST service:" + pe.getMessage());
         } finally {
             client.close();
-        }        
+        }
 
         return (response != null) ? response.asRepoBean() : null;
     }
@@ -107,16 +107,16 @@ public class StashGetRepoCommand extends AbstractStashCommand implements GetRepo
     @Override
     public Map<String, Collection<LocalRepoBean>> getAllRepositories() throws SCMCallException {
         Map<String, Collection<LocalRepoBean>> repositories = new HashMap<String, Collection<LocalRepoBean>>();
-        logger.debug("Getting all repositories from Stash");
+        LOGGER.debug("Getting all repositories from Stash");
         int pCount = 0;
         int rCount = 0;
-        
+
         StashGetProjectsCommand getProjectsCommand = new StashGetProjectsCommand();
         Collection<String> projects = getProjectsCommand.getProjects();
         if (projects.size() > 0) {
             pCount = projects.size();
         }
-        
+
         for (String projectKey:projects) {
             Collection<LocalRepoBean> repos = getRepositories(projectKey);
             if (repos.size() > 0) {
@@ -124,8 +124,8 @@ public class StashGetRepoCommand extends AbstractStashCommand implements GetRepo
                 rCount += repos.size();
             }
         }
-        
-        logger.debug("Retrieved " + rCount + " repositories from " + pCount + " projects");
+
+        LOGGER.debug("Retrieved " + rCount + " repositories from " + pCount + " projects");
         return repositories;
     }
 

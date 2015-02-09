@@ -35,27 +35,27 @@ import java.util.HashMap;
  * @author nick.leaver@surevine.com
  */
 public class StashForkRepoCommand extends AbstractStashCommand implements ForkRepoCommand {
-    private static Logger logger = Logger.getLogger(StashForkRepoCommand.class);
+    private static final Logger LOGGER = Logger.getLogger(StashForkRepoCommand.class);
     private static final String RESOURCE = "/rest/api/1.0/projects/%s/repos/%s";
     private SCMSystemProperties scmSystemProperties;
 
     StashForkRepoCommand() {
         scmSystemProperties = PropertyUtil.getSCMSystemProperties();
     }
-    
+
     @Override
     public LocalRepoBean forkRepo(String projectKey, String repositorySlug, String forkProjectKey)
             throws SCMCallException {
     	projectKey = projectKey.toUpperCase();
         repositorySlug = repositorySlug.toLowerCase();
         forkProjectKey = forkProjectKey.toUpperCase();
-        
+
         HashMap<String, String> projectMap = new HashMap<String, String>();
         projectMap.put("key", forkProjectKey);
         JSONObject payload = new JSONObject().put("project", projectMap);
 
         String resource = scmSystemProperties.getHost() + String.format(RESOURCE, projectKey, repositorySlug);
-        logger.debug("REST call to " + resource);
+        LOGGER.debug("REST call to " + resource);
 
         Client client = getClient();
         StashRepoJSONBean response = null;
@@ -65,12 +65,12 @@ public class StashForkRepoCommand extends AbstractStashCommand implements ForkRe
                     .header("Authorization", scmSystemProperties.getBasicAuthHeader())
                     .post(Entity.json(payload.toString()), StashRepoJSONBean.class);
         } catch (ProcessingException pe) {
-            logger.error("Could not connect to REST service " + resource, pe);
+            LOGGER.error("Could not connect to REST service " + resource, pe);
             throw new SCMCallException("forkRepo", "Could not connect to REST service:" + pe.getMessage());
         } finally {
             client.close();
         }
-        
+
         return response.asRepoBean();
     }
 }

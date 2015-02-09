@@ -9,12 +9,12 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StashMergeRequestJSONBean {
 
-    private static Logger logger = Logger.getLogger(StashMergeRequestJSONBean.class);
+    private static final Logger LOGGER = Logger.getLogger(StashMergeRequestJSONBean.class);
 	private String title;
 
 	private HashMap<String, Object> fromRef;
 	private HashMap<String, Object> toRef;
-	
+
 	public StashMergeRequestJSONBean() {
 		//
 	}
@@ -33,18 +33,18 @@ public class StashMergeRequestJSONBean {
 
 	public void setTitle(String title) {
 		this.title = title;
-		logger.debug("Setting title to "+title);
+		LOGGER.debug("Setting title to "+title);
 	}
 
 	public void setFromRef(HashMap<String, Object> fromRef) {
 		this.fromRef = fromRef;
-		logger.debug("Setting fromRef to "+fromRef.toString());
-		
+		LOGGER.debug("Setting fromRef to "+fromRef.toString());
+
 	}
 
 	public void setToRef(HashMap<String, Object> toRef) {
 		this.toRef = toRef;
-		logger.debug("Setting toRed to "+toRef.toString());
+		LOGGER.debug("Setting toRed to "+toRef.toString());
 	}
 
 }

@@ -43,18 +43,19 @@ import java.util.Map;
  * @author nick.leaver@surevine.com
  */
 public class DistributorImpl implements Distributor {
-    private static Logger logger = Logger.getLogger(DistributorImpl.class);
+
+    private static final Logger LOGGER = Logger.getLogger(DistributorImpl.class);
 
     @Override
-    public void distributeToSingleDestination(final String partnerName, final String projectKey, final String repositorySlug) 
+    public void distributeToSingleDestination(final String partnerName, final String projectKey, final String repositorySlug)
             throws SCMFederatorServiceException {
-        logger.info("Distributing to partner: " + partnerName + " repository "
+        LOGGER.info("Distributing to partner: " + partnerName + " repository "
                 + projectKey + ":" + repositorySlug);
         try {
             LocalRepoBean repo = SCMCommand.getRepository(projectKey, repositorySlug);
 
             if (repo == null) {
-                logger.error("Could not distribute repository:" + projectKey + ":" + repositorySlug
+                LOGGER.error("Could not distribute repository:" + projectKey + ":" + repositorySlug
                         + " does not exist in the SCM system");
                 throw new SCMFederatorServiceException(projectKey + ":" + repositorySlug
                         + " does not exist in the SCM system");
@@ -76,23 +77,23 @@ public class DistributorImpl implements Distributor {
             for (SharedRepoIdentification repoShare:currentSharedRepositories) {
                 if (repoShare != null && repoShare.getProjectKey() != null
                     && repoShare.getRepoSlug() != null) {
-                    
+
                     String projectKey = repoShare.getProjectKey();
                     String repositorySlug = repoShare.getRepoSlug();
-                    
-                    logger.info("Distributing repository " + projectKey + ":" + repositorySlug);
+
+                    LOGGER.info("Distributing repository " + projectKey + ":" + repositorySlug);
 
                     try {
                         LocalRepoBean repo = SCMCommand.getRepository(projectKey, repositorySlug);
 
                         if (repo == null) {
-                            logger.info("Skipping distribution of " + projectKey + ":" + repositorySlug
+                            LOGGER.info("Skipping distribution of " + projectKey + ":" + repositorySlug
                                     + " because the repository does not exist in the SCM system");
                         } else {
                                 distribute(repo, MetadataUtil.getMetadata(repo), false);
                         }
                     } catch (SCMFederatorServiceException | GitException | SCMCallException | CompressorException | ArchiveException | IOException e) {
-                        logger.info("Skipping distribution of " + projectKey + ":" + repositorySlug + " due to error: " + e.getMessage());
+                        LOGGER.info("Skipping distribution of " + projectKey + ":" + repositorySlug + " due to error: " + e.getMessage());
                     }
                 }
             }
@@ -105,7 +106,7 @@ public class DistributorImpl implements Distributor {
      * @param metadata the metadata to be send with the distribution
      * @param sendEvenIfNoUpdates if true the repo will be distributed even if there are no new updates since last export
      */
-    private void distribute(final LocalRepoBean repo, final Map<String, String> metadata, final boolean sendEvenIfNoUpdates) 
+    private void distribute(final LocalRepoBean repo, final Map<String, String> metadata, final boolean sendEvenIfNoUpdates)
             throws SCMFederatorServiceException, GitException, CompressorException, ArchiveException, IOException {
         if (repo ==  null) {
             throw new SCMFederatorServiceException("The repository information for  " + repo.getProjectKey() + ":"
@@ -130,7 +131,7 @@ public class DistributorImpl implements Distributor {
             gatewayPackage.createArchive();
             GatewayClient.getInstance().sendToGateway(gatewayPackage);
         } else {
-            logger.info("Skipping distribution of " + repo.getProjectKey() + ":" + repo.getSlug() + " due to no updates since last distribution");
-        }            
+            LOGGER.info("Skipping distribution of " + repo.getProjectKey() + ":" + repo.getSlug() + " due to no updates since last distribution");
+        }
     }
 }

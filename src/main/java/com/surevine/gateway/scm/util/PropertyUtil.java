@@ -29,7 +29,7 @@ import java.util.ResourceBundle;
  * @author nick.leaver@surevine.com
  */
 public final class PropertyUtil {
-    private static Logger logger = Logger.getLogger(PropertyUtil.class);
+    private static final Logger LOGGER = Logger.getLogger(PropertyUtil.class);
     private static final String PROP_TEMP_DIR = "fedscm.temp.dir";
     private static final String PROP_REMOTE_BUNDLE_DIR = "fedscm.bundle.dir";
     private static final String PROP_VERSION = "fedscm.version";
@@ -56,19 +56,19 @@ public final class PropertyUtil {
         checkInit();
         return bundle.getString(key);
     }
-    
+
     public static boolean getBooleanProperty(final String key) {
         return Boolean.parseBoolean(getProperty(key));
     }
-    
+
     public static String getProjectConfigServiceURL() {
         return getProperty(PROP_GATEWAY_PROJECT_CONFIG_URL);
     }
-    
+
     public static String getOrgName() {
         return getProperty(PROP_ORG_NAME);
     }
-    
+
     public static String getPartnerProjectKeyString(final String partnerName, final String partnerKey) {
         return String.format(getProperty(PROP_PARTNER_PROJECT_KEY), partnerName, partnerKey);
     }
@@ -76,7 +76,7 @@ public final class PropertyUtil {
     public static String getPartnerForkProjectKeyString(final String partnerName, final String partnerKey) {
         return String.format(getProperty(PROP_PARTNER_FORK_PROJECT_KEY), partnerName, partnerKey);
     }
-    
+
     public static String getGatewayURL() {
         return getProperty(PROP_GATEWAY_SERVICE_URL);
     }
@@ -84,11 +84,11 @@ public final class PropertyUtil {
     public static int getExportInterval() {
         return Integer.parseInt(getProperty(PROP_EXPORT_INTERVAL));
     }
-    
+
     public static boolean isExportAtStart() {
         return getBooleanProperty(PROP_GATEWAY_RUN_AT_START);
     }
-    
+
     public static String getBundleDir() {
     	return getProperty(PROP_REMOTE_BUNDLE_DIR);
     }
@@ -98,7 +98,7 @@ public final class PropertyUtil {
         try {
             Files.createDirectories(Paths.get(gatewayImportDir));
         } catch (Exception e) {
-            logger.error(e);
+            LOGGER.error(e);
         }
         return gatewayImportDir;
     }
@@ -108,7 +108,7 @@ public final class PropertyUtil {
         try {
             Files.createDirectories(Paths.get(tmpDir));
         } catch (Exception e) {
-            logger.error(e);
+            LOGGER.error(e);
         }
         return tmpDir;
     }
@@ -118,7 +118,7 @@ public final class PropertyUtil {
         try {
             Files.createDirectories(Paths.get(bundleDir));
         } catch (Exception e) {
-            logger.error(e);
+            LOGGER.error(e);
         }
         return bundleDir;
     }
@@ -126,7 +126,7 @@ public final class PropertyUtil {
     public static String getSystemVersion() {
         return getProperty(PROP_VERSION);
     }
-    
+
     public static String getGitDir() {
         String gitDir = getProperty(PROP_GIT_REPODIR);
         Path gitDirPath = Paths.get(gitDir);
@@ -135,11 +135,11 @@ public final class PropertyUtil {
             Files.createDirectories(gitDirPath.resolve("local_scm"));
             Files.createDirectories(gitDirPath.resolve("from_gateway"));
         } catch (Exception e) {
-            logger.error(e);
+            LOGGER.error(e);
         }
         return gitDir;
     }
-    
+
     public static SCMSystemProperties getSCMSystemProperties(String type, String username, String password, String hostname, String authToken) {
         return new SCMSystemProperties(type, username, password, hostname, authToken);
     }
@@ -150,7 +150,7 @@ public final class PropertyUtil {
         String scmPassword = getProperty(PROP_SCM_PASSWORD);
         String scmHostname = getProperty(PROP_SCM_HOSTNAME);
         String scmAuthToken = getProperty(PROP_SCM_AUTH_TOKEN);
-        
+
         return getSCMSystemProperties(scmType, scmUsername, scmPassword, scmHostname, scmAuthToken);
     }
 
@@ -161,10 +161,10 @@ public final class PropertyUtil {
     private static void checkInit() {
         if (bundle == null) {
             bundle = ResourceBundle.getBundle("federated-scm");
-            logger.info("SCM federator properties loaded:");
+            LOGGER.info("SCM federator properties loaded:");
             for (String key : bundle.keySet()) {
                 if (!key.toLowerCase().contains("password")) {
-                    logger.info("\t" + key + ":" + bundle.getString(key));
+                    LOGGER.info("\t" + key + ":" + bundle.getString(key));
                 }
             }
         }

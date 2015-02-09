@@ -35,7 +35,7 @@ import java.util.List;
  * @author nick.leaver@surevine.com
  */
 public class StashGetProjectsCommand extends AbstractStashCommand implements GetProjectsCommand {
-    private static Logger logger = Logger.getLogger(StashGetProjectsCommand.class);
+    private static final Logger LOGGER = Logger.getLogger(StashGetProjectsCommand.class);
     private static final String ALL_RESOURCE = "/rest/api/1.0/projects?limit=10000";
     private SCMSystemProperties scmSystemProperties;
 
@@ -48,7 +48,7 @@ public class StashGetProjectsCommand extends AbstractStashCommand implements Get
         HashSet<String> projectKeys = new HashSet<String>();
         String resource = scmSystemProperties.getHost() + ALL_RESOURCE;
         Client client = getClient();
-        logger.debug("REST call to " + resource);
+        LOGGER.debug("REST call to " + resource);
 
         PagedProjectResult response = null;
         try {
@@ -57,16 +57,16 @@ public class StashGetProjectsCommand extends AbstractStashCommand implements Get
                     .header("Authorization", scmSystemProperties.getBasicAuthHeader())
                     .get(PagedProjectResult.class);
         } catch (ProcessingException pe) {
-            logger.error("Could not connect to REST service " + resource, pe);
+            LOGGER.error("Could not connect to REST service " + resource, pe);
             throw new SCMCallException("getProjects", "Could not connect to REST service:" + pe.getMessage());
         } finally {
             client.close();
         }
-        
+
         for (StashProjectJSONBean stashProjectJSONBean:response.getValues()) {
             projectKeys.add(stashProjectJSONBean.getKey().toLowerCase());
         }
-               
+
         return projectKeys;
     }
 

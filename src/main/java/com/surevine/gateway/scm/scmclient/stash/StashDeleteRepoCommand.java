@@ -31,7 +31,7 @@ import javax.ws.rs.core.MediaType;
  * @author nick.leaver@surevine.com
  */
 public class StashDeleteRepoCommand extends AbstractStashCommand implements DeleteRepoCommand {
-    private static Logger logger = Logger.getLogger(StashDeleteRepoCommand.class);
+    private static final Logger LOGGER = Logger.getLogger(StashDeleteRepoCommand.class);
     private static final String RESOURCE = "/rest/api/1.0/projects/%s/repos/%s";
     private SCMSystemProperties scmSystemProperties;
 
@@ -46,13 +46,13 @@ public class StashDeleteRepoCommand extends AbstractStashCommand implements Dele
         } else if (repoSlug == null || repoSlug.isEmpty()) {
             throw new SCMCallException("deleteProject", "No repo slug provided");
         }
-        
+
         projectKey = projectKey.toUpperCase();
         repoSlug = repoSlug.toLowerCase();
 
         Client client = getClient();
         String resource = scmSystemProperties.getHost() + String.format(RESOURCE, projectKey, repoSlug);
-        logger.debug("REST call to " + resource);
+        LOGGER.debug("REST call to " + resource);
 
         try {
             client.target(resource)
@@ -60,7 +60,7 @@ public class StashDeleteRepoCommand extends AbstractStashCommand implements Dele
                     .header("Authorization", scmSystemProperties.getBasicAuthHeader())
                     .delete();
         } catch (ProcessingException pe) {
-            logger.error("Could not connect to REST service " + resource, pe);
+            LOGGER.error("Could not connect to REST service " + resource, pe);
             throw new SCMCallException("deleteRepo", "Could not connect to REST service:" + pe.getMessage());
         } finally {
             client.close();

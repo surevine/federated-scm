@@ -33,7 +33,7 @@ import java.util.TimerTask;
  * @author nick.leaver@surevine.com
  */
 public class FederateSCMContextListener implements ServletContextListener {
-    private Logger logger = Logger.getLogger(FederateSCMContextListener.class);
+    private static final Logger LOGGER = Logger.getLogger(FederateSCMContextListener.class);
     private Distributor distributor;
     private static final String CONTEXT_KEY = "scmExporter";
 
@@ -43,39 +43,39 @@ public class FederateSCMContextListener implements ServletContextListener {
 
     @Override
     public void contextInitialized(final ServletContextEvent servletContextEvent) {
-        logger.info("Initialising SCM export timer");
+        LOGGER.info("Initialising SCM export timer");
         int interval = PropertyUtil.getExportInterval();
         boolean exportAtStart = PropertyUtil.isExportAtStart();
         Timer timer = new Timer();
         Calendar cal = Calendar.getInstance();
-        
+
         if (!exportAtStart) {
             cal.add(Calendar.SECOND, interval);
         }
-        
+
         Date start = cal.getTime();
         TimerTask federateTask = new TimerTask() {
             @Override
             public void run() {
-                logger.info("Running SCM export");
+                LOGGER.info("Running SCM export");
                 distributor.distributeAll();
             }
         };
 
         timer.scheduleAtFixedRate(federateTask, start, interval * 1000);
         servletContextEvent.getServletContext().setAttribute(CONTEXT_KEY, timer);
-        
+
         if (exportAtStart) {
-            logger.info("SCM export timer initialised");
+            LOGGER.info("SCM export timer initialised");
         } else {
             String startTimeString = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss").format(start);
-            logger.info("SCM export timer initialised with delayed start. First export will run in " + interval + " seconds at " + startTimeString);
+            LOGGER.info("SCM export timer initialised with delayed start. First export will run in " + interval + " seconds at " + startTimeString);
         }
     }
 
     @Override
     public void contextDestroyed(final ServletContextEvent servletContextEvent) {
-        logger.info("Shutting down SCM export timer");
+        LOGGER.info("Shutting down SCM export timer");
         Timer timer = (Timer) servletContextEvent.getServletContext().getAttribute(CONTEXT_KEY);
 
         if (timer != null) {
@@ -83,6 +83,6 @@ public class FederateSCMContextListener implements ServletContextListener {
         }
 
         servletContextEvent.getServletContext().removeAttribute(CONTEXT_KEY);
-        logger.info("SCM export timer shutdown complete");
+        LOGGER.info("SCM export timer shutdown complete");
     }
 }

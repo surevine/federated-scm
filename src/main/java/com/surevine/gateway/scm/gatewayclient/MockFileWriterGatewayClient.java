@@ -28,7 +28,7 @@ import java.nio.file.Paths;
  * @author nick.leaver@surevine.com
  */
 public class MockFileWriterGatewayClient extends GatewayClient {
-    private static Logger logger = Logger.getLogger(MockFileWriterGatewayClient.class);
+    private static final Logger LOGGER = Logger.getLogger(MockFileWriterGatewayClient.class);
     private Path tmpOutputDir;
 
     protected MockFileWriterGatewayClient() {
@@ -39,13 +39,13 @@ public class MockFileWriterGatewayClient extends GatewayClient {
             // drop exception - mock class
         }
     }
-    
+
     @Override
     public void sendToGateway(final GatewayPackage gatewayPackage) {
         Path archivePath = gatewayPackage.getArchive();
         try {
             Files.copy(archivePath, tmpOutputDir.resolve(archivePath.getFileName().toString()));
-            logger.info("Copied distributable " + archivePath.getFileName() + " to " + tmpOutputDir);
+            LOGGER.info("Copied distributable " + archivePath.getFileName() + " to " + tmpOutputDir);
         } catch (Exception e) {
             // drop exception - mock class
         }

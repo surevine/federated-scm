@@ -32,10 +32,10 @@ import java.util.List;
  * @author nick.leaver@surevine.com
  */
 public class MockGatewayConfigServiceFacade extends GatewayConfigServiceFacade {
-    private static Logger logger = Logger.getLogger(MockGatewayConfigServiceFacade.class);
+    private static final Logger LOGGER = Logger.getLogger(MockGatewayConfigServiceFacade.class);
     public List<SharedRepoIdentification> getSharedRepositories() {
         List<SharedRepoIdentification> sharedRepositories = new ArrayList<SharedRepoIdentification>();
-        
+
         try {
             InputStream mockConfigIS = getClass().getClassLoader().getResourceAsStream("mock_project_config.json");
             JSONObject jsonObject = new JSONObject(IOUtils.toString(mockConfigIS, Charset.forName("UTF-8")));
@@ -44,12 +44,12 @@ public class MockGatewayConfigServiceFacade extends GatewayConfigServiceFacade {
                 JSONArray repos = jsonObject.getJSONArray(project);
                 for (int i = 0; i < repos.length(); i++) {
                     String repo = repos.getString(i);
-                    logger.debug("Shared repository configuration loaded: " + project + ":" + repo);
+                    LOGGER.debug("Shared repository configuration loaded: " + project + ":" + repo);
                     sharedRepositories.add(new SharedRepoIdentification(project, repo));
                 }
             }
         } catch (IOException e) {
-            logger.error("Could not read the mock gateway config", e);
+            LOGGER.error("Could not read the mock gateway config", e);
         }
         return sharedRepositories;
     }

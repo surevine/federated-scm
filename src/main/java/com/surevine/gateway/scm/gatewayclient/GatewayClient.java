@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
  * @author nick.leaver@surevine.com
  */
 public class GatewayClient {
-    private static Logger logger = Logger.getLogger(GatewayClient.class);
+    private static final Logger LOGGER = Logger.getLogger(GatewayClient.class);
     private static final String USE_MOCK_KEY = "fedscm.mock.gatewayclient";
     private static GatewayClient instance;
 
@@ -56,9 +56,9 @@ public class GatewayClient {
             GenericEntity<MultipartFormDataOutput> entity = new GenericEntity<MultipartFormDataOutput>(mfdo) {
             };
             client.target(gatewayServiceURL).request().post(Entity.entity(entity, MediaType.MULTIPART_FORM_DATA_TYPE));
-            logger.info(gatewayPackage.getArchive().getFileName() + " sent to the gateway as " + filename);
+            LOGGER.info(gatewayPackage.getArchive().getFileName() + " sent to the gateway as " + filename);
         } catch (IOException e) {
-            logger.error("Failed to send " + gatewayPackage.getArchive().toString() + " to the gateway", e);
+            LOGGER.error("Failed to send " + gatewayPackage.getArchive().toString() + " to the gateway", e);
         }
     }
 

@@ -62,55 +62,55 @@ import java.util.Map;
  * TODO: Framework code only
  */
 public class IncomingProcessorImpl implements IncomingProcessor {
-    private Logger logger = Logger.getLogger(IncomingProcessorImpl.class);
+    private static final Logger LOGGER = Logger.getLogger(IncomingProcessorImpl.class);
     private List<File> createdFiles = new ArrayList<File>();
 
     @Override
     public void processIncomingRepository(final Path archivePath) throws SCMFederatorServiceException {
         if (!isTarGz(archivePath)) {
-            logger.debug("Not processing " + archivePath + " as it is not a .tar.gz");
+            LOGGER.debug("Not processing " + archivePath + " as it is not a .tar.gz");
             return;
         }
 
         registerCreatedFile(archivePath.toFile());
 
-        logger.debug(archivePath+" being processed as a potential git bundle");
+        LOGGER.debug(archivePath+" being processed as a potential git bundle");
 
         Path metadataPath = null;
         Collection<Path> extractedFilePaths = null;
         try {
-        	logger.debug("Extracting "+archivePath);
+        	LOGGER.debug("Extracting "+archivePath);
         	extractedFilePaths = extractTarGz(archivePath);
         	if ( extractedFilePaths == null ) {
-        		logger.debug(archivePath+" did not have the right contents");
+        		LOGGER.debug(archivePath+" did not have the right contents");
         		return;
         	}
 
             metadataPath = getMetadataFilePath(extractedFilePaths);
-        	logger.debug("Extracted "+archivePath+", metadata path is "+metadataPath);
+        	LOGGER.debug("Extracted "+archivePath+", metadata path is "+metadataPath);
         } catch ( IOException e ) {
-            logger.debug("Error when expanding " + archivePath + ": "+e.getMessage());
+            LOGGER.debug("Error when expanding " + archivePath + ": "+e.getMessage());
             return;
         }
 
-        logger.debug(archivePath+" expanded, reading metadata");
+        LOGGER.debug(archivePath+" expanded, reading metadata");
 
         if (metadataPath == null) {
-            logger.debug("Not processing " + archivePath + " as it does not contain a metadata file");
+            LOGGER.debug("Not processing " + archivePath + " as it does not contain a metadata file");
             return;
         }
 
         Map<String, String> metadata = MetadataUtil.getMetadataFromPath(metadataPath);
         if (!MetadataUtil.metadataValid(metadata)) {
-            logger.debug("Not processing " + archivePath + " as it does not contain all of the required metadata");
+            LOGGER.debug("Not processing " + archivePath + " as it does not contain all of the required metadata");
             return;
         }
 
-        logger.debug(archivePath+" metadata read");
+        LOGGER.debug(archivePath+" metadata read");
 
         Path extractedGitBundle = getGitBundleFilePath(extractedFilePaths);
 
-        logger.debug(archivePath+" bundle copied, sending for processing");
+        LOGGER.debug(archivePath+" bundle copied, sending for processing");
 
         processIncomingRepository(extractedGitBundle, metadata);
     }
@@ -133,13 +133,13 @@ public class IncomingProcessorImpl implements IncomingProcessor {
             BundleProcessor processor = getAppropriateBundleProcessor(bundleDestination, metadata);
         	processor.processBundle();
         } catch (SCMCallException e) {
-            logger.error("Error while accessing local SCM system", e);
+            LOGGER.error("Error while accessing local SCM system", e);
             throw new SCMFederatorServiceException("\"Error while accessing local SCM system: " + e.getMessage());
         } catch (NoBundleProcessorAvailableException e) {
-            logger.error("No bundle processor available for the determined repository state", e);
+            LOGGER.error("No bundle processor available for the determined repository state", e);
             throw new SCMFederatorServiceException("\"Error while unpacking bundle: No processor available");
 		} catch (BundleProcessingException e) {
-			logger.error("Error while processing bundle: "+e.getMessage());
+			LOGGER.error("Error while processing bundle: "+e.getMessage());
             throw new SCMFederatorServiceException("\"Error while unpacking bundle: "+e.getMessage());
 		} finally {
 			clearCreatedFiles();
@@ -192,7 +192,7 @@ public class IncomingProcessorImpl implements IncomingProcessor {
 
         Path bundleDestination = buildBundleDestination(metadata);
 
-        logger.debug("Copying received bundle from temporary location " + extractedGitBundle + " to " + bundleDestination);
+        LOGGER.debug("Copying received bundle from temporary location " + extractedGitBundle + " to " + bundleDestination);
         if (Files.exists(bundleDestination)) {
             Files.copy(extractedGitBundle, bundleDestination, StandardCopyOption.REPLACE_EXISTING);
         } else {
@@ -223,7 +223,7 @@ public class IncomingProcessorImpl implements IncomingProcessor {
     		openTarGz(archivePath);
 	    	return true;
     	} catch ( Exception e ) {
-    		logger.debug("Verification of "+archivePath.getName((archivePath.getNameCount() - 1))+" failed: "+e.getMessage());
+    		LOGGER.debug("Verification of "+archivePath.getName((archivePath.getNameCount() - 1))+" failed: "+e.getMessage());
     		return false;
     	}
     }
@@ -271,7 +271,7 @@ public class IncomingProcessorImpl implements IncomingProcessor {
     	TarArchiveInputStream archive = openTarGz(archivePath);
 
     	if (!tarGzHasExpectedContents(archive)) {
-    		logger.debug(archivePath.toString()+" does not have the correct contents - exactly one .bundle and exactly one .metadata.json");
+    		LOGGER.debug(archivePath.toString()+" does not have the correct contents - exactly one .bundle and exactly one .metadata.json");
     		return null;
     	}
 
@@ -284,7 +284,7 @@ public class IncomingProcessorImpl implements IncomingProcessor {
         Files.createDirectories(tmpDir);
 
     	Collection<Path> extractedFiles = new ArrayList<Path>();
-		logger.debug("Extracting "+archivePath.toString()+" to "+tmpDir);
+		LOGGER.debug("Extracting "+archivePath.toString()+" to "+tmpDir);
 
 		File tmp = tmpDir.toFile();
 
@@ -296,7 +296,7 @@ public class IncomingProcessorImpl implements IncomingProcessor {
 				continue;
 			}
 
-			logger.debug("Creating output file "+outputFile.getAbsolutePath());
+			LOGGER.debug("Creating output file "+outputFile.getAbsolutePath());
 			registerCreatedFile(outputFile);
 
 			final OutputStream outputFileStream = new FileOutputStream(outputFile);
@@ -312,15 +312,15 @@ public class IncomingProcessorImpl implements IncomingProcessor {
     }
 
     private void registerCreatedFile(File outputFile) {
-    	logger.debug("Registering "+outputFile.getAbsolutePath()+" for eventual cleanup");
+    	LOGGER.debug("Registering "+outputFile.getAbsolutePath()+" for eventual cleanup");
     	createdFiles.add(outputFile);
 	}
 
     private void clearCreatedFiles() {
-    	logger.debug("Cleaning up "+createdFiles.size()+" created file(s)");
+    	LOGGER.debug("Cleaning up "+createdFiles.size()+" created file(s)");
     	for ( File file : createdFiles ) {
     		if ( file.exists() ) {
-    	    	logger.debug("Deleting "+file.getAbsolutePath());
+    	    	LOGGER.debug("Deleting "+file.getAbsolutePath());
     			file.delete();
     		}
     	}

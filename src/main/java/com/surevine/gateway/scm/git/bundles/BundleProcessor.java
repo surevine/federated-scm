@@ -15,8 +15,8 @@ import com.surevine.gateway.scm.util.PropertyUtil;
 
 public abstract class BundleProcessor {
 
-    private Logger logger = Logger.getLogger(BundleProcessor.class);
-    
+    private static final Logger LOGGER = Logger.getLogger(BundleProcessor.class);
+
 	protected Path bundle;
 	protected Map<String, String> metadata;
 	protected String partnerName;
@@ -24,11 +24,11 @@ public abstract class BundleProcessor {
 	protected String repositorySlug;
 	protected String partnerProjectKey;
 	protected String partnerProjectForkKey;
-	
+
 	protected boolean repoWasCreated = false;
 	protected boolean forkWasCreated = false;
 
-	
+
 	public BundleProcessor() {
 		//
 	}
@@ -36,34 +36,34 @@ public abstract class BundleProcessor {
 	public  void setBundleLocation(Path bundleLocation) {
 		bundle = bundleLocation;
 	}
-	
+
 	public Map<String, String> getMetadata() {
 		return metadata;
 	}
-	
+
 	public Path getBundleLocation() {
 		return bundle;
 	}
-	
+
 	public void setBundleMetadata(Map<String, String> metadata) {
 		this.metadata = metadata;
-		logger.debug(metadata.toString());
-		
+		LOGGER.debug(metadata.toString());
+
 		partnerName = metadata.get(MetadataUtil.KEY_ORGANISATION).toLowerCase();
 		projectKey = metadata.get(MetadataUtil.KEY_PROJECT).toLowerCase();
 		repositorySlug = metadata.get(MetadataUtil.KEY_REPO).toLowerCase();
-		
-		logger.debug(partnerName+" - "+projectKey+" - "+repositorySlug);
-		
+
+		LOGGER.debug(partnerName+" - "+projectKey+" - "+repositorySlug);
+
 		partnerProjectKey = PropertyUtil
 				.getPartnerProjectKeyString(partnerName, projectKey)
 				.toLowerCase();
-		
+
 		partnerProjectForkKey = PropertyUtil
 				.getPartnerForkProjectKeyString(partnerName, projectKey)
 				.toLowerCase();
 	}
-	
+
 	public LocalRepoBean getRepoForBundle() {
         LocalRepoBean repoBean = new LocalRepoBean();
         repoBean.setProjectKey(partnerProjectKey);
@@ -71,59 +71,59 @@ public abstract class BundleProcessor {
         repoBean.setCloneSourceURI(bundle.toString());
         repoBean.setFromGateway(true);
         repoBean.setSourcePartner(partnerName);
-        
+
         return repoBean;
 	}
-	
+
 	public abstract LocalRepoBean getPrimaryRepo() throws SCMCallException, BundleProcessingException;
 	public abstract LocalRepoBean getForkedRepo() throws SCMCallException, BundleProcessingException;
 
 	public void processBundle() throws SCMCallException, BundleProcessingException {
 		Map<String, String> metadata = getMetadata();
 		Path bundleDestination = getBundleLocation();
-		
+
 		if ( metadata == null || bundleDestination == null ){
 			throw new BundleProcessingException("Bundle path and metadata both required");
 		}
-        
+
         LocalRepoBean repoBean = getRepoForBundle();
-        
+
         try {
         	repoBean.emptyRepoDirectory();
-        	
-        	logger.debug("Cloning from localRepoBean");
+
+        	LOGGER.debug("Cloning from localRepoBean");
             // create local repository from bundle
             GitFacade.getInstance().clone(repoBean);
-            
+
             // create a new repository in the SCM system to hold the shared source
             LocalRepoBean primaryRepo = getPrimaryRepo();
 
-            logger.debug("Adding `scm` remote at "+primaryRepo.getCloneSourceURI());
+            LOGGER.debug("Adding `scm` remote at "+primaryRepo.getCloneSourceURI());
             GitFacade.getInstance().addRemote(repoBean, "scm", primaryRepo.getCloneSourceURI());
-            
+
             if ( repoWasCreated ) {
-            	logger.debug("Repo was created, so pushing");
+            	LOGGER.debug("Repo was created, so pushing");
 	            // push the incoming repository into the new SCM repository
 	            GitFacade.getInstance().push(repoBean, "scm");
             } else {
-            	logger.debug("Repo not created, not doing anything");
+            	LOGGER.debug("Repo not created, not doing anything");
             }
 
             // create project in the SCM system to hold update forks from this partner if it doesn't already exist
             LocalRepoBean forkedRepo = getForkedRepo();
-            logger.debug("Got forked repo");
+            LOGGER.debug("Got forked repo");
 
-            logger.debug("Updating `scm` remote to "+forkedRepo.getCloneSourceURI());
+            LOGGER.debug("Updating `scm` remote to "+forkedRepo.getCloneSourceURI());
             // update local repository remote to point at the fork instead for its scm remote
             GitFacade.getInstance().updateRemote(repoBean, "scm", forkedRepo.getCloneSourceURI());
-            logger.debug("Updated remote to "+forkedRepo.getCloneSourceURI().toString());
-            
-        	logger.debug("Pushing to fork and creating MR");
+            LOGGER.debug("Updated remote to "+forkedRepo.getCloneSourceURI().toString());
+
+        	LOGGER.debug("Pushing to fork and creating MR");
             GitFacade.getInstance().push(repoBean, "scm");
     		SCMCommand.createMergeRequest(forkedRepo, primaryRepo);
-    		
+
         } catch (Exception e) {
-            logger.error("Could not import new repository " + repoBean, e);
+            LOGGER.error("Could not import new repository " + repoBean, e);
         }
 	}
 }

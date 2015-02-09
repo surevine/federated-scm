@@ -31,14 +31,13 @@ import java.util.concurrent.TimeUnit;
 /**
  * Facade over access to the configured shared repositories in the gateway
  * management component
- * 
+ *
  * @author nick.leaver@surevine.com
  */
 public class GatewayConfigServiceFacade {
 	private static final String USE_MOCK_KEY = "fedscm.mock.gatewayconfig";
+	private static final Logger LOGGER = Logger.getLogger(GatewayConfigServiceFacade.class);
 	private static GatewayConfigServiceFacade instance;
-	private static Logger logger = Logger
-			.getLogger(GatewayConfigServiceFacade.class);
 
 	protected GatewayConfigServiceFacade() {
 		// external instantiation protection
@@ -51,7 +50,7 @@ public class GatewayConfigServiceFacade {
 		Client client = new ResteasyClientBuilder()
 				.establishConnectionTimeout(6, TimeUnit.SECONDS)
 				.socketTimeout(6, TimeUnit.SECONDS).build();
-		logger.info("Attempting to retrieve project sharing configuration from "
+		LOGGER.info("Attempting to retrieve project sharing configuration from "
 				+ gatewayConfigServiceURL);
 		String jsonResponse = client.target(gatewayConfigServiceURL).request()
 				.get(String.class);
@@ -65,7 +64,7 @@ public class GatewayConfigServiceFacade {
 				String repositorySlug = projectConfigurationObject
 						.getString("repositorySlug");
 
-				logger.debug("Shared repository configuration loaded: "
+				LOGGER.debug("Shared repository configuration loaded: "
 						+ projectKey + ":" + repositorySlug);
 				sharedRepositories.add(new SharedRepoIdentification(projectKey,
 						repositorySlug));

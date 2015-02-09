@@ -33,7 +33,7 @@ import javax.ws.rs.core.MediaType;
  * @author nick.leaver@surevine.com
  */
 public class StashCreateRepoCommand extends AbstractStashCommand implements CreateRepoCommand {
-    private static Logger logger = Logger.getLogger(StashCreateRepoCommand.class);
+    private static final Logger LOGGER = Logger.getLogger(StashCreateRepoCommand.class);
     private static final String RESOURCE = "/rest/api/1.0/projects/%s/repos";
     private SCMSystemProperties scmSystemProperties;
 
@@ -48,13 +48,13 @@ public class StashCreateRepoCommand extends AbstractStashCommand implements Crea
         } else if (name == null || name.isEmpty()) {
             throw new SCMCallException("createRepo", "No repo name was provided");
         }
-        
+
         projectKey = projectKey.toUpperCase();
         name = name.toLowerCase();
 
         Client client = getClient();
         String resource = scmSystemProperties.getHost() + String.format(RESOURCE, projectKey);
-        logger.debug("REST call to " + resource);
+        LOGGER.debug("REST call to " + resource);
 
         StashRepoJSONBean args = new StashRepoJSONBean();
         args.setName(name);
@@ -66,12 +66,12 @@ public class StashCreateRepoCommand extends AbstractStashCommand implements Crea
                     .header("Authorization", scmSystemProperties.getBasicAuthHeader())
                     .post(Entity.json(args), StashRepoJSONBean.class);
         } catch (ProcessingException pe) {
-            logger.error("Could not connect to REST service " + resource, pe);
+            LOGGER.error("Could not connect to REST service " + resource, pe);
             throw new SCMCallException("createRepo", "Could not connect to REST service:" + pe.getMessage());
         } finally {
             client.close();
         }
-        
+
         return response.asRepoBean();
     }
 }

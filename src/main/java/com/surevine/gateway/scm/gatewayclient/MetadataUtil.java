@@ -39,7 +39,7 @@ import java.util.Map;
  * @author nick.leaver@surevine.com
  */
 public final class MetadataUtil {
-    private static Logger logger = Logger.getLogger(MetadataUtil.class);
+    private static final Logger LOGGER = Logger.getLogger(MetadataUtil.class);
     public static final String KEY_SOURCE = "source_type";
     public static final String VALUE_SOURCE = "SCM";
     public static final String KEY_LIMIT_DISTRIBUTION_TO = "limit_distribution_to";
@@ -83,7 +83,7 @@ public final class MetadataUtil {
         String projectKey = repoBean.getProjectKey().toLowerCase();
     	projectKey = projectKey.replace(organisationName+"_", "");
 
-        logger.debug(organisationName+", "+projectKey+", "+repoBean.getProjectKey()+", "+PropertyUtil.getOrgName());
+        LOGGER.debug(organisationName+", "+projectKey+", "+repoBean.getProjectKey()+", "+PropertyUtil.getOrgName());
 
         metadataMap.put(KEY_SOURCE, VALUE_SOURCE);
         metadataMap.put(KEY_PROJECT, projectKey);
@@ -115,7 +115,7 @@ public final class MetadataUtil {
                 }
             }
         } catch (IOException e) {
-            logger.error("Could not read the mock gateway config", e);
+            LOGGER.error("Could not read the mock gateway config", e);
         }
         return metadata;
     }

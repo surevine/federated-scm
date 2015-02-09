@@ -40,14 +40,14 @@ import com.surevine.gateway.scm.util.SCMSystemProperties;
  * This being Gitlab, what we're actually doing is creating a
  * group, not a project. A Gitlab 'group' is a Stash 'project',
  * and a Gitlab 'project' is a Stash 'repo'
- * 
+ *
  * API documentation for this entity's endpoint is here: http://doc.gitlab.com/ce/api/groups.html
- * 
+ *
  * @author martin.hewitt@surevine.com
  */
 public class GitlabCreateGroupCommand extends AbstractGitlabCommand implements CreateProjectCommand {
 
-    private static Logger logger = Logger.getLogger(GitlabCreateGroupCommand.class);
+    private static final Logger LOGGER = Logger.getLogger(GitlabCreateGroupCommand.class);
     private static final String RESOURCE = "/api/v3/groups";
     private static final String USER_RESOURCE = "/api/v3/user";
     private SCMSystemProperties scmSystemProperties;
@@ -61,13 +61,13 @@ public class GitlabCreateGroupCommand extends AbstractGitlabCommand implements C
     	GitlabGroupJSONBean projectBean = createGroup(projectKey);
     	addUserToGroup(projectBean);
     }
-    
+
     private GitlabGroupJSONBean createGroup(String projectKey) throws SCMCallException {
         String resource = scmSystemProperties.getHost() + RESOURCE;
         String privateToken = scmSystemProperties.getAuthToken();
         Client client = getClient();
-        logger.debug("REST POST call to " + resource);
-        
+        LOGGER.debug("REST POST call to " + resource);
+
         projectKey = projectKey.toLowerCase();
 
         GitlabGroupJSONBean projectBean = new GitlabGroupJSONBean();
@@ -80,24 +80,24 @@ public class GitlabCreateGroupCommand extends AbstractGitlabCommand implements C
                 .request(MediaType.APPLICATION_JSON)
                 .post(Entity.form(projectBean.toMap()), GitlabGroupJSONBean.class);
         } catch (ProcessingException pe) {
-            logger.error("Could not connect to REST service " + resource, pe);
+            LOGGER.error("Could not connect to REST service " + resource, pe);
             throw new SCMCallException("createProject", "Could not connect to REST service:" + pe.getMessage());
         } finally {
             client.close();
         }
-        
+
         return projectBean;
     }
-    
+
     private void addUserToGroup(GitlabGroupJSONBean projectBean) throws SCMCallException {
         String resource = scmSystemProperties.getHost() + RESOURCE+"/"+projectBean.getId()+"/members";
         String privateToken = scmSystemProperties.getAuthToken();
         Client client = getClient();
-        logger.debug("REST GET call to " + resource);
-        
+        LOGGER.debug("REST GET call to " + resource);
+
         GitlabGetUserCommand getUser = new GitlabGetUserCommand();
         GitlabUserJSONBean user = getUser.getAuthorizedUser();
-        
+
         MultivaluedMap<String, String> data = new MultivaluedMapImpl<String, String>();
         data.putSingle("id", projectBean.getId());
         data.putSingle("user_id", user.getId());
@@ -109,7 +109,7 @@ public class GitlabCreateGroupCommand extends AbstractGitlabCommand implements C
                 .request(MediaType.APPLICATION_JSON)
                 .post(Entity.form(data));
         } catch (ProcessingException pe) {
-            logger.error("Could not connect to REST service " + resource, pe);
+            LOGGER.error("Could not connect to REST service " + resource, pe);
             throw new SCMCallException("createProject", "Could not add user to project:" + pe.getMessage());
         } finally {
             client.close();

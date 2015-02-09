@@ -53,7 +53,8 @@ import java.util.Set;
  * @author nick.leaver@surevine.com
  */
 public class JGitGitFacade extends GitFacade {
-    private static Logger logger = Logger.getLogger(JGitGitFacade.class);
+
+    private static final Logger LOGGER = Logger.getLogger(JGitGitFacade.class);
 
     @Override
     public void push(final LocalRepoBean repoBean, final String remoteName) throws GitException {
@@ -61,12 +62,12 @@ public class JGitGitFacade extends GitFacade {
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
             Repository repository = builder.setGitDir(repoBean.getRepoDirectory().toFile()).findGitDir().build();
             Git git = new org.eclipse.jgit.api.Git(repository);
-            
+
             // dry run the push - if the push cannot be done automatically we have no way to recover so we just log
             // and throw an exception
             PushCommand dryRunPushCommand = git.push();
             dryRunPushCommand.setRemote(remoteName);
-            dryRunPushCommand.setDryRun(true); 
+            dryRunPushCommand.setDryRun(true);
             Iterable<PushResult> dryRunResult = dryRunPushCommand.call();
             for (PushResult result:dryRunResult) {
                 for (RemoteRefUpdate remoteRefUpdate:result.getRemoteUpdates()) {
@@ -81,7 +82,7 @@ public class JGitGitFacade extends GitFacade {
                     }
                 }
             }
-            
+
             // if we get to this point the dry run was OK so try the real thing
             PushCommand realPushCommand = git.push();
             realPushCommand.setRemote(remoteName);
@@ -99,9 +100,9 @@ public class JGitGitFacade extends GitFacade {
                 }
             }
         } catch (GitAPIException | IOException e) {
-            logger.error(e);
+            LOGGER.error(e);
             throw new GitException(e);
-        } 
+        }
     }
 
     @Override
@@ -117,7 +118,7 @@ public class JGitGitFacade extends GitFacade {
                 remotes.put(remoteName, config.getString("remote", remoteName, "url"));
             }
         } catch (IOException e) {
-            logger.error(e);
+            LOGGER.error(e);
             throw new GitException(e);
         }
         return remotes;
@@ -135,7 +136,7 @@ public class JGitGitFacade extends GitFacade {
             config.save();
 
         } catch (IOException e) {
-            logger.error(e);
+            LOGGER.error(e);
             throw new GitException(e);
         }
     }
@@ -155,15 +156,15 @@ public class JGitGitFacade extends GitFacade {
         try {
             cloneCommand.call();
         } catch (GitAPIException e) {
-            logger.error(e);
+            LOGGER.error(e);
             throw new GitException(e);
         }
     }
 
     @Override
     public boolean fetch(final LocalRepoBean repoBean, final String remoteName) throws GitException {
-        String remoteToPull = (remoteName != null) ? remoteName : "origin";        
-        
+        String remoteToPull = (remoteName != null) ? remoteName : "origin";
+
         FetchResult result;
         try {
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
@@ -175,11 +176,11 @@ public class JGitGitFacade extends GitFacade {
             result = fetchCommand.call();
             repository.close();
         } catch (GitAPIException | IOException e) {
-            logger.error(e);
+            LOGGER.error(e);
             throw new GitException(e);
         }
-        
-        boolean hadUpdates = !result.getTrackingRefUpdates().isEmpty();        
+
+        boolean hadUpdates = !result.getTrackingRefUpdates().isEmpty();
         return hadUpdates;
     }
 
@@ -194,7 +195,7 @@ public class JGitGitFacade extends GitFacade {
             tagCommand.call();
             repository.close();
         } catch (GitAPIException | IOException e) {
-            logger.error(e);
+            LOGGER.error(e);
             throw new GitException(e);
         }
     }
@@ -210,7 +211,7 @@ public class JGitGitFacade extends GitFacade {
                     + "_" + repoBean.getSlug()) + ".bundle";
             Path outputPath = Paths.get(PropertyUtil.getTempDir(), fileName);
             outputStream = Files.newOutputStream(outputPath);
-            
+
             Map<String, Ref> refMap = repository.getAllRefs();
             for (Ref ref:refMap.values()) {
                 bundleWriter.include(ref);
@@ -227,7 +228,7 @@ public class JGitGitFacade extends GitFacade {
                 try {
                     outputStream.close();
                 } catch (IOException ioe) {
-                    logger.error(ioe);
+                    LOGGER.error(ioe);
                 }
             }
         }
@@ -236,30 +237,30 @@ public class JGitGitFacade extends GitFacade {
     @Override
     public boolean repoAlreadyCloned(final LocalRepoBean repoBean) throws GitException {
         boolean alreadyCloned = false;
-        
+
         // if the enclosing directory exists then examine the repository to check it's the right one
         if (Files.exists(repoBean.getRepoDirectory())) {
             try {
                 // load the repository into jgit
                 FileRepositoryBuilder builder = new FileRepositoryBuilder();
-                Repository repository = 
+                Repository repository =
                         builder.setGitDir(repoBean.getGitConfigDirectory().toFile()).findGitDir().build();
-                
+
                 // examine the repository configuration and confirm whether it has a remote named "origin"
-                // that points to the clone URL in the argument repo information. If it does the repo has 
+                // that points to the clone URL in the argument repo information. If it does the repo has
                 // already been cloned.
                 Config storedConfig = repository.getConfig();
-                String originURL = storedConfig.getString("remote", "origin", "url");        
+                String originURL = storedConfig.getString("remote", "origin", "url");
                 alreadyCloned = originURL != null && repoBean.getCloneSourceURI() != null
                         && originURL.equals(repoBean.getCloneSourceURI());
                 repository.close();
             } catch (IOException e) {
-                logger.error(e);
+                LOGGER.error(e);
                 throw new GitException(e);
             }
         }
         return alreadyCloned;
     }
 
-    
+
 }

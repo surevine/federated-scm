@@ -44,32 +44,32 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
  * This being Gitlab, what we're actually doing is retrieving
  * projects, not repos. A Gitlab 'group' is a Stash 'project',
  * and a Gitlab 'project' is a Stash 'repo'
- * 
+ *
  * API documentation for this entity's endpoint is here: http://doc.gitlab.com/ce/api/projects.html
- * 
+ *
  * @author martin.hewitt@surevine.com
  */
 public class GitlabGetProjectCommand extends AbstractGitlabCommand implements GetRepoCommand {
-    private static Logger logger = Logger.getLogger(GitlabGetProjectCommand.class);
+    private static final Logger LOGGER = Logger.getLogger(GitlabGetProjectCommand.class);
     private static final String RESOURCE = "/api/v3/projects";
     private SCMSystemProperties scmSystemProperties;
 
     GitlabGetProjectCommand() {
         scmSystemProperties = PropertyUtil.getSCMSystemProperties();
     }
-	
+
     @Override
     // 								 getProjects(String namespace) throws SCMCallException {
     public Collection<LocalRepoBean> getRepositories(final String projectKey) throws SCMCallException {
     	List<GitlabProjectJSONBean> projects = getAllProjects();
     	Collection<LocalRepoBean> rtn = new ArrayList<LocalRepoBean>();
-    	
+
     	for ( GitlabProjectJSONBean project : projects ) {
     		if ( project.getNamespacePath().equals(projectKey) ) {
     			rtn.add(project.asRepoBean());
     		}
     	}
-    	
+
         return rtn;
     }
 
@@ -80,20 +80,20 @@ public class GitlabGetProjectCommand extends AbstractGitlabCommand implements Ge
     	if ( rtn == null ) {
     		return null;
     	}
-    	
+
     	return rtn.asRepoBean();
     }
-    
+
     public GitlabProjectJSONBean getProject(final String projectKey, final String repositorySlug) throws SCMCallException {
-    	
+
     	if ( projectKey == null || repositorySlug == null ) {
     		throw new SCMCallException("getProject", "Project key and repo slug required");
     	}
-    	
+
     	if ( projectKey.contains("%s")) {
     		throw new SCMCallException("getProject", "Project key has arrived without replacement");
     	}
-    	
+
     	String projectPath = projectKey+"/"+repositorySlug;
     	projectPath = projectPath.toLowerCase();
     	for ( GitlabProjectJSONBean bean : getAllProjects() ) {
@@ -101,7 +101,7 @@ public class GitlabGetProjectCommand extends AbstractGitlabCommand implements Ge
     			return bean;
     		}
     	}
-    	
+
     	return null;
     }
 
@@ -109,7 +109,7 @@ public class GitlabGetProjectCommand extends AbstractGitlabCommand implements Ge
     // 					 						  getAllProjects() throws SCMCallException {
     public Map<String, Collection<LocalRepoBean>> getAllRepositories() throws SCMCallException {
     	Map<String, Collection<LocalRepoBean>> rtn = new HashMap<String, Collection<LocalRepoBean>>();
-    	
+
     	LocalRepoBean thisBean;
     	String thisNamespace;
     	for ( GitlabProjectJSONBean project : getAllProjects() ) {
@@ -118,18 +118,18 @@ public class GitlabGetProjectCommand extends AbstractGitlabCommand implements Ge
     		if ( !rtn.containsKey(thisNamespace) ) {
     			rtn.put(thisNamespace, new ArrayList<LocalRepoBean>());
     		}
-    		
+
 			rtn.get(thisNamespace).add(thisBean);
     	}
-    	
+
     	return rtn;
     }
-    
+
     private List<GitlabProjectJSONBean> getAllProjects() throws SCMCallException {
         String resource = scmSystemProperties.getHost() + RESOURCE;
         String privateToken = scmSystemProperties.getAuthToken();
         Client client = getClient();
-        logger.debug("REST GET call to " + resource);
+        LOGGER.debug("REST GET call to " + resource);
 
         PagedProjectResult response = null;
         try {
@@ -138,12 +138,12 @@ public class GitlabGetProjectCommand extends AbstractGitlabCommand implements Ge
                     .request(MediaType.APPLICATION_JSON)
                     .get(PagedProjectResult.class);
         } catch (ProcessingException pe) {
-            logger.error("Could not connect to REST service " + resource, pe);
+            LOGGER.error("Could not connect to REST service " + resource, pe);
             throw new SCMCallException("getAllProjects", "Could not connect to REST service:" + pe.getMessage());
         } finally {
             client.close();
         }
-        
+
         return response;
     }
 

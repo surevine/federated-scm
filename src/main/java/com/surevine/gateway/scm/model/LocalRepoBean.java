@@ -32,7 +32,7 @@ import java.nio.file.Paths;
  */
 public class LocalRepoBean {
 
-	private Logger logger = Logger.getLogger(LocalRepoBean.class);
+	private static final Logger LOGGER = Logger.getLogger(LocalRepoBean.class);
 
     private String slug;
     private boolean fromGateway;
@@ -171,7 +171,7 @@ public class LocalRepoBean {
         try {
             Files.createDirectories(repoDir);
         } catch (IOException e) {
-        	logger.error("Failed to create repository directory.", e);
+        	LOGGER.error("Failed to create repository directory.", e);
         }
         return repoDir;
     }

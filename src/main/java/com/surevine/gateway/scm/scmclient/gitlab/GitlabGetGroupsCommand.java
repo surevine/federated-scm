@@ -40,52 +40,52 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
  * This being Gitlab, what we're actually doing is retrieving
  * groups, not projects. A Gitlab 'group' is a Stash 'project',
  * and a Gitlab 'project' is a Stash 'repo'
- * 
+ *
  * API documentation for this entity's endpoint is here: http://doc.gitlab.com/ce/api/groups.html
- * 
+ *
  * @author martin.hewitt@surevine.com
  */
 public class GitlabGetGroupsCommand extends AbstractGitlabCommand implements GetProjectsCommand {
-    private static Logger logger = Logger.getLogger(GitlabGetGroupsCommand.class);
+    private static final Logger LOGGER = Logger.getLogger(GitlabGetGroupsCommand.class);
     private static final String ALL_RESOURCE = "/api/v3/groups";
     private SCMSystemProperties scmSystemProperties;
 
     GitlabGetGroupsCommand() {
         scmSystemProperties = PropertyUtil.getSCMSystemProperties();
     }
-    
+
     @Override
     public Collection<String> getProjects() throws SCMCallException {
     	List<GitlabGroupJSONBean> projects = getProjectObjects();
         ArrayList<String> projectKeys = new ArrayList<String>();
-        
+
         if ( projects.size() > 0 ) {
         	for ( GitlabGroupJSONBean projectBean : projects ) {
 	            projectKeys.add(projectBean.getPath().toLowerCase());
 	        }
         }
-               
+
         return projectKeys;
     }
-    
+
     public Map<String, Integer> getProjectsWithIds() throws SCMCallException {
     	Map<String, Integer> rtn = new HashMap<String, Integer>();
     	List<GitlabGroupJSONBean> projects = getProjectObjects();
-        
+
         if ( projects.size() > 0 ) {
         	for ( GitlabGroupJSONBean projectBean : projects ) {
         		rtn.put(projectBean.getPath(), projectBean.getIdInt());
 	        }
         }
-               
+
         return rtn;
     }
-    
+
     public List<GitlabGroupJSONBean> getProjectObjects() throws SCMCallException {
         String resource = scmSystemProperties.getHost() + ALL_RESOURCE;
         String privateToken = scmSystemProperties.getAuthToken();
         Client client = getClient();
-        logger.debug("REST call to " + resource);
+        LOGGER.debug("REST call to " + resource);
 
         PagedProjectResult response = null;
         try {
@@ -94,12 +94,12 @@ public class GitlabGetGroupsCommand extends AbstractGitlabCommand implements Get
                     .request(MediaType.APPLICATION_JSON)
                     .get(PagedProjectResult.class);
         } catch (ProcessingException pe) {
-            logger.error("Could not connect to REST service " + resource, pe);
+            LOGGER.error("Could not connect to REST service " + resource, pe);
             throw new SCMCallException("getProjects", "Could not connect to REST service:" + pe.getMessage());
         } finally {
             client.close();
         }
-        
+
         return response;
     }
 

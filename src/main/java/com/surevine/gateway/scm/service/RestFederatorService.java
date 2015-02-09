@@ -62,11 +62,11 @@ import java.util.UUID;
 @Path("/federator")
 @Produces("application/json")
 public class RestFederatorService {
-    
-	private Logger logger = Logger.getLogger(RestFederatorService.class);
-    
+
+	private static final Logger LOGGER = Logger.getLogger(RestFederatorService.class);
+
     private Distributor distributionService;
-    
+
     public static final String BUNDLE_FORM_FIELD = "bundle";
 
     /**
@@ -99,7 +99,7 @@ public class RestFederatorService {
     }
 
     /**
-     * Causes the SCM federator to attempt to distribute all shared repositories via the gateway. 
+     * Causes the SCM federator to attempt to distribute all shared repositories via the gateway.
      * No service errors are returned from this call. Any errors with individual repositories will be logged.
      */
     @GET
@@ -121,7 +121,7 @@ public class RestFederatorService {
         }
         return distributionService;
     }
-    
+
     @POST
     @Path("incoming")
     @Consumes("multipart/form-data")
@@ -130,29 +130,29 @@ public class RestFederatorService {
      * form, with the `bundle` field the file input containing the Git bundle
      */
     public Response incomingBundle(MultipartFormDataInput input) {
-    	
+
     	try {
     		java.nio.file.Path bundlePath = importBundle(input);
     		HashMap<String, String> metadata = importMetadata(input);
-    		
+
     		IncomingProcessor incoming = new IncomingProcessorImpl();
     		incoming.processIncomingRepository(bundlePath, metadata);
-    		
+
     		bundlePath.toFile().delete();
 
 		} catch (IOException e) {
 			return Response.status(400).entity(e.getMessage()).build();
 		} catch (SCMFederatorServiceException e) {
 			return Response.status(500).entity(e.getMessage()).build();
-		} 
-    	
+		}
+
     	return Response.ok().build();
     }
-    
+
     private java.nio.file.Path importBundle(MultipartFormDataInput input) throws IOException {
-    	
+
 		Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
-    	
+
     	// Process the file first
 		List<InputPart> inputParts = uploadForm.get(BUNDLE_FORM_FIELD);
 		if ( inputParts == null ) {
@@ -161,39 +161,39 @@ public class RestFederatorService {
                 .type(MediaType.TEXT_PLAIN).build());
 		}
     	java.nio.file.Path file;
- 
+
 		for (InputPart inputPart : inputParts) {
 			file = generateFilename();
 
 			InputStream inputStream = inputPart.getBody(InputStream.class, null);
 			Files.copy(inputStream, file, StandardCopyOption.REPLACE_EXISTING);
-			
+
 			return file;
 		}
 		return null;
     }
-    
+
     private HashMap<String, String> importMetadata(MultipartFormDataInput input) throws IOException {
 		Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
 		HashMap<String, String> rtn = new HashMap<String, String>();
-		
+
 		for (String key : uploadForm.keySet() ) {
 			if ( key.equals(BUNDLE_FORM_FIELD) ) {
 				continue;
 			}
-			
+
 			rtn.put(key, uploadForm.get(key).get(0).getBodyAsString());
 		}
-		
-		logger.debug(rtn.toString());
-		
+
+		LOGGER.debug(rtn.toString());
+
 		return rtn;
     }
-    
+
     private java.nio.file.Path generateFilename() {
     	String filename = UUID.randomUUID().toString();
     	String filepath = PropertyUtil.getTempDir()+"/"+filename+".bundle";
-    	logger.debug(filepath);
+    	LOGGER.debug(filepath);
     	return new File(filepath).toPath();
     }
 }

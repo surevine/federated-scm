@@ -36,14 +36,14 @@ import com.surevine.gateway.scm.util.SCMSystemProperties;
  * This being Gitlab, what we're actually doing is creating a
  * group, not a project. A Gitlab 'group' is a Stash 'project',
  * and a Gitlab 'project' is a Stash 'repo'
- * 
+ *
  * API documentation for this entity's endpoint is here: http://doc.gitlab.com/ce/api/groups.html
- * 
+ *
  * @author martin.hewitt@surevine.com
  */
 public class GitlabDeleteGroupCommand extends AbstractGitlabCommand implements DeleteProjectCommand {
 
-    private static Logger logger = Logger.getLogger(GitlabDeleteGroupCommand.class);
+    private static final Logger LOGGER = Logger.getLogger(GitlabDeleteGroupCommand.class);
     private static final String RESOURCE = "/api/v3/groups/";
     private SCMSystemProperties scmSystemProperties;
 
@@ -59,28 +59,28 @@ public class GitlabDeleteGroupCommand extends AbstractGitlabCommand implements D
         projectKey = projectKey.toLowerCase();
         GitlabGetGroupsCommand projectCmd = new GitlabGetGroupsCommand();
         List<GitlabGroupJSONBean> projects = projectCmd.getProjectObjects();
-        
+
         Integer projectId = null;
-        
+
         for ( GitlabGroupJSONBean project : projects ) {
         	if ( project.getName().equals(projectKey) ) {
         		projectId = project.getIdInt();
         	}
         }
-        
+
         if ( projectId == null ) {
         	throw new SCMCallException("deleteProject", "No project found with the key provided");
         }
-        
+
         deleteProject(projectId);
     }
 
     public void deleteProject (int projectId) throws SCMCallException {
         String resource = scmSystemProperties.getHost() + RESOURCE + projectId;
-        
+
         String privateToken = scmSystemProperties.getAuthToken();
         Client client = getClient();
-        logger.debug("REST call to " + resource);
+        LOGGER.debug("REST call to " + resource);
 
         try {
         	client.target(resource)
@@ -88,7 +88,7 @@ public class GitlabDeleteGroupCommand extends AbstractGitlabCommand implements D
                 .request(MediaType.APPLICATION_JSON)
                 .delete();
         } catch (ProcessingException pe) {
-            logger.error("Could not connect to REST service " + resource, pe);
+            LOGGER.error("Could not connect to REST service " + resource, pe);
             throw new SCMCallException("createProject", "Could not connect to REST service:" + pe.getMessage());
         } finally {
             client.close();

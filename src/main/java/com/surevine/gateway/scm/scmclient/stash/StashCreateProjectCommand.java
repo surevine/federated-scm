@@ -32,7 +32,7 @@ import javax.ws.rs.core.MediaType;
  * @author nick.leaver@surevine.com
  */
 public class StashCreateProjectCommand extends AbstractStashCommand implements CreateProjectCommand {
-    private static Logger logger = Logger.getLogger(StashCreateProjectCommand.class);
+    private static final Logger LOGGER = Logger.getLogger(StashCreateProjectCommand.class);
     private static final String RESOURCE = "/rest/api/1.0/projects/";
     private SCMSystemProperties scmSystemProperties;
 
@@ -49,7 +49,7 @@ public class StashCreateProjectCommand extends AbstractStashCommand implements C
         projectBean.setDescription(projectKey);
 
         String resource = scmSystemProperties.getHost() + RESOURCE;
-        logger.debug("REST call to " + resource);
+        LOGGER.debug("REST call to " + resource);
 
         try {
         client.target(resource)
@@ -57,7 +57,7 @@ public class StashCreateProjectCommand extends AbstractStashCommand implements C
                 .header("Authorization", scmSystemProperties.getBasicAuthHeader())
                 .post(Entity.json(projectBean), StashProjectJSONBean.class);
         } catch (ProcessingException pe) {
-            logger.error("Could not connect to REST service " + resource, pe);
+            LOGGER.error("Could not connect to REST service " + resource, pe);
             throw new SCMCallException("createProject", "Could not connect to REST service:" + pe.getMessage());
         } finally {
             client.close();
