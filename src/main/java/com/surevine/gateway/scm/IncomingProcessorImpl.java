@@ -223,7 +223,7 @@ public class IncomingProcessorImpl implements IncomingProcessor {
     		openTarGz(archivePath);
 	    	return true;
     	} catch ( Exception e ) {
-    		LOGGER.debug("Verification of "+archivePath.getName((archivePath.getNameCount() - 1))+" failed: "+e.getMessage());
+    		LOGGER.debug("Verification of "+archivePath.getName(archivePath.getNameCount() - 1)+" failed: "+e.getMessage());
     		return false;
     	}
     }
@@ -254,7 +254,7 @@ public class IncomingProcessorImpl implements IncomingProcessor {
 	    		fileCount++;
 	    	}
 	    	archive.reset();
-	    	return (hasMetaData && hasBundle && fileCount == 2);
+	    	return hasMetaData && hasBundle && fileCount == 2;
         } catch ( IOException e ) {
         	return false;
         }
