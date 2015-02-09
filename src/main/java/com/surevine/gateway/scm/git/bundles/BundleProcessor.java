@@ -10,7 +10,6 @@ import com.surevine.gateway.scm.git.GitFacade;
 import com.surevine.gateway.scm.model.LocalRepoBean;
 import com.surevine.gateway.scm.scmclient.SCMCallException;
 import com.surevine.gateway.scm.scmclient.SCMCommand;
-import com.surevine.gateway.scm.service.SCMFederatorServiceException;
 import com.surevine.gateway.scm.util.PropertyUtil;
 
 public abstract class BundleProcessor {

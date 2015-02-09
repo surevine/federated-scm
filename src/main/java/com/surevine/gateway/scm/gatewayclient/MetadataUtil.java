@@ -18,12 +18,10 @@
 package com.surevine.gateway.scm.gatewayclient;
 
 import com.surevine.gateway.scm.model.LocalRepoBean;
-import com.surevine.gateway.scm.service.SCMFederatorServiceException;
 import com.surevine.gateway.scm.util.InputValidator;
 import com.surevine.gateway.scm.util.PropertyUtil;
 import com.surevine.gateway.scm.util.StringUtil;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;

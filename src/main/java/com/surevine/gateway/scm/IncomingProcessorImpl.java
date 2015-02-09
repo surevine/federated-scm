@@ -18,24 +18,20 @@
 package com.surevine.gateway.scm;
 
 import com.surevine.gateway.scm.gatewayclient.MetadataUtil;
-import com.surevine.gateway.scm.git.GitFacade;
 import com.surevine.gateway.scm.git.bundles.BundleProcessingException;
 import com.surevine.gateway.scm.git.bundles.BundleProcessor;
 import com.surevine.gateway.scm.git.bundles.LocalProjectBundleProcessor;
 import com.surevine.gateway.scm.git.bundles.NoBundleProcessorAvailableException;
 import com.surevine.gateway.scm.git.bundles.PartnerProjectBundleProcessor;
-import com.surevine.gateway.scm.model.LocalRepoBean;
 import com.surevine.gateway.scm.scmclient.SCMCallException;
 import com.surevine.gateway.scm.scmclient.SCMCommand;
 import com.surevine.gateway.scm.service.SCMFederatorServiceException;
-import com.surevine.gateway.scm.util.InputValidator;
 import com.surevine.gateway.scm.util.PropertyUtil;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
@@ -52,7 +48,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 

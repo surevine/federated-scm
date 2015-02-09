@@ -5,7 +5,6 @@ import org.apache.log4j.Logger;
 import com.surevine.gateway.scm.model.LocalRepoBean;
 import com.surevine.gateway.scm.scmclient.SCMCallException;
 import com.surevine.gateway.scm.scmclient.SCMCommand;
-import com.surevine.gateway.scm.service.SCMFederatorServiceException;
 
 public class LocalProjectBundleProcessor extends BundleProcessor {
 

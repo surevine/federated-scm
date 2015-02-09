@@ -31,7 +31,6 @@ import com.surevine.gateway.scm.service.SCMFederatorServiceException;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.log4j.Logger;
-import org.eclipse.jgit.api.errors.GitAPIException;
 
 import java.io.IOException;
 import java.nio.file.Path;

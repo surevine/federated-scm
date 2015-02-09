@@ -17,9 +17,6 @@
 */
 package com.surevine.gateway.scm.scmclient.gitlab;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
