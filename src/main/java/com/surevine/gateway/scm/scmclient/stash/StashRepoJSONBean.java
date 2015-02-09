@@ -79,7 +79,7 @@ public class StashRepoJSONBean {
         String cloneURL = null;
         if (links != null) {
             for (Link link:links.get("clone")) {
-                if (link.getName().equalsIgnoreCase("ssh")) {
+                if ("ssh".equalsIgnoreCase(link.getName())) {
                     cloneURL = link.getHref();
                     break;
                 }

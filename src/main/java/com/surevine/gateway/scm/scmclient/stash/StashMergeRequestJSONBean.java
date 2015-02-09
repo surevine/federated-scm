@@ -2,6 +2,7 @@ package com.surevine.gateway.scm.scmclient.stash;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
@@ -12,8 +13,8 @@ public class StashMergeRequestJSONBean {
     private static final Logger LOGGER = Logger.getLogger(StashMergeRequestJSONBean.class);
 	private String title;
 
-	private HashMap<String, Object> fromRef;
-	private HashMap<String, Object> toRef;
+	private Map<String, Object> fromRef;
+	private Map<String, Object> toRef;
 
 	public StashMergeRequestJSONBean() {
 		//
@@ -23,11 +24,11 @@ public class StashMergeRequestJSONBean {
 		return title;
 	}
 
-	public HashMap<String, Object> getFromRef() {
+	public Map<String, Object> getFromRef() {
 		return fromRef;
 	}
 
-	public HashMap<String, Object> getToRef() {
+	public Map<String, Object> getToRef() {
 		return toRef;
 	}
 

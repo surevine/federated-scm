@@ -246,7 +246,7 @@ public class IncomingProcessorImpl implements IncomingProcessor {
 
         try {
 	    	while ( (entry = archive.getNextTarEntry()) != null ) {
-	    		if ( entry.getName().equals(".metadata.json") ) {
+	    		if (".metadata.json".equals(entry.getName())) {
 	    			hasMetaData = true;
 	    		} else if ( entry.getName().contains(".bundle") ) {
 	    			hasBundle = true;
