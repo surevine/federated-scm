@@ -59,7 +59,6 @@ public class GitlabGetProjectCommand extends AbstractGitlabCommand implements Ge
     }
 
     @Override
-    // 								 getProjects(String namespace) throws SCMCallException {
     public Collection<LocalRepoBean> getRepositories(final String projectKey) throws SCMCallException {
     	List<GitlabProjectJSONBean> projects = getAllProjects();
     	Collection<LocalRepoBean> rtn = new ArrayList<LocalRepoBean>();
@@ -74,7 +73,6 @@ public class GitlabGetProjectCommand extends AbstractGitlabCommand implements Ge
     }
 
     @Override
-    // 					 getProject(String namespace, String projectName) throws SCMCallException {
     public LocalRepoBean getRepository(final String projectKey, final String repositorySlug) throws SCMCallException {
     	GitlabProjectJSONBean rtn = getProject(projectKey, repositorySlug);
     	if ( rtn == null ) {

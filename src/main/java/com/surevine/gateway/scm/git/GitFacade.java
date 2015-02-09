@@ -28,7 +28,7 @@ import java.util.Map;
  */
 public abstract class GitFacade {
     private static GitFacade instance;
-    
+
     protected GitFacade() {
         // no-op
     }
@@ -97,16 +97,7 @@ public abstract class GitFacade {
      * @return the Path to the bundle file
      */
     public abstract Path bundle(LocalRepoBean repoBean) throws GitException;
-    
-    
-//    /**
-//     * Verifies a given Git bundle to check it will apply cleanly
-//     * @param bundlePath
-//     * @return boolean
-//     * @throws GitException
-//     */
-//    public abstract Boolean verifyBundle(Path bundlePath) throws GitException;
-    
+
     /**
      * Determines if a repo has already been cloned into the scm federator working directory
      * @param repoBean Information about the remote Repo
