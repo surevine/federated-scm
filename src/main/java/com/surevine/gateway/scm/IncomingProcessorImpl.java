@@ -201,7 +201,7 @@ public class IncomingProcessorImpl implements IncomingProcessor {
         return bundleDestination;
     }
 
-    public TarArchiveInputStream openTarGz(final Path archivePath) throws FileNotFoundException, IOException {
+    public TarArchiveInputStream openTarGz(final Path archivePath) throws IOException {
     	File file = archivePath.toFile();
 
     	return new TarArchiveInputStream(
@@ -262,7 +262,7 @@ public class IncomingProcessorImpl implements IncomingProcessor {
     	return new File(tmpDir).toPath();
     }
 
-    public Collection<Path> extractTarGz(final Path archivePath) throws FileNotFoundException, IOException {
+    public Collection<Path> extractTarGz(final Path archivePath) throws IOException {
     	TarArchiveInputStream archive = openTarGz(archivePath);
 
     	if (!tarGzHasExpectedContents(archive)) {
