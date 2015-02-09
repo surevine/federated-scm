@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author nick.leaver@surevine.com
@@ -51,7 +52,7 @@ public class StashGetRepoCommand extends AbstractStashCommand implements GetRepo
     @Override
     public Collection<LocalRepoBean> getRepositories(String projectKey) throws SCMCallException {
     	projectKey = projectKey.toUpperCase();
-        HashSet<LocalRepoBean> repositories = new HashSet<LocalRepoBean>();
+        Set<LocalRepoBean> repositories = new HashSet<LocalRepoBean>();
 
         Client client = getClient();
         String resource = scmSystemProperties.getHost() + String.format(ALL_RESOURCE, projectKey);
@@ -113,13 +114,13 @@ public class StashGetRepoCommand extends AbstractStashCommand implements GetRepo
 
         StashGetProjectsCommand getProjectsCommand = new StashGetProjectsCommand();
         Collection<String> projects = getProjectsCommand.getProjects();
-        if (projects.size() > 0) {
+        if (!projects.isEmpty()) {
             pCount = projects.size();
         }
 
         for (String projectKey:projects) {
             Collection<LocalRepoBean> repos = getRepositories(projectKey);
-            if (repos.size() > 0) {
+            if (!repos.isEmpty()) {
                 repositories.put(projectKey, repos);
                 rCount += repos.size();
             }
