@@ -104,7 +104,6 @@ public class GitlabGetProjectCommand extends AbstractGitlabCommand implements Ge
     }
 
     @Override
-    // 					 						  getAllProjects() throws SCMCallException {
     public Map<String, Collection<LocalRepoBean>> getAllRepositories() throws SCMCallException {
     	Map<String, Collection<LocalRepoBean>> rtn = new HashMap<String, Collection<LocalRepoBean>>();
 
