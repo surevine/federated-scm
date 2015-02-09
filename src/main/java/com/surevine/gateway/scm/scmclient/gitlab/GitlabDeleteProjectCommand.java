@@ -24,6 +24,7 @@ public class GitlabDeleteProjectCommand extends AbstractGitlabCommand implements
         scmSystemProperties = PropertyUtil.getSCMSystemProperties();
     }
 
+    @Override
 	public void deleteRepo(String projectKey, String repoSlug) throws SCMCallException {
 
         String resource = scmSystemProperties.getHost() + RESOURCE;
@@ -37,7 +38,6 @@ public class GitlabDeleteProjectCommand extends AbstractGitlabCommand implements
         Client client = getClient();
         LOGGER.debug("REST call to " + resource);
 
-        GitlabProjectJSONBean createdBean = null;
         try {
         	client.target(resource)
         		.queryParam("private_token", privateToken)

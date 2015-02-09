@@ -52,6 +52,7 @@ public class GitlabCreateProjectCommand extends AbstractGitlabCommand implements
         scmSystemProperties = PropertyUtil.getSCMSystemProperties();
     }
 
+    @Override
 	public LocalRepoBean createRepo(String projectKey, String name) throws SCMCallException {
         if (projectKey == null || projectKey.isEmpty()) {
             throw new SCMCallException("createRepo", "No project key provided");

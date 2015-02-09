@@ -14,6 +14,7 @@ public class LocalProjectBundleProcessor extends BundleProcessor {
 		super();
 	}
 
+	@Override
 	public LocalRepoBean getForkedRepo() throws SCMCallException {
 		LOGGER.debug("Checking if "+partnerProjectForkKey+" exists");
         if (!SCMCommand.getProjects().contains(partnerProjectForkKey)) {
@@ -32,6 +33,7 @@ public class LocalProjectBundleProcessor extends BundleProcessor {
         return forkedRepo;
 	}
 
+	@Override
 	public LocalRepoBean getPrimaryRepo() throws SCMCallException, BundleProcessingException {
 		// this repo should exist, otherwise we wouldn't be here, but let's double-check
         if (!SCMCommand.getProjects().contains(projectKey)) {

@@ -15,6 +15,7 @@ public class PartnerProjectBundleProcessor extends BundleProcessor {
 		super();
 	}
 
+	@Override
 	public LocalRepoBean getForkedRepo() throws SCMCallException {
         if (!SCMCommand.getProjects().contains(partnerProjectForkKey)) {
         	LOGGER.debug("Creating fork "+partnerProjectForkKey);
@@ -32,6 +33,7 @@ public class PartnerProjectBundleProcessor extends BundleProcessor {
         return forkedRepo;
 	}
 
+	@Override
 	public LocalRepoBean getPrimaryRepo() throws SCMCallException {
         // create project in the SCM system to hold repositories from this partner if it doesn't already exist
         if (!SCMCommand.getProjects().contains(partnerProjectKey)) {

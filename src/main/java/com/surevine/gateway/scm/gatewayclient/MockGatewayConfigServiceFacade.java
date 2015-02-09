@@ -32,7 +32,10 @@ import java.util.List;
  * @author nick.leaver@surevine.com
  */
 public class MockGatewayConfigServiceFacade extends GatewayConfigServiceFacade {
+
     private static final Logger LOGGER = Logger.getLogger(MockGatewayConfigServiceFacade.class);
+
+    @Override
     public List<SharedRepoIdentification> getSharedRepositories() {
         List<SharedRepoIdentification> sharedRepositories = new ArrayList<SharedRepoIdentification>();
 

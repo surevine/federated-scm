@@ -28,7 +28,7 @@ public class GitlabCreateMergeRequestCommand extends AbstractGitlabCommand imple
         scmSystemProperties = PropertyUtil.getSCMSystemProperties();
 	}
 
-
+	@Override
 	public void createMergeRequest(LocalRepoBean from, LocalRepoBean to ) throws SCMCallException{
         String resource = scmSystemProperties.getHost() + PROJECT_RESOURCE;
         String privateToken = scmSystemProperties.getAuthToken();
