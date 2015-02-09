@@ -83,8 +83,8 @@ public class IncomingProcessorImpl implements IncomingProcessor {
 
             metadataPath = getMetadataFilePath(extractedFilePaths);
         	LOGGER.debug("Extracted "+archivePath+", metadata path is "+metadataPath);
-        } catch ( IOException e ) {
-            LOGGER.debug("Error when expanding " + archivePath + ": "+e.getMessage());
+        } catch (IOException e) {
+            LOGGER.debug("Error when expanding " + archivePath, e);
             return;
         }
 
