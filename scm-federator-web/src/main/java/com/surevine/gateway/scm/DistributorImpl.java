@@ -48,7 +48,7 @@ public class DistributorImpl implements Distributor {
     @Override
     public void distributeToSingleDestination(final String partnerName, final String projectKey, final String repositorySlug)
             throws SCMFederatorServiceException {
-        LOGGER.info("Distributing to partner: " + partnerName + " repository "
+        LOGGER.error("Distributing to partner: " + partnerName + " repository "
                 + projectKey + ":" + repositorySlug);
         try {
             LocalRepoBean repo = SCMCommand.getRepository(projectKey, repositorySlug);

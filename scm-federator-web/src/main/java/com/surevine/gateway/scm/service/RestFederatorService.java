@@ -41,7 +41,9 @@ import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
@@ -75,12 +77,21 @@ public class RestFederatorService {
     @Path("distribute")
     @Consumes("application/json")
     public Response distributeToSingleDestination(@QueryParam("destination") final String partnerName,
-                             @QueryParam("projectKey") final String projectKey,
-                             @QueryParam("repositorySlug") final String repositorySlug)
+                             @QueryParam("identifier") final String identifier)
             throws SCMFederatorServiceException {
+
+    	String[] identifierParts;
+		try {
+			identifierParts = URLDecoder.decode(identifier, "UTF-8").split("/");
+		} catch (UnsupportedEncodingException e) {
+			throw new SCMFederatorServiceException("Error decoding identifier query parameter. Cannot distribute repository.");
+		}
+    	String projectKey = identifierParts[0];
+    	String repositorySlug = identifierParts[1];
+
         // check input
         if (!InputValidator.partnerNameIsValid(partnerName)
-                || !InputValidator.projectKeyIsValid(projectKey)
+                || !InputValidator.projectKeyIsValid(repositorySlug)
                 || !InputValidator.repoSlugIsValid(repositorySlug)) {
             // one of the params is dirty and we can't use it so reject the request
             throw new WebApplicationException(Response.status(HttpURLConnection.HTTP_BAD_REQUEST)
