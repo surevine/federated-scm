@@ -67,16 +67,15 @@ public class RestFederatorService {
 
     /**
      * Causes the SCM federator to attempt to distribute the named repository to the specified destination.
-     * @param partnerName the name of the partner / gateway destination the repo should be sent to
-     * @param projectKey the project (SCM group) key
-     * @param repositorySlug the repository slug (short name) as it appears in the SCM system
+     * @param partner Key of the partner / gateway destination the repo should be sent to
+     * @param identifier the unique identifierof the repository
      * @return a HTTP response appropriate to the success or failure of the call
      * @throws SCMFederatorServiceException if the specified repository could not be distributed
      */
     @POST
     @Path("distribute")
     @Consumes("application/json")
-    public Response distributeToSingleDestination(@QueryParam("destination") final String partnerName,
+    public Response distributeToSingleDestination(@QueryParam("partner") final String partner,
                              @QueryParam("identifier") final String identifier)
             throws SCMFederatorServiceException {
 
@@ -90,8 +89,8 @@ public class RestFederatorService {
     	String repositorySlug = identifierParts[1];
 
         // check input
-        if (!InputValidator.partnerNameIsValid(partnerName)
-                || !InputValidator.projectKeyIsValid(repositorySlug)
+        if (!InputValidator.partnerNameIsValid(partner)
+                || !InputValidator.projectKeyIsValid(projectKey)
                 || !InputValidator.repoSlugIsValid(repositorySlug)) {
             // one of the params is dirty and we can't use it so reject the request
             throw new WebApplicationException(Response.status(HttpURLConnection.HTTP_BAD_REQUEST)
@@ -99,7 +98,7 @@ public class RestFederatorService {
                     .type(MediaType.TEXT_PLAIN).build());
         }
 
-        getDistributionService().distributeToSingleDestination(partnerName, projectKey, repositorySlug);
+        getDistributionService().distributeToSingleDestination(partner, projectKey, repositorySlug);
         return Response.ok(MediaType.APPLICATION_JSON).build();
     }
 
