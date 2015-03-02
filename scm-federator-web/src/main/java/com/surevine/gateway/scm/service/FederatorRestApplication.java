@@ -24,6 +24,6 @@ import javax.ws.rs.core.Application;
  * REST Application
  * @author nick.leaver@surevine.com
  */
-@ApplicationPath("rest")
+@ApplicationPath("api")
 public class FederatorRestApplication extends Application {
 }

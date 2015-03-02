@@ -55,8 +55,8 @@ import java.util.UUID;
  * REST proxy for the federator service
  * @author nick.leaver@surevine.com
  */
-@Path("/federator")
-@Produces("application/json")
+@Path("/")
+@Produces(MediaType.APPLICATION_JSON)
 public class RestFederatorService {
 
 	private static final Logger LOGGER = Logger.getLogger(RestFederatorService.class);
