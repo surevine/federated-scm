@@ -14,7 +14,7 @@ fedscm.logfile,federated-scm.log,,The log file to write detailed log information
 fedscm.org.name,,,The name of the organisation owning the installation. Used by partners in their gateway configurations for sending here.
 
 scm.type,gitlab,stash | gitlab,The type of SCM tool being federated
-scm.hostname,,,The base URL of the SCM tool being federated
+scm.hostname,http://localhost,,The base URL of the SCM tool being federated
 scm.auth.username,,,The username used for access to the SCM tool (only required for Stash)
 scm.auth.password,,,The password used for access to the SCM tool (only required for Stash)
 scm.auth.token,,,The authorisation token used for access to the SCM tool (only required for Gitlab)
