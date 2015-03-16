@@ -1,0 +1,27 @@
+# Template file containing details of the properties available for configuration of the application.
+# Template configuration can be parsed by the generator script to generate a usable deployment configuration file
+# Properties are expressed within a CSV format using the following headings:
+#
+# property name, default value, text to display as options, description
+#
+
+fedscm.temp.dir,/tmp/tpsc/scm,,The temporary directory to use to write files before they are sent to the Gateway
+fedscm.git.dir,/tmp/tpsc/scm/repositories,,The directory in which to clone Git repositories being federated
+fedscm.bundle.dir,/tmp/tpsc/scm/bundle_remotes,,The directory in which to process Git bundles being federated
+fedscm.export.interval,86400,,The interval duration in seconds between the automatic periodic exports
+fedscm.export.run_at_start,false,,Whether an export should be run on system startup
+fedscm.logfile,federated-scm.log,,The log file to write detailed log information to
+fedscm.org.name,,,The name of the organisation owning the installation. Used by partners in their gateway configurations for sending here.
+
+scm.type,gitlab,stash | gitlab,The type of SCM tool being federated
+scm.hostname,http://localhost,,The base URL of the SCM tool being federated
+scm.auth.username,,,The username used for access to the SCM tool (only required for Stash)
+scm.auth.password,,,The password used for access to the SCM tool (only required for Stash)
+scm.auth.token,,,The authorisation token used for access to the SCM tool (only required for Gitlab)
+scm.import.project.key,%s_%s,,The name template used for generating repository names for received shared repositories 
+scm.import.project.fork,%s_%s_sync,,The name template used for generating fork names for shared repositories
+
+gateway.serviceURL,http://localhost:8080/gateway/api/export,,The URL of the Gateway service that exports should be sent to
+gateway.configurationServiceURL,http://localhost:9000/api/projects,,The URL of the management console service that is invoked by the timed export to obtain details of configured shares to be exported
+
+fedscm.mock.gatewayclient,false,true | false,Flag to determine whether or not to run the SCM Federator against a mock Gateway. Should only be used for development purposes.
