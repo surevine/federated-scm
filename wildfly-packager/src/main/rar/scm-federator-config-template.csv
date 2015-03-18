@@ -18,10 +18,10 @@ scm.hostname,http://localhost,,The base URL of the SCM tool being federated
 scm.auth.username,,,The username used for access to the SCM tool (only required for Stash)
 scm.auth.password,,,The password used for access to the SCM tool (only required for Stash)
 scm.auth.token,,,The authorisation token used for access to the SCM tool (only required for Gitlab)
-scm.import.project.key,%s_%s,,The name template used for generating repository names for received shared repositories 
+scm.import.project.key,%s_%s,,The name template used for generating repository names for received shared repositories
 scm.import.project.fork,%s_%s_sync,,The name template used for generating fork names for shared repositories
 
 gateway.serviceURL,http://localhost:8080/gateway/api/export,,The URL of the Gateway service that exports should be sent to
-gateway.configurationServiceURL,http://localhost:9000/api/projects,,The URL of the management console service that is invoked by the timed export to obtain details of configured shares to be exported
+gateway.configurationServiceURL,http://localhost:9000/api/federation/outbound,,The URL of the management console service that is invoked by the timed export to obtain details of configured shares to be exported
 
 fedscm.mock.gatewayclient,false,true | false,Flag to determine whether or not to run the SCM Federator against a mock Gateway. Should only be used for development purposes.
