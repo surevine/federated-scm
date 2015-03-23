@@ -51,10 +51,10 @@ public class SCMSystemProperties {
         this.type = SCMType.getType(type);
         this.username = username;
         this.password = password;
-        this.host = host;
+        this.host = host.replaceAll("/$", "");
         this.encodedAuth = "Basic " + Base64.encodeBase64String((username + ":" + password).getBytes());
     }
-    
+
     SCMSystemProperties(final String type, final String username, final String password, final String host, final String authToken) {
     	this(type, username, password, host);
     	this.authToken = authToken;
@@ -79,7 +79,7 @@ public class SCMSystemProperties {
     public String getBasicAuthHeader() {
         return encodedAuth;
     }
-    
+
     public String getAuthToken() {
     	return authToken;
     }
