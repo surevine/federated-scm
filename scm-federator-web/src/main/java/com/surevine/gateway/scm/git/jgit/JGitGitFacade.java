@@ -262,5 +262,17 @@ public class JGitGitFacade extends GitFacade {
         return alreadyCloned;
     }
 
+    @Override
+    public boolean isRepoEmpty(LocalRepoBean repoBean) throws GitException {
+    	FileRepositoryBuilder builder = new FileRepositoryBuilder();
+    	Repository repository = null;
+    	try {
+    		repository = builder.setGitDir(repoBean.getRepoDirectory().toFile()).findGitDir().build();
+    		return repository.getRef("HEAD").getObjectId() == null;
+    	} catch(IOException e) {
+    		throw new GitException("Error detecting whether repository is empty.", e);
+    	}
+    }
+
 
 }

@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.surevine.gateway.scm.gatewayclient.MetadataUtil;
+import com.surevine.gateway.scm.git.GitException;
 import com.surevine.gateway.scm.git.GitFacade;
 import com.surevine.gateway.scm.model.LocalRepoBean;
 import com.surevine.gateway.scm.scmclient.SCMCallException;
@@ -88,6 +89,12 @@ public abstract class BundleProcessor {
         LocalRepoBean repoBean = getRepoForBundle();
 
         try {
+
+        	if(GitFacade.getInstance().isRepoEmpty(repoBean)) {
+        		LOGGER.debug("Recieved repo bundle is empty. Skipping import.");
+        		return;
+			}
+
         	repoBean.emptyRepoDirectory();
 
         	LOGGER.debug("Cloning from localRepoBean");

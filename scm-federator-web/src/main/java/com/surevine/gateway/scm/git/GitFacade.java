@@ -106,6 +106,13 @@ public abstract class GitFacade {
     public abstract boolean repoAlreadyCloned(LocalRepoBean repoBean) throws GitException;
 
     /**
+     * Determines whether a repo is empty (no files)
+     * @param repoBean repo to check
+     * @return
+     */
+    public abstract boolean isRepoEmpty(LocalRepoBean repoBean) throws GitException;
+
+    /**
      * Set the Git implementation
      * @param instance the git implementation
      */
