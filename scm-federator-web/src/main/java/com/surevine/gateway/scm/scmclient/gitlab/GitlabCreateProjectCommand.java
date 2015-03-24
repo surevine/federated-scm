@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*/
+ */
 package com.surevine.gateway.scm.scmclient.gitlab;
 
 import java.util.List;
@@ -32,7 +32,6 @@ import com.surevine.gateway.scm.scmclient.SCMCallException;
 import com.surevine.gateway.scm.util.PropertyUtil;
 import com.surevine.gateway.scm.util.SCMSystemProperties;
 
-
 /**
  * This being Gitlab, what we're actually doing is creating a
  * project, not a repo. A Gitlab 'group' is a Stash 'project',
@@ -44,65 +43,61 @@ import com.surevine.gateway.scm.util.SCMSystemProperties;
  */
 public class GitlabCreateProjectCommand extends AbstractGitlabCommand implements CreateRepoCommand {
 
-    private static final Logger LOGGER = Logger.getLogger(GitlabCreateProjectCommand.class);
-    private static final String RESOURCE = "/api/v3/projects";
-    private SCMSystemProperties scmSystemProperties;
+	private static final Logger LOGGER = Logger.getLogger(GitlabCreateProjectCommand.class);
+	private static final String RESOURCE = "/api/v3/projects";
+	private final SCMSystemProperties scmSystemProperties;
 
-    GitlabCreateProjectCommand() {
-        scmSystemProperties = PropertyUtil.getSCMSystemProperties();
-    }
-
-    @Override
-	public LocalRepoBean createRepo(String projectKey, String name) throws SCMCallException {
-        if (projectKey == null || projectKey.isEmpty()) {
-            throw new SCMCallException("createRepo", "No project key provided");
-        }
-
-        projectKey = projectKey.toLowerCase();
-        name = name.toLowerCase();
-
-        GitlabGetGroupsCommand projectCmd = new GitlabGetGroupsCommand();
-        List<GitlabGroupJSONBean> projects = projectCmd.getProjectObjects();
-
-        GitlabGroupJSONBean project = null;
-
-        for ( GitlabGroupJSONBean projectEntry : projects ) {
-        	if ( projectEntry.getName().equals(projectKey) ) {
-        		project = projectEntry;
-        	}
-        }
-
-        if ( project == null ) {
-        	throw new SCMCallException("createRepo", "No project found with the key provided");
-        }
-
-        return createRepo(project, name);
+	GitlabCreateProjectCommand() {
+		scmSystemProperties = PropertyUtil.getSCMSystemProperties();
 	}
 
-	public LocalRepoBean createRepo(GitlabGroupJSONBean project, String name) throws SCMCallException {
-		name = name.toLowerCase();
-        String resource = scmSystemProperties.getHost() + RESOURCE;
-        String privateToken = scmSystemProperties.getAuthToken();
-        Client client = getClient();
-        LOGGER.debug("REST POST call to " + resource);
+	@Override
+	public LocalRepoBean createRepo(final String projectKey, final String name) throws SCMCallException {
+		if (projectKey == null || projectKey.isEmpty()) {
+			throw new SCMCallException("createRepo", "No project key provided");
+		}
 
-        GitlabProjectJSONBean projectBean = new GitlabProjectJSONBean();
-        projectBean.setName(name);
-        projectBean.setNamespaceId(project.getId());
+		final GitlabGetGroupsCommand projectCmd = new GitlabGetGroupsCommand();
+		final List<GitlabGroupJSONBean> projects = projectCmd.getProjectObjects();
 
-        GitlabProjectJSONBean createdBean = null;
-        try {
-        	createdBean = client.target(resource)
-        		.queryParam("private_token", privateToken)
-                .request(MediaType.APPLICATION_JSON)
-                .post(Entity.form(projectBean.toMap()), GitlabProjectJSONBean.class);
-        } catch (ProcessingException pe) {
-            LOGGER.error("Could not connect to REST service " + resource, pe);
-            throw new SCMCallException("createProject", "Could not connect to REST service:" + pe.getMessage());
-        } finally {
-            client.close();
-        }
+		GitlabGroupJSONBean project = null;
 
-        return createdBean.asRepoBean();
+		for (final GitlabGroupJSONBean projectEntry : projects) {
+			if (projectEntry.getName().equals(projectKey)) {
+				project = projectEntry;
+			}
+		}
+
+		if (project == null) {
+			throw new SCMCallException("createRepo", "No project found with the key provided");
+		}
+
+		return createRepo(project, name);
+	}
+
+	public LocalRepoBean createRepo(final GitlabGroupJSONBean project, final String name) throws SCMCallException {
+		final String resource = scmSystemProperties.getHost() + RESOURCE;
+		final String privateToken = scmSystemProperties.getAuthToken();
+		final Client client = getClient();
+		LOGGER.debug("REST POST call to " + resource);
+
+		final GitlabProjectJSONBean projectBean = new GitlabProjectJSONBean();
+		projectBean.setName(name);
+		projectBean.setPath(name);
+		projectBean.setNamespaceId(project.getId());
+
+		GitlabProjectJSONBean createdBean = null;
+		try {
+			createdBean = client.target(resource).queryParam("private_token", privateToken)
+					.request(MediaType.APPLICATION_JSON)
+					.post(Entity.form(projectBean.toMap()), GitlabProjectJSONBean.class);
+		} catch (final ProcessingException pe) {
+			LOGGER.error("Could not connect to REST service " + resource, pe);
+			throw new SCMCallException("createProject", "Could not connect to REST service:" + pe.getMessage());
+		} finally {
+			client.close();
+		}
+
+		return createdBean.asRepoBean();
 	}
 }

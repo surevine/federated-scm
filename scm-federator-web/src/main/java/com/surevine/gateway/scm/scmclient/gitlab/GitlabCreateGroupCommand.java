@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*/
+ */
 package com.surevine.gateway.scm.scmclient.gitlab;
 
 import javax.ws.rs.ProcessingException;
@@ -42,72 +42,67 @@ import com.surevine.gateway.scm.util.SCMSystemProperties;
  */
 public class GitlabCreateGroupCommand extends AbstractGitlabCommand implements CreateProjectCommand {
 
-    private static final Logger LOGGER = Logger.getLogger(GitlabCreateGroupCommand.class);
-    private static final String RESOURCE = "/api/v3/groups";
-    private static final String USER_RESOURCE = "/api/v3/user";
-    private SCMSystemProperties scmSystemProperties;
+	private static final Logger LOGGER = Logger.getLogger(GitlabCreateGroupCommand.class);
+	private static final String RESOURCE = "/api/v3/groups";
+	private static final String USER_RESOURCE = "/api/v3/user";
+	private final SCMSystemProperties scmSystemProperties;
 
-    GitlabCreateGroupCommand() {
-        scmSystemProperties = PropertyUtil.getSCMSystemProperties();
-    }
+	GitlabCreateGroupCommand() {
+		scmSystemProperties = PropertyUtil.getSCMSystemProperties();
+	}
 
-    @Override
-    public void createProject(final String projectKey) throws SCMCallException {
-    	GitlabGroupJSONBean projectBean = createGroup(projectKey);
-    	addUserToGroup(projectBean);
-    }
+	@Override
+	public void createProject(final String projectKey) throws SCMCallException {
+		final GitlabGroupJSONBean projectBean = createGroup(projectKey);
+		addUserToGroup(projectBean);
+	}
 
-    private GitlabGroupJSONBean createGroup(String projectKey) throws SCMCallException {
-        String resource = scmSystemProperties.getHost() + RESOURCE;
-        String privateToken = scmSystemProperties.getAuthToken();
-        Client client = getClient();
-        LOGGER.debug("REST POST call to " + resource);
+	private GitlabGroupJSONBean createGroup(final String projectKey) throws SCMCallException {
+		final String resource = scmSystemProperties.getHost() + RESOURCE;
+		final String privateToken = scmSystemProperties.getAuthToken();
+		final Client client = getClient();
+		LOGGER.debug("REST POST call to " + resource);
 
-        projectKey = projectKey.toLowerCase();
+		GitlabGroupJSONBean projectBean = new GitlabGroupJSONBean();
+		projectBean.setName(projectKey);
+		projectBean.setPath(projectKey);
 
-        GitlabGroupJSONBean projectBean = new GitlabGroupJSONBean();
-        projectBean.setName(projectKey);
-        projectBean.setPath(projectKey);
+		try {
+			projectBean = client.target(resource).queryParam("private_token", privateToken)
+					.request(MediaType.APPLICATION_JSON)
+					.post(Entity.form(projectBean.toMap()), GitlabGroupJSONBean.class);
+		} catch (final ProcessingException pe) {
+			LOGGER.error("Could not connect to REST service " + resource, pe);
+			throw new SCMCallException("createProject", "Could not connect to REST service:" + pe.getMessage());
+		} finally {
+			client.close();
+		}
 
-        try {
-        	projectBean = client.target(resource)
-        		.queryParam("private_token", privateToken)
-                .request(MediaType.APPLICATION_JSON)
-                .post(Entity.form(projectBean.toMap()), GitlabGroupJSONBean.class);
-        } catch (ProcessingException pe) {
-            LOGGER.error("Could not connect to REST service " + resource, pe);
-            throw new SCMCallException("createProject", "Could not connect to REST service:" + pe.getMessage());
-        } finally {
-            client.close();
-        }
+		return projectBean;
+	}
 
-        return projectBean;
-    }
+	private void addUserToGroup(final GitlabGroupJSONBean projectBean) throws SCMCallException {
+		final String resource = scmSystemProperties.getHost() + RESOURCE + "/" + projectBean.getId() + "/members";
+		final String privateToken = scmSystemProperties.getAuthToken();
+		final Client client = getClient();
+		LOGGER.debug("REST GET call to " + resource);
 
-    private void addUserToGroup(GitlabGroupJSONBean projectBean) throws SCMCallException {
-        String resource = scmSystemProperties.getHost() + RESOURCE+"/"+projectBean.getId()+"/members";
-        String privateToken = scmSystemProperties.getAuthToken();
-        Client client = getClient();
-        LOGGER.debug("REST GET call to " + resource);
+		final GitlabGetUserCommand getUser = new GitlabGetUserCommand();
+		final GitlabUserJSONBean user = getUser.getAuthorizedUser();
 
-        GitlabGetUserCommand getUser = new GitlabGetUserCommand();
-        GitlabUserJSONBean user = getUser.getAuthorizedUser();
+		final MultivaluedMap<String, String> data = new MultivaluedMapImpl<String, String>();
+		data.putSingle("id", projectBean.getId());
+		data.putSingle("user_id", user.getId());
+		data.putSingle("access_level", "50");
 
-        MultivaluedMap<String, String> data = new MultivaluedMapImpl<String, String>();
-        data.putSingle("id", projectBean.getId());
-        data.putSingle("user_id", user.getId());
-        data.putSingle("access_level", "50");
-
-        try {
-        	client.target(resource)
-        		.queryParam("private_token", privateToken)
-                .request(MediaType.APPLICATION_JSON)
-                .post(Entity.form(data));
-        } catch (ProcessingException pe) {
-            LOGGER.error("Could not connect to REST service " + resource, pe);
-            throw new SCMCallException("createProject", "Could not add user to project:" + pe.getMessage());
-        } finally {
-            client.close();
-        }
-    }
+		try {
+			client.target(resource).queryParam("private_token", privateToken).request(MediaType.APPLICATION_JSON)
+					.post(Entity.form(data));
+		} catch (final ProcessingException pe) {
+			LOGGER.error("Could not connect to REST service " + resource, pe);
+			throw new SCMCallException("createProject", "Could not add user to project:" + pe.getMessage());
+		} finally {
+			client.close();
+		}
+	}
 }

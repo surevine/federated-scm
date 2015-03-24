@@ -14,20 +14,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*/
+ */
 package com.surevine.gateway.scm.scmclient;
 
 import java.util.Collection;
 
 /**
  * Gets project information from an SCM system
+ *
  * @author nick.leaver@surevine.com
  */
 public interface GetProjectsCommand {
-    /**
-     * Gets a collection of all projects in the SCM system
-     * @return a collection of all projects in the SCM system
-     * @throws com.surevine.gateway.scm.scmclient.SCMCallException
-     */
-    Collection<String> getProjects() throws SCMCallException;
+	/**
+	 * Gets a collection of all projects in the SCM system
+	 *
+	 * @return a collection of all projects in the SCM system
+	 * @throws com.surevine.gateway.scm.scmclient.SCMCallException
+	 */
+	Collection<String> getProjects() throws SCMCallException;
+
+	/**
+	 * Checks whether a particular project exists in the SCM system
+	 *
+	 * @return whether the project exists in the SCM system
+	 * @throws com.surevine.gateway.scm.scmclient.SCMCallException
+	 */
+	boolean projectExists(final String project) throws SCMCallException;
 }

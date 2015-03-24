@@ -14,13 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*/
+ */
 package com.surevine.gateway.scm.scmclient.gitlab;
-
-import com.surevine.gateway.scm.scmclient.GetProjectsCommand;
-import com.surevine.gateway.scm.scmclient.SCMCallException;
-import com.surevine.gateway.scm.util.PropertyUtil;
-import com.surevine.gateway.scm.util.SCMSystemProperties;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,6 +30,11 @@ import javax.ws.rs.core.MediaType;
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
+import com.surevine.gateway.scm.scmclient.GetProjectsCommand;
+import com.surevine.gateway.scm.scmclient.SCMCallException;
+import com.surevine.gateway.scm.util.PropertyUtil;
+import com.surevine.gateway.scm.util.SCMSystemProperties;
+
 /**
  * This being Gitlab, what we're actually doing is retrieving
  * groups, not projects. A Gitlab 'group' is a Stash 'project',
@@ -45,68 +45,76 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
  * @author martin.hewitt@surevine.com
  */
 public class GitlabGetGroupsCommand extends AbstractGitlabCommand implements GetProjectsCommand {
-    private static final Logger LOGGER = Logger.getLogger(GitlabGetGroupsCommand.class);
-    private static final String ALL_RESOURCE = "/api/v3/groups";
-    private SCMSystemProperties scmSystemProperties;
+	private static final Logger LOGGER = Logger.getLogger(GitlabGetGroupsCommand.class);
+	private static final String ALL_RESOURCE = "/api/v3/groups";
+	private final SCMSystemProperties scmSystemProperties;
 
-    GitlabGetGroupsCommand() {
-        scmSystemProperties = PropertyUtil.getSCMSystemProperties();
-    }
+	GitlabGetGroupsCommand() {
+		scmSystemProperties = PropertyUtil.getSCMSystemProperties();
+	}
 
-    @Override
-    public Collection<String> getProjects() throws SCMCallException {
-    	List<GitlabGroupJSONBean> projects = getProjectObjects();
-        ArrayList<String> projectKeys = new ArrayList<String>();
+	@Override
+	public Collection<String> getProjects() throws SCMCallException {
+		final List<GitlabGroupJSONBean> projects = getProjectObjects();
+		final ArrayList<String> projectKeys = new ArrayList<String>();
 
-        if ( projects.size() > 0 ) {
-        	for ( GitlabGroupJSONBean projectBean : projects ) {
-	            projectKeys.add(projectBean.getPath().toLowerCase());
-	        }
-        }
+		if (projects.size() > 0) {
+			for (final GitlabGroupJSONBean projectBean : projects) {
+				projectKeys.add(projectBean.getPath());
+			}
+		}
 
-        return projectKeys;
-    }
+		return projectKeys;
+	}
 
-    public Map<String, Integer> getProjectsWithIds() throws SCMCallException {
-    	Map<String, Integer> rtn = new HashMap<String, Integer>();
-    	List<GitlabGroupJSONBean> projects = getProjectObjects();
+	@Override
+	public boolean projectExists(final String project) throws SCMCallException {
+		final Collection<String> projects = getProjects();
+		for (final String loadedProject : projects) {
+			if (loadedProject.equalsIgnoreCase(project)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
-        if ( projects.size() > 0 ) {
-        	for ( GitlabGroupJSONBean projectBean : projects ) {
-        		rtn.put(projectBean.getPath(), projectBean.getIdInt());
-	        }
-        }
+	public Map<String, Integer> getProjectsWithIds() throws SCMCallException {
+		final Map<String, Integer> rtn = new HashMap<String, Integer>();
+		final List<GitlabGroupJSONBean> projects = getProjectObjects();
 
-        return rtn;
-    }
+		if (projects.size() > 0) {
+			for (final GitlabGroupJSONBean projectBean : projects) {
+				rtn.put(projectBean.getPath(), projectBean.getIdInt());
+			}
+		}
 
-    public List<GitlabGroupJSONBean> getProjectObjects() throws SCMCallException {
-        String resource = scmSystemProperties.getHost() + ALL_RESOURCE;
-        String privateToken = scmSystemProperties.getAuthToken();
-        Client client = getClient();
-        LOGGER.debug("REST call to " + resource);
+		return rtn;
+	}
 
-        PagedProjectResult response = null;
-        try {
-            response = client.target(resource)
-            		.queryParam("private_token", privateToken)
-                    .request(MediaType.APPLICATION_JSON)
-                    .get(PagedProjectResult.class);
-        } catch (ProcessingException pe) {
-            LOGGER.error("Could not connect to REST service " + resource, pe);
-            throw new SCMCallException("getProjects", "Could not connect to REST service:" + pe.getMessage());
-        } finally {
-            client.close();
-        }
+	public List<GitlabGroupJSONBean> getProjectObjects() throws SCMCallException {
+		final String resource = scmSystemProperties.getHost() + ALL_RESOURCE;
+		final String privateToken = scmSystemProperties.getAuthToken();
+		final Client client = getClient();
+		LOGGER.debug("REST call to " + resource);
 
-        return response;
-    }
+		PagedProjectResult response = null;
+		try {
+			response = client.target(resource).queryParam("private_token", privateToken)
+					.request(MediaType.APPLICATION_JSON).get(PagedProjectResult.class);
+		} catch (final ProcessingException pe) {
+			LOGGER.error("Could not connect to REST service " + resource, pe);
+			throw new SCMCallException("getProjects", "Could not connect to REST service:" + pe.getMessage());
+		} finally {
+			client.close();
+		}
 
-    /**
-     * Private wrapper for typing response results
-     */
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    private static class PagedProjectResult
-    	extends ArrayList<GitlabGroupJSONBean> {
-    }
+		return response;
+	}
+
+	/**
+	 * Private wrapper for typing response results
+	 */
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	private static class PagedProjectResult extends ArrayList<GitlabGroupJSONBean> {
+	}
 }
