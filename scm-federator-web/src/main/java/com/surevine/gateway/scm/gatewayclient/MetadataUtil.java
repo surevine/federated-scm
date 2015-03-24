@@ -56,14 +56,10 @@ public final class MetadataUtil {
 		// no-op
 	}
 
-	public static Map<String, String> getSinglePartnerMetadata(final LocalRepoBean repoBean, final String partner) {
-		final Map<String, String> metadataMap = generateMetadata(repoBean, VALUE_SINGLE_DISTRIBUTION);
-		metadataMap.put(KEY_LIMIT_DISTRIBUTION_TO, partner);
+	public static Map<String, String> getSinglePartnerMetadata(final LocalRepoBean repoBean, final String partnerName) {
+		final Map<String, String> metadataMap = generateMetadata(repoBean, VALUE_SINGLE_DISTRIBUTION, partnerName);
+		metadataMap.put(KEY_LIMIT_DISTRIBUTION_TO, partnerName);
 		return metadataMap;
-	}
-
-	public static Map<String, String> getMetadata(final LocalRepoBean repoBean) {
-		return generateMetadata(repoBean, VALUE_DISTRIBUTE_TO_ALL_PERMITTED);
 	}
 
 	public static String deriveFilenameFromMetadata(final Map<String, String> metadata) {
@@ -74,11 +70,29 @@ public final class MetadataUtil {
 		return StringUtil.cleanStringForFilePath(sb.toString()) + ".tar.gz";
 	}
 
-	private static Map<String, String> generateMetadata(final LocalRepoBean repoBean, final String distributionType) {
+	private static Map<String, String> generateMetadata(final LocalRepoBean repoBean, final String distributionType,
+			final String partnerName) {
 		final Map<String, String> metadataMap = new HashMap<>();
 
 		final String organisationName = PropertyUtil.getOrgName();
-		final String projectKey = repoBean.getProjectKey();
+		String projectKey = repoBean.getProjectKey();
+
+		// lower the project key and partner name to case insensitively check for the partner name as a prefix to the
+		// project key
+		final String lowerProjectKey = projectKey.toLowerCase();
+		final String lowerPartnerName = partnerName.toLowerCase();
+
+		// check to see if the partner name is present; if so, we know we're returning the project to its originating
+		// organisation and must ensure it is removed before continuing
+		if (lowerProjectKey.startsWith(lowerPartnerName)) {
+			// if the lowered partner name is present in the lowered project key, grab the length of the resulting
+			// key with the name stripped off
+			final int lengthLessPartnerName = lowerProjectKey.replace(lowerPartnerName + "_", "").length();
+
+			// now we can use the length of the resulting string above to strip the partner name without changing
+			// the case of the entire project key
+			projectKey = projectKey.substring(projectKey.length() - lengthLessPartnerName, projectKey.length());
+		}
 
 		LOGGER.debug(organisationName + ", " + projectKey);
 

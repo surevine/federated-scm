@@ -14,33 +14,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*/
+ */
 package com.surevine.gateway.scm.gatewayclient;
 
-import com.surevine.gateway.scm.git.jgit.TestUtility;
-import com.surevine.gateway.scm.git.GitFacade;
-import com.surevine.gateway.scm.model.LocalRepoBean;
-import org.junit.Test;
+import static org.junit.Assert.assertTrue;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+
+import com.surevine.gateway.scm.git.GitFacade;
+import com.surevine.gateway.scm.git.jgit.TestUtility;
+import com.surevine.gateway.scm.model.LocalRepoBean;
 
 /**
  * @author nick.leaver@surevine.com
  */
 public class GatewayPackageTest {
-    @Test
-    public void testGatewayPackageFileCreation() throws Exception {
-        LocalRepoBean repo = TestUtility.createTestRepo();
-        GitFacade git = GitFacade.getInstance();
-        Path bundlePath = git.bundle(repo);
-        GatewayPackage gatewayPackage = new GatewayPackage(bundlePath, MetadataUtil.getMetadata(repo));
-        gatewayPackage.createArchive();
-        
-        assertTrue(Files.exists(gatewayPackage.getArchive()));
-        TestUtility.destroyTestRepo(repo);
-        Files.delete(gatewayPackage.getArchive());
-    }
+	@Test
+	public void testGatewayPackageFileCreation() throws Exception {
+		final LocalRepoBean repo = TestUtility.createTestRepo();
+		final GitFacade git = GitFacade.getInstance();
+		final Path bundlePath = git.bundle(repo);
+		final GatewayPackage gatewayPackage = new GatewayPackage(bundlePath, MetadataUtil.getSinglePartnerMetadata(
+				repo, repo.getSourcePartner()));
+		gatewayPackage.createArchive();
+
+		assertTrue(Files.exists(gatewayPackage.getArchive()));
+		TestUtility.destroyTestRepo(repo);
+		Files.delete(gatewayPackage.getArchive());
+	}
 }

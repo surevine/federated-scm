@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -18,14 +19,20 @@
     </properties>
 
     <dependencies>
-    
+
+        <!-- community dependencies -->
+        <dependency>
+            <groupId>com.surevine.community</groupId>
+            <artifactId>federation-transfer-model</artifactId>
+        </dependency>
+        
         <!-- third party compile dependencies -->
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
             <scope>compile</scope>
         </dependency>
-        
+
         <!-- third party provided dependencies -->
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -72,10 +79,10 @@
             <artifactId>commons-io</artifactId>
         </dependency>
         <dependency>
-        	<groupId>org.apache.commons</groupId>
-        	<artifactId>commons-lang3</artifactId>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
         </dependency>
-     	
+
         <!-- test dependencies -->
         <dependency>
             <groupId>junit</groupId>
@@ -149,12 +156,12 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>cobertura-maven-plugin</artifactId>
             </plugin>
-			<plugin>
-				<artifactId>maven-scm-plugin</artifactId>
-				<configuration>
-					<tag>${project.artifactId}-${project.version}</tag>
-				</configuration>
-			</plugin>
+            <plugin>
+                <artifactId>maven-scm-plugin</artifactId>
+                <configuration>
+                    <tag>${project.artifactId}-${project.version}</tag>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 

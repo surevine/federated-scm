@@ -23,5 +23,3 @@ scm.import.project.fork,%s_%s_sync,,The name template used for generating fork n
 
 gateway.serviceURL,http://localhost:8080/gateway/api/export,,The URL of the Gateway service that exports should be sent to
 gateway.configurationServiceURL,http://localhost:9000/api/federation/outbound,,The URL of the management console service that is invoked by the timed export to obtain details of configured shares to be exported
-
-fedscm.mock.gatewayclient,false,true | false,Flag to determine whether or not to run the SCM Federator against a mock Gateway. Should only be used for development purposes.

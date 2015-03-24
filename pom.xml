@@ -12,6 +12,7 @@
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
         <powermock.version>1.5.6</powermock.version>
+        <community.base.version>0.0.11</community.base.version>
     </properties>
 
     <modules>
@@ -31,8 +32,14 @@
                 <type>war</type>
                 <scope>provided</scope>
             </dependency>
-
+            
             <!-- community dependencies -->
+            <dependency>
+                <groupId>com.surevine.community</groupId>
+                <artifactId>federation-transfer-model</artifactId>
+                <version>${community.base.version}</version>
+                <scope>provided</scope>
+            </dependency>
 
             <!-- third party dependencies -->
             <dependency>

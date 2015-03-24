@@ -24,6 +24,11 @@
         <!-- internal jar dependencies -->
 
         <!-- community dependencies -->
+        <dependency>
+            <groupId>com.surevine.community</groupId>
+            <artifactId>federation-transfer-model</artifactId>
+            <scope>compile</scope>
+        </dependency>
 
         <!-- third party compile dependencies -->
         <dependency>

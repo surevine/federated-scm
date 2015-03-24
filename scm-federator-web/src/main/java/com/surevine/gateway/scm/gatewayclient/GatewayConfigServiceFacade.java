@@ -17,16 +17,18 @@
  */
 package com.surevine.gateway.scm.gatewayclient;
 
-import com.surevine.gateway.scm.util.PropertyUtil;
-import org.apache.log4j.Logger;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import javax.ws.rs.client.Client;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import javax.ws.rs.client.Client;
+
+import org.apache.log4j.Logger;
+import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
+
+import com.surevine.community.transfermodel.federation.FederationConfiguration;
+import com.surevine.community.transfermodel.federation.RepositoryType;
+import com.surevine.gateway.scm.util.PropertyUtil;
 
 /**
  * Facade over access to the configured shared repositories in the gateway
@@ -35,7 +37,6 @@ import java.util.concurrent.TimeUnit;
  * @author nick.leaver@surevine.com
  */
 public class GatewayConfigServiceFacade {
-	private static final String USE_MOCK_KEY = "fedscm.mock.gatewayconfig";
 	private static final Logger LOGGER = Logger.getLogger(GatewayConfigServiceFacade.class);
 	private static GatewayConfigServiceFacade instance;
 
@@ -43,47 +44,31 @@ public class GatewayConfigServiceFacade {
 		// external instantiation protection
 	}
 
-	public List<SharedRepoIdentification> getSharedRepositories() {
-		String gatewayConfigServiceURL = PropertyUtil
-				.getProjectConfigServiceURL();
-		List<SharedRepoIdentification> sharedRepositories = new ArrayList<SharedRepoIdentification>();
-		Client client = new ResteasyClientBuilder()
-				.establishConnectionTimeout(6, TimeUnit.SECONDS)
-				.socketTimeout(6, TimeUnit.SECONDS).build();
-		LOGGER.info("Attempting to retrieve project sharing configuration from "
-				+ gatewayConfigServiceURL);
-		String jsonResponse = client.target(gatewayConfigServiceURL).request()
-				.get(String.class);
-		if (jsonResponse != null && jsonResponse.length() > 0) {
-			JSONArray jsonArray = new JSONArray(jsonResponse);
-			for (int i = 0; i < jsonArray.length(); i++) {
-				JSONObject projectConfigurationObject = jsonArray
-						.getJSONObject(i);
-				String projectKey = projectConfigurationObject
-						.getString("projectKey");
-				String repositorySlug = projectConfigurationObject
-						.getString("repositorySlug");
+	public List<FederationConfiguration> getSharedRepositories() {
+		final String managementUrl = PropertyUtil.getProjectConfigServiceURL();
 
-				LOGGER.debug("Shared repository configuration loaded: "
-						+ projectKey + ":" + repositorySlug);
-				sharedRepositories.add(new SharedRepoIdentification(projectKey,
-						repositorySlug));
-			}
+		LOGGER.info("Attempting to retrieve project sharing configuration from " + managementUrl);
+
+		// call the management console to get the list of shares to be exported
+		final Client client = new ResteasyClientBuilder().establishConnectionTimeout(6, TimeUnit.SECONDS)
+				.socketTimeout(6, TimeUnit.SECONDS).build();
+
+		final FederationConfiguration[] configurations = client.target(managementUrl)
+				.queryParam("repoType", RepositoryType.SCM.name()).request().get(FederationConfiguration[].class);
+		for (final FederationConfiguration configuration : configurations) {
+			final String repositoryIdentifier = configuration.getRepository().getIdentifier();
+			final String partnerIdentifier = configuration.getPartner().getSourceKey();
+
+			LOGGER.debug("Shared repository configuration loaded: " + repositoryIdentifier + " shared with "
+					+ partnerIdentifier);
 		}
 
-		return sharedRepositories;
+		return Arrays.asList(configurations);
 	}
 
 	public static GatewayConfigServiceFacade getInstance() {
 		if (instance == null) {
-			boolean useMock;
-			try {
-				useMock = PropertyUtil.getBooleanProperty(USE_MOCK_KEY);
-			} catch (Exception e) {
-				useMock = false;
-			}
-			instance = (useMock) ? new MockGatewayConfigServiceFacade()
-					: new GatewayConfigServiceFacade();
+			instance = new GatewayConfigServiceFacade();
 		}
 		return instance;
 	}
