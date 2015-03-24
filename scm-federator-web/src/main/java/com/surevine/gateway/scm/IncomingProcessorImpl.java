@@ -339,13 +339,28 @@ public class IncomingProcessorImpl implements IncomingProcessor {
 	 *            Sanitised metadata
 	 */
 	private void sanitiseProjectKey(final Map<String, String> metadata) {
-		final String organisationName = PropertyUtil.getOrgName().toLowerCase();
-		final String projectKey = metadata.get(MetadataUtil.KEY_PROJECT);
+		// get the configured organisation name of this federator
+		final String organisationName = PropertyUtil.getOrgName();
 
-		// If local organisation name is present it indicates that the project is mastered locally
-		// (and this is a share back from partner)
-		if (projectKey.startsWith(organisationName + "_")) {
-			metadata.put(MetadataUtil.KEY_PROJECT, projectKey.replace(organisationName + "_", ""));
+		// get the project key received in the metadata
+		String projectKey = metadata.get(MetadataUtil.KEY_PROJECT);
+
+		// lower the organisation name and project key to ensure we are case-insensitive when matching/removing
+		final String lowerOrganisationName = organisationName.toLowerCase();
+		final String lowerProjectKey = projectKey.toLowerCase();
+
+		// check to see if the organisation name is present, and if so, ensure it is removed before continuing
+		if (lowerProjectKey.startsWith(lowerOrganisationName)) {
+			// if the lowered organisation name is present in the lowered project key, grab the length of the resulting
+			// key with the name stripped off
+			final int lengthLessOrganisationName = lowerProjectKey.replace(lowerOrganisationName + "_", "").length();
+
+			// now we can use the length of the resulting string above to strip the organisation name without changing
+			// the case of the entire project key
+			projectKey = projectKey.substring(projectKey.length() - lengthLessOrganisationName, projectKey.length());
+
+			// update the metadata with the resulting project key
+			metadata.put(MetadataUtil.KEY_PROJECT, projectKey);
 		}
 	}
 

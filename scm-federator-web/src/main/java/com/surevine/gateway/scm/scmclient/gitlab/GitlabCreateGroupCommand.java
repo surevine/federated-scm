@@ -57,13 +57,11 @@ public class GitlabCreateGroupCommand extends AbstractGitlabCommand implements C
 		addUserToGroup(projectBean);
 	}
 
-	private GitlabGroupJSONBean createGroup(String projectKey) throws SCMCallException {
+	private GitlabGroupJSONBean createGroup(final String projectKey) throws SCMCallException {
 		final String resource = scmSystemProperties.getHost() + RESOURCE;
 		final String privateToken = scmSystemProperties.getAuthToken();
 		final Client client = getClient();
 		LOGGER.debug("REST POST call to " + resource);
-
-		projectKey = projectKey.toLowerCase();
 
 		GitlabGroupJSONBean projectBean = new GitlabGroupJSONBean();
 		projectBean.setName(projectKey);

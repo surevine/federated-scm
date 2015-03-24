@@ -91,10 +91,9 @@ public class GitlabForkProjectCommand extends AbstractGitlabCommand implements F
 		return rtn;
 	}
 
-	private void changeProjectOwnership(final GitlabProjectJSONBean forked, String forkGroupName)
+	private void changeProjectOwnership(final GitlabProjectJSONBean forked, final String forkGroupName)
 			throws SCMCallException {
 		final GitlabGetGroupsCommand getGroup = new GitlabGetGroupsCommand();
-		forkGroupName = forkGroupName.toLowerCase();
 		final Integer groupId = getGroup.getProjectsWithIds().get(forkGroupName);
 
 		String resource = scmSystemProperties.getHost() + GROUP_RESOURCE;

@@ -89,10 +89,9 @@ public class GitlabGetProjectCommand extends AbstractGitlabCommand implements Ge
 			throw new SCMCallException("getProject", "Project key has arrived without replacement");
 		}
 
-		String projectPath = projectKey + "/" + repositorySlug;
-		projectPath = projectPath.toLowerCase();
 		for (final GitlabProjectJSONBean bean : getAllProjects()) {
-			if (bean.getPathWithNamespace().equals(projectPath)) {
+			if (projectKey.equalsIgnoreCase((String) bean.getNamespace().get("name"))
+					&& repositorySlug.equals(bean.getName())) {
 				return bean;
 			}
 		}

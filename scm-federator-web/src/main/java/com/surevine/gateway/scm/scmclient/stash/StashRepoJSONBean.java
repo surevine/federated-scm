@@ -26,7 +26,7 @@ import com.surevine.gateway.scm.model.LocalRepoBean;
 
 /**
  * Bean for easily working with Stash API repository information
- * 
+ *
  * @author nick.leaver@surevine.com
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -114,7 +114,7 @@ public class StashRepoJSONBean {
 	public LocalRepoBean asRepoBean() {
 		final LocalRepoBean repoBean = new LocalRepoBean();
 		repoBean.setCloneSourceURI(getRepoCloneURL());
-		repoBean.setSlug(slug);
+		repoBean.setSlug(name);
 		repoBean.setFromGateway(false);
 		repoBean.setProjectKey(getProject().getKey());
 		return repoBean;

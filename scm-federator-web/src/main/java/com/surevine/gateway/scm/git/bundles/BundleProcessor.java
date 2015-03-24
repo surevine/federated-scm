@@ -47,15 +47,15 @@ public abstract class BundleProcessor {
 		this.metadata = metadata;
 		LOGGER.debug(metadata.toString());
 
-		partnerName = metadata.get(MetadataUtil.KEY_ORGANISATION).toLowerCase();
-		projectKey = metadata.get(MetadataUtil.KEY_PROJECT).toLowerCase();
-		repositorySlug = metadata.get(MetadataUtil.KEY_REPO).toLowerCase();
+		partnerName = metadata.get(MetadataUtil.KEY_ORGANISATION);
+		projectKey = metadata.get(MetadataUtil.KEY_PROJECT);
+		repositorySlug = metadata.get(MetadataUtil.KEY_REPO);
 
 		LOGGER.debug(partnerName + " - " + projectKey + " - " + repositorySlug);
 
-		partnerProjectKey = PropertyUtil.getPartnerProjectKeyString(partnerName, projectKey).toLowerCase();
+		partnerProjectKey = PropertyUtil.getPartnerProjectKeyString(partnerName, projectKey);
 
-		partnerProjectForkKey = PropertyUtil.getPartnerForkProjectKeyString(partnerName, projectKey).toLowerCase();
+		partnerProjectForkKey = PropertyUtil.getPartnerForkProjectKeyString(partnerName, projectKey);
 	}
 
 	public LocalRepoBean getRepoForBundle() {

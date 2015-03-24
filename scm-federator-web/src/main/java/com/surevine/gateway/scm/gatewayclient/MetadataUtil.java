@@ -68,19 +68,19 @@ public final class MetadataUtil {
 
 	public static String deriveFilenameFromMetadata(final Map<String, String> metadata) {
 		final StringBuilder sb = new StringBuilder();
-		sb.append("scm_").append(metadata.get(MetadataUtil.KEY_ORGANISATION)).append("_")
-				.append(metadata.get(MetadataUtil.KEY_PROJECT)).append("_").append(metadata.get(MetadataUtil.KEY_REPO));
+		sb.append("scm_").append(metadata.get(MetadataUtil.KEY_ORGANISATION).toLowerCase()).append("_")
+		.append(metadata.get(MetadataUtil.KEY_PROJECT).toLowerCase()).append("_")
+		.append(metadata.get(MetadataUtil.KEY_REPO).toLowerCase());
 		return StringUtil.cleanStringForFilePath(sb.toString()) + ".tar.gz";
 	}
 
 	private static Map<String, String> generateMetadata(final LocalRepoBean repoBean, final String distributionType) {
 		final Map<String, String> metadataMap = new HashMap<>();
-		final String organisationName = PropertyUtil.getOrgName().toLowerCase();
-		String projectKey = repoBean.getProjectKey().toLowerCase();
-		projectKey = projectKey.replace(organisationName + "_", "");
 
-		LOGGER.debug(organisationName + ", " + projectKey + ", " + repoBean.getProjectKey() + ", "
-				+ PropertyUtil.getOrgName());
+		final String organisationName = PropertyUtil.getOrgName();
+		final String projectKey = repoBean.getProjectKey();
+
+		LOGGER.debug(organisationName + ", " + projectKey);
 
 		metadataMap.put(KEY_SOURCE, VALUE_SOURCE);
 		metadataMap.put(KEY_PROJECT, projectKey);

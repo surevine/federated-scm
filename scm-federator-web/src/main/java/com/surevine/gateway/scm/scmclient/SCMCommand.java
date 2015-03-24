@@ -27,7 +27,7 @@ import com.surevine.gateway.scm.util.PropertyUtil;
 
 /**
  * SCM system commands
- * 
+ *
  * @author nick.leaver@surevine.com
  */
 public abstract class SCMCommand {
@@ -52,7 +52,7 @@ public abstract class SCMCommand {
 
 	/**
 	 * Forks a repository in an SCM system
-	 * 
+	 *
 	 * @param projectKey
 	 *            the existing project (or group) key
 	 * @param repositorySlug
@@ -68,7 +68,7 @@ public abstract class SCMCommand {
 
 	/**
 	 * Gets a collection of all projects in the SCM system
-	 * 
+	 *
 	 * @return a collection of all projects in the SCM system
 	 * @throws SCMCallException
 	 */
@@ -77,8 +77,18 @@ public abstract class SCMCommand {
 	}
 
 	/**
+	 * Gets a collection of all projects in the SCM system
+	 *
+	 * @return a collection of all projects in the SCM system
+	 * @throws SCMCallException
+	 */
+	public static boolean projectExists(final String project) throws SCMCallException {
+		return getCommandFactory().getGetProjectsCommandImpl().projectExists(project);
+	}
+
+	/**
 	 * Creates a new project in the SCM system
-	 * 
+	 *
 	 * @param projectKey
 	 *            the project key
 	 * @throws SCMCallException
@@ -89,7 +99,7 @@ public abstract class SCMCommand {
 
 	/**
 	 * Deletes a project - use with care
-	 * 
+	 *
 	 * @param projectKey
 	 *            the project key
 	 * @throws SCMCallException
@@ -100,7 +110,7 @@ public abstract class SCMCommand {
 
 	/**
 	 * Gets all repositories under a project
-	 * 
+	 *
 	 * @param projectKey
 	 *            the project key
 	 * @return all repositories in the project
@@ -112,7 +122,7 @@ public abstract class SCMCommand {
 
 	/**
 	 * Gets a single repo from a project
-	 * 
+	 *
 	 * @param projectKey
 	 *            the owning project key
 	 * @param repositorySlug
@@ -128,7 +138,7 @@ public abstract class SCMCommand {
 	/**
 	 * Gets all repositories in the SCM system.
 	 * Warning: this is probably expensive.
-	 * 
+	 *
 	 * @return a mapping of projects to repositories
 	 * @throws SCMCallException
 	 */
@@ -138,7 +148,7 @@ public abstract class SCMCommand {
 
 	/**
 	 * Creates a repo in the specified project
-	 * 
+	 *
 	 * @param projectKey
 	 *            the project
 	 * @param name
@@ -152,7 +162,7 @@ public abstract class SCMCommand {
 
 	/**
 	 * Deletes a repository from a project
-	 * 
+	 *
 	 * @param projectKey
 	 *            The project key
 	 * @param repoSlug
@@ -165,7 +175,7 @@ public abstract class SCMCommand {
 
 	/**
 	 * Deletes a repository from a project
-	 * 
+	 *
 	 * @param LocalRepoBean
 	 *            The source repository
 	 * @param LocalRepoBean
@@ -180,7 +190,7 @@ public abstract class SCMCommand {
 	/**
 	 * Set a command factory implementation ignoring the configured type in system properties.
 	 * It's mostly for injecting a mock for testing but may be useful elsewhere.
-	 * 
+	 *
 	 * @param commandFactory
 	 *            the command factory implementation.
 	 */

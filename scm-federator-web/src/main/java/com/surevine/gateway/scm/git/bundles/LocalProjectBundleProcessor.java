@@ -17,7 +17,7 @@ public class LocalProjectBundleProcessor extends BundleProcessor {
 	@Override
 	public LocalRepoBean getForkedRepo() throws SCMCallException {
 		LOGGER.debug("Checking if " + partnerProjectForkKey + " exists");
-		if (!SCMCommand.getProjects().contains(partnerProjectForkKey)) {
+		if (!SCMCommand.projectExists(partnerProjectForkKey)) {
 			LOGGER.debug("Creating fork " + partnerProjectForkKey);
 			SCMCommand.createProject(partnerProjectForkKey);
 			forkWasCreated = true;
@@ -36,7 +36,7 @@ public class LocalProjectBundleProcessor extends BundleProcessor {
 	@Override
 	public LocalRepoBean getPrimaryRepo() throws SCMCallException, BundleProcessingException {
 		// this repo should exist, otherwise we wouldn't be here, but let's double-check
-		if (!SCMCommand.getProjects().contains(projectKey)) {
+		if (!SCMCommand.projectExists(projectKey)) {
 			throw new BundleProcessingException("Using LocalProjectBundleProcessor, but no project exists");
 		}
 

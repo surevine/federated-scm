@@ -60,11 +60,22 @@ public class GitlabGetGroupsCommand extends AbstractGitlabCommand implements Get
 
 		if (projects.size() > 0) {
 			for (final GitlabGroupJSONBean projectBean : projects) {
-				projectKeys.add(projectBean.getPath().toLowerCase());
+				projectKeys.add(projectBean.getPath());
 			}
 		}
 
 		return projectKeys;
+	}
+
+	@Override
+	public boolean projectExists(final String project) throws SCMCallException {
+		final Collection<String> projects = getProjects();
+		for (final String loadedProject : projects) {
+			if (loadedProject.equalsIgnoreCase(project)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public Map<String, Integer> getProjectsWithIds() throws SCMCallException {

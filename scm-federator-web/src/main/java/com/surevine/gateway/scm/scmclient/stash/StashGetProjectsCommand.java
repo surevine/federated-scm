@@ -64,10 +64,21 @@ public class StashGetProjectsCommand extends AbstractStashCommand implements Get
 		}
 
 		for (final StashProjectJSONBean stashProjectJSONBean : response.getValues()) {
-			projectKeys.add(stashProjectJSONBean.getKey().toLowerCase());
+			projectKeys.add(stashProjectJSONBean.getKey());
 		}
 
 		return projectKeys;
+	}
+
+	@Override
+	public boolean projectExists(final String project) throws SCMCallException {
+		final Collection<String> projects = getProjects();
+		for (final String loadedProject : projects) {
+			if (loadedProject.equalsIgnoreCase(project)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

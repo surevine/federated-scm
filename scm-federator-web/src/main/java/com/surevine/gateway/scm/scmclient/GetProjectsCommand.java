@@ -21,15 +21,23 @@ import java.util.Collection;
 
 /**
  * Gets project information from an SCM system
- * 
+ *
  * @author nick.leaver@surevine.com
  */
 public interface GetProjectsCommand {
 	/**
 	 * Gets a collection of all projects in the SCM system
-	 * 
+	 *
 	 * @return a collection of all projects in the SCM system
 	 * @throws com.surevine.gateway.scm.scmclient.SCMCallException
 	 */
 	Collection<String> getProjects() throws SCMCallException;
+
+	/**
+	 * Checks whether a particular project exists in the SCM system
+	 *
+	 * @return whether the project exists in the SCM system
+	 * @throws com.surevine.gateway.scm.scmclient.SCMCallException
+	 */
+	boolean projectExists(final String project) throws SCMCallException;
 }

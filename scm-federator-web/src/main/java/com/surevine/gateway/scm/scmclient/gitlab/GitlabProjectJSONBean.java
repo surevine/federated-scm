@@ -30,6 +30,9 @@ public class GitlabProjectJSONBean {
 	@JsonProperty("namespace")
 	private Map namespace;
 
+	@JsonProperty("name_with_namespace")
+	private String nameWithNamespace;
+
 	@JsonProperty("ssh_url_to_repo")
 	private String sshUrl;
 
@@ -59,6 +62,8 @@ public class GitlabProjectJSONBean {
 
 		rtn.put("name", Arrays.asList(name));
 
+		rtn.put("path", Arrays.asList(path));
+
 		if (namespaceId != null) {
 			rtn.put("namespace_id", Arrays.asList(namespaceId));
 		}
@@ -68,6 +73,10 @@ public class GitlabProjectJSONBean {
 
 	public void setNamespace(final Map namespace) {
 		this.namespace = namespace;
+	}
+
+	public void setNameWithNamespace(final String nameWithNamespace) {
+		this.nameWithNamespace = nameWithNamespace;
 	}
 
 	public void setSshUrlToRepo(final String sshUrl) {
@@ -91,8 +100,20 @@ public class GitlabProjectJSONBean {
 		return repoBean;
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public String getPath() {
+		return path;
+	}
+
 	public Map getNamespace() {
 		return namespace;
+	}
+
+	public String getNameWithNamespace() {
+		return nameWithNamespace;
 	}
 
 	public Integer getNamespaceId() {
