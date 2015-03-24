@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*/
+ */
 package com.surevine.gateway.scm.scmclient.gitlab;
 
 import javax.ws.rs.ProcessingException;
@@ -36,85 +36,84 @@ import com.surevine.gateway.scm.util.SCMSystemProperties;
  */
 public class GitlabForkProjectCommand extends AbstractGitlabCommand implements ForkRepoCommand {
 
-    private static final Logger LOGGER = Logger.getLogger(GitlabForkProjectCommand.class);
-    private static final String PROJECT_RESOURCE = "/api/v3/projects";
-    private static final String GROUP_RESOURCE = "/api/v3/groups";
-    private SCMSystemProperties scmSystemProperties;
+	private static final Logger LOGGER = Logger.getLogger(GitlabForkProjectCommand.class);
+	private static final String PROJECT_RESOURCE = "/api/v3/projects";
+	private static final String GROUP_RESOURCE = "/api/v3/groups";
+	private final SCMSystemProperties scmSystemProperties;
 
 	public GitlabForkProjectCommand() {
-        scmSystemProperties = PropertyUtil.getSCMSystemProperties();
+		scmSystemProperties = PropertyUtil.getSCMSystemProperties();
 	}
 
-    @Override
-    public LocalRepoBean forkRepo(String projectKey, String repositorySlug, String forkProjectKey) throws SCMCallException {
-        // This is going to need to be a two-stage process:
-        // 1. Fork the project using POST /projects/fork/:id
-        GitlabProjectJSONBean forked = forkProject(projectKey, repositorySlug);
+	@Override
+	public LocalRepoBean forkRepo(final String projectKey, final String repositorySlug, final String forkProjectKey)
+			throws SCMCallException {
+		// This is going to need to be a two-stage process:
+		// 1. Fork the project using POST /projects/fork/:id
+		final GitlabProjectJSONBean forked = forkProject(projectKey, repositorySlug);
 
-        // 2. Transfer the ownership of the project to the group using POST  /groups/:id/projects/:project_id
-        changeProjectOwnership(forked, forkProjectKey);
+		// 2. Transfer the ownership of the project to the group using POST /groups/:id/projects/:project_id
+		changeProjectOwnership(forked, forkProjectKey);
 
-        GitlabGetProjectCommand getProject = new GitlabGetProjectCommand();
-        return getProject.getProject(forkProjectKey, repositorySlug).asRepoBean();
-    }
+		final GitlabGetProjectCommand getProject = new GitlabGetProjectCommand();
+		return getProject.getProject(forkProjectKey, repositorySlug).asRepoBean();
+	}
 
-    // Fork the project using POST /projects/fork/:id
-    private GitlabProjectJSONBean forkProject(String groupName, String projectName) throws SCMCallException {
-        String resource = scmSystemProperties.getHost() + PROJECT_RESOURCE;
-        String privateToken = scmSystemProperties.getAuthToken();
-        Client client = getClient();
+	// Fork the project using POST /projects/fork/:id
+	private GitlabProjectJSONBean forkProject(final String groupName, final String projectName) throws SCMCallException {
+		String resource = scmSystemProperties.getHost() + PROJECT_RESOURCE;
+		final String privateToken = scmSystemProperties.getAuthToken();
+		final Client client = getClient();
 
-        GitlabGetProjectCommand getProject = new GitlabGetProjectCommand();
-        GitlabProjectJSONBean project = getProject.getProject(groupName, projectName);
+		final GitlabGetProjectCommand getProject = new GitlabGetProjectCommand();
+		final GitlabProjectJSONBean project = getProject.getProject(groupName, projectName);
 
-        if (project == null) {
-        	throw new SCMCallException("forkProject", "Should have project "+groupName+"/"+projectName+", but don't");
-        }
+		if (project == null) {
+			throw new SCMCallException("forkProject", "Should have project " + groupName + "/" + projectName
+					+ ", but don't");
+		}
 
-        resource += "/fork/"+project.getId();
+		resource += "/fork/" + project.getId();
 
-        LOGGER.debug("REST POST call to " + resource);
+		LOGGER.debug("REST POST call to " + resource);
 
-        GitlabProjectJSONBean rtn = null;
-        try {
-        	rtn = client.target(resource)
-        		.queryParam("private_token", privateToken)
-                .request(MediaType.APPLICATION_JSON)
-                .post(Entity.form(new MultivaluedHashMap()), GitlabProjectJSONBean.class);
-        } catch (ProcessingException pe) {
-            LOGGER.error("Could not connect to REST service " + resource, pe);
-            throw new SCMCallException("createProject", "Could not connect to REST service:" + pe.getMessage());
-        } finally {
-            client.close();
-        }
+		GitlabProjectJSONBean rtn = null;
+		try {
+			rtn = client.target(resource).queryParam("private_token", privateToken).request(MediaType.APPLICATION_JSON)
+					.post(Entity.form(new MultivaluedHashMap()), GitlabProjectJSONBean.class);
+		} catch (final ProcessingException pe) {
+			LOGGER.error("Could not connect to REST service " + resource, pe);
+			throw new SCMCallException("createProject", "Could not connect to REST service:" + pe.getMessage());
+		} finally {
+			client.close();
+		}
 
-        return rtn;
-    }
+		return rtn;
+	}
 
-    private void changeProjectOwnership(GitlabProjectJSONBean forked, String forkGroupName) throws SCMCallException {
-    	GitlabGetGroupsCommand getGroup = new GitlabGetGroupsCommand();
-    	forkGroupName = forkGroupName.toLowerCase();
-    	Integer groupId = getGroup.getProjectsWithIds().get(forkGroupName);
+	private void changeProjectOwnership(final GitlabProjectJSONBean forked, String forkGroupName)
+			throws SCMCallException {
+		final GitlabGetGroupsCommand getGroup = new GitlabGetGroupsCommand();
+		forkGroupName = forkGroupName.toLowerCase();
+		final Integer groupId = getGroup.getProjectsWithIds().get(forkGroupName);
 
-        String resource = scmSystemProperties.getHost() + GROUP_RESOURCE;
-        String privateToken = scmSystemProperties.getAuthToken();
-        Client client = getClient();
+		String resource = scmSystemProperties.getHost() + GROUP_RESOURCE;
+		final String privateToken = scmSystemProperties.getAuthToken();
+		final Client client = getClient();
 
-        resource += "/"+groupId+"/projects/"+forked.getId();
+		resource += "/" + groupId + "/projects/" + forked.getId();
 
-        LOGGER.debug("REST POST call to " + resource);
+		LOGGER.debug("REST POST call to " + resource);
 
-        String rtn = null;
-        try {
-        	rtn = client.target(resource)
-        		.queryParam("private_token", privateToken)
-                .request(MediaType.APPLICATION_JSON)
-                .post(Entity.form(new MultivaluedHashMap()), String.class);
-        } catch (ProcessingException pe) {
-            LOGGER.error("Could not connect to REST service " + resource, pe);
-            throw new SCMCallException("createProject", "Could not connect to REST service:" + pe.getMessage());
-        } finally {
-            client.close();
-        }
+		String rtn = null;
+		try {
+			rtn = client.target(resource).queryParam("private_token", privateToken).request(MediaType.APPLICATION_JSON)
+					.post(Entity.form(new MultivaluedHashMap()), String.class);
+		} catch (final ProcessingException pe) {
+			LOGGER.error("Could not connect to REST service " + resource, pe);
+			throw new SCMCallException("createProject", "Could not connect to REST service:" + pe.getMessage());
+		} finally {
+			client.close();
+		}
 	}
 }

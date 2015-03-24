@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*/
+ */
 package com.surevine.gateway.scm.scmclient.gitlab;
 
 import java.util.List;
@@ -41,55 +41,53 @@ import com.surevine.gateway.scm.util.SCMSystemProperties;
  */
 public class GitlabDeleteGroupCommand extends AbstractGitlabCommand implements DeleteProjectCommand {
 
-    private static final Logger LOGGER = Logger.getLogger(GitlabDeleteGroupCommand.class);
-    private static final String RESOURCE = "/api/v3/groups/";
-    private SCMSystemProperties scmSystemProperties;
+	private static final Logger LOGGER = Logger.getLogger(GitlabDeleteGroupCommand.class);
+	private static final String RESOURCE = "/api/v3/groups/";
+	private final SCMSystemProperties scmSystemProperties;
 
-    GitlabDeleteGroupCommand() {
-        scmSystemProperties = PropertyUtil.getSCMSystemProperties();
-    }
+	GitlabDeleteGroupCommand() {
+		scmSystemProperties = PropertyUtil.getSCMSystemProperties();
+	}
 
-    @Override
-    public void deleteProject (String projectKey) throws SCMCallException {
-        if (projectKey == null || projectKey.isEmpty()) {
-            throw new SCMCallException("deleteProject", "No project key provided");
-        }
-        projectKey = projectKey.toLowerCase();
-        GitlabGetGroupsCommand projectCmd = new GitlabGetGroupsCommand();
-        List<GitlabGroupJSONBean> projects = projectCmd.getProjectObjects();
+	@Override
+	public void deleteProject(String projectKey) throws SCMCallException {
+		if (projectKey == null || projectKey.isEmpty()) {
+			throw new SCMCallException("deleteProject", "No project key provided");
+		}
+		projectKey = projectKey.toLowerCase();
+		final GitlabGetGroupsCommand projectCmd = new GitlabGetGroupsCommand();
+		final List<GitlabGroupJSONBean> projects = projectCmd.getProjectObjects();
 
-        Integer projectId = null;
+		Integer projectId = null;
 
-        for ( GitlabGroupJSONBean project : projects ) {
-        	if ( project.getName().equals(projectKey) ) {
-        		projectId = project.getIdInt();
-        	}
-        }
+		for (final GitlabGroupJSONBean project : projects) {
+			if (project.getName().equals(projectKey)) {
+				projectId = project.getIdInt();
+			}
+		}
 
-        if ( projectId == null ) {
-        	throw new SCMCallException("deleteProject", "No project found with the key provided");
-        }
+		if (projectId == null) {
+			throw new SCMCallException("deleteProject", "No project found with the key provided");
+		}
 
-        deleteProject(projectId);
-    }
+		deleteProject(projectId);
+	}
 
-    public void deleteProject (int projectId) throws SCMCallException {
-        String resource = scmSystemProperties.getHost() + RESOURCE + projectId;
+	public void deleteProject(final int projectId) throws SCMCallException {
+		final String resource = scmSystemProperties.getHost() + RESOURCE + projectId;
 
-        String privateToken = scmSystemProperties.getAuthToken();
-        Client client = getClient();
-        LOGGER.debug("REST call to " + resource);
+		final String privateToken = scmSystemProperties.getAuthToken();
+		final Client client = getClient();
+		LOGGER.debug("REST call to " + resource);
 
-        try {
-        	client.target(resource)
-        		.queryParam("private_token", privateToken)
-                .request(MediaType.APPLICATION_JSON)
-                .delete();
-        } catch (ProcessingException pe) {
-            LOGGER.error("Could not connect to REST service " + resource, pe);
-            throw new SCMCallException("createProject", "Could not connect to REST service:" + pe.getMessage());
-        } finally {
-            client.close();
-        }
-    }
+		try {
+			client.target(resource).queryParam("private_token", privateToken).request(MediaType.APPLICATION_JSON)
+					.delete();
+		} catch (final ProcessingException pe) {
+			LOGGER.error("Could not connect to REST service " + resource, pe);
+			throw new SCMCallException("createProject", "Could not connect to REST service:" + pe.getMessage());
+		} finally {
+			client.close();
+		}
+	}
 }
