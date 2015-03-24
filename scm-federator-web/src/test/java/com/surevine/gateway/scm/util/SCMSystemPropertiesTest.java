@@ -30,12 +30,12 @@ public class SCMSystemPropertiesTest {
         String username = "username";
         String password = "password";
         String correctAuthHeader = "Basic dXNlcm5hbWU6cGFzc3dvcmQ=";
-        
-        SCMSystemProperties props = new SCMSystemProperties("stash", username, password, null);
-        
+
+        SCMSystemProperties props = new SCMSystemProperties("stash", username, password, "localhost");
+
         assertEquals(correctAuthHeader, props.getBasicAuthHeader());
     }
-    
+
     @Test
     public void checkStringTypeMapping() {
         assertEquals(SCMSystemProperties.SCMType.STASH, SCMSystemProperties.SCMType.getType("stash"));
