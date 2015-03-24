@@ -86,16 +86,16 @@ public abstract class BundleProcessor {
 
         try {
 
-        	if(GitFacade.getInstance().isRepoEmpty(repoBean)) {
-        		LOGGER.debug("Recieved repo bundle is empty. Skipping import.");
-        		return;
-			}
-
         	repoBean.emptyRepoDirectory();
 
 			LOGGER.debug("Cloning from localRepoBean");
 			// create local repository from bundle
 			GitFacade.getInstance().clone(repoBean);
+
+        	if(GitFacade.getInstance().isRepoEmpty(repoBean)) {
+        		LOGGER.debug("Recieved repo bundle is empty. Skipping import.");
+        		return;
+			}
 
 			// create a new repository in the SCM system to hold the shared source
 			final LocalRepoBean primaryRepo = getPrimaryRepo();
