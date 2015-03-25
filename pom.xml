@@ -3,7 +3,7 @@
 
     <groupId>com.surevine.community.scm</groupId>
     <artifactId>federated-scm-parent</artifactId>
-    <version>2.0.5-SNAPSHOT</version>
+    <version>2.0.5</version>
     <packaging>pom</packaging>
     <name>federated-scm-parent</name>
 
@@ -257,7 +257,7 @@
 
     <scm>
         <connection>scm:git:ssh://git@github.com/surevine/federated-scm.git</connection>
-      <tag>HEAD</tag>
+      <tag>federated-scm-parent-2.0.5</tag>
   </scm>
     <distributionManagement>
         <repository>

@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.surevine.community.scm</groupId>
         <artifactId>federated-scm-parent</artifactId>
-        <version>2.0.5-SNAPSHOT</version>
+        <version>2.0.5</version>
     </parent>
     <artifactId>scm-federator-ear</artifactId>
     <name>scm-federator-ear</name>
