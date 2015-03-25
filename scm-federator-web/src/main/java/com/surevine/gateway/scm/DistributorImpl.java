@@ -105,20 +105,10 @@ public class DistributorImpl implements Distributor {
 					final String projectKey = projectKeyParts[0];
 					final String repositorySlug = projectKeyParts[1];
 
-					LOGGER.info("Distributing repository " + projectKey + ":" + repositorySlug);
-
 					try {
-						final LocalRepoBean repo = SCMCommand.getRepository(projectKey, repositorySlug);
-
-						if (repo == null) {
-							LOGGER.info("Skipping distribution of " + projectKey + ":" + repositorySlug
-									+ " because the repository does not exist in the SCM system");
-						} else {
-							distribute(repo, MetadataUtil.getSinglePartnerMetadata(repo, partnerName), false);
-						}
-					} catch (SCMFederatorServiceException | GitException | SCMCallException | CompressorException
-							| ArchiveException | IOException e) {
-						LOGGER.info("Skipping distribution of " + projectKey + ":" + repositorySlug + " due to error: "
+						distributeToSingleDestination(partnerName, projectKey, repositorySlug);
+					} catch (final SCMFederatorServiceException e) {
+						LOGGER.info("Failed distribution of " + projectKey + ":" + repositorySlug + " due to error: "
 								+ e.getMessage());
 					}
 				}
@@ -140,8 +130,8 @@ public class DistributorImpl implements Distributor {
 			final boolean sendEvenIfNoUpdates) throws SCMFederatorServiceException, GitException, CompressorException,
 			ArchiveException, IOException {
 		if (repo == null) {
-			throw new SCMFederatorServiceException("The repository information for  " + repo.getProjectKey() + ":"
-					+ repo.getSlug() + " could not be retrieved from the SCM system.");
+			throw new SCMFederatorServiceException(
+					"The repository information for could not be retrieved from the SCM system.");
 		}
 
 		final GitFacade gitFacade = GitFacade.getInstance();
