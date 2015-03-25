@@ -17,6 +17,7 @@
  */
 package com.surevine.gateway.scm.gatewayclient;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -55,11 +56,16 @@ public class GatewayConfigServiceFacade {
 
 		final FederationConfiguration[] configurations = client.target(managementUrl)
 				.queryParam("repoType", RepositoryType.SCM.name()).request().get(FederationConfiguration[].class);
+
+		if (configurations == null || configurations.length == 0) {
+			LOGGER.info("No outbound repositories configured to be shared from this federator.");
+			return new ArrayList<FederationConfiguration>();
+		}
 		for (final FederationConfiguration configuration : configurations) {
 			final String repositoryIdentifier = configuration.getRepository().getIdentifier();
 			final String partnerIdentifier = configuration.getPartner().getSourceKey();
 
-			LOGGER.debug("Shared repository configuration loaded: " + repositoryIdentifier + " shared with "
+			LOGGER.info("Shared repository configuration loaded: " + repositoryIdentifier + " shared with "
 					+ partnerIdentifier);
 		}
 
