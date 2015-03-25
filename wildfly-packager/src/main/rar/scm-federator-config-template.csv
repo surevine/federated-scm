@@ -15,9 +15,9 @@ fedscm.org.name,,,The name of the organisation owning the installation. Used by 
 
 scm.type,gitlab,stash | gitlab,The type of SCM tool being federated
 scm.hostname,http://localhost,,The base URL of the SCM tool being federated
+scm.auth.token,,,The authorisation token used for access to the SCM tool (only required for Gitlab)
 scm.auth.username,,,The username used for access to the SCM tool (only required for Stash)
 scm.auth.password,,,The password used for access to the SCM tool (only required for Stash)
-scm.auth.token,,,The authorisation token used for access to the SCM tool (only required for Gitlab)
 scm.import.project.key,%s_%s,,The name template used for generating repository names for received shared repositories
 scm.import.project.fork,%s_%s_sync,,The name template used for generating fork names for shared repositories
 
