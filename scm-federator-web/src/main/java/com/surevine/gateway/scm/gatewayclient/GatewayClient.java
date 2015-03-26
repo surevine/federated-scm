@@ -59,6 +59,12 @@ public class GatewayClient {
             LOGGER.info(gatewayPackage.getArchive().getFileName() + " sent to the gateway as " + filename);
         } catch (IOException e) {
             LOGGER.error("Failed to send " + gatewayPackage.getArchive().toString() + " to the gateway", e);
+        } finally {
+        	try {
+				gatewayPackage.deleteArchive();
+			} catch (IOException e) {
+				LOGGER.warn("Failed to delete archive " + gatewayPackage.getArchive().toString() + " from working directory.", e);
+			}
         }
     }
 

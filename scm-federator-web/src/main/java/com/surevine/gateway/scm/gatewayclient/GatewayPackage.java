@@ -43,16 +43,16 @@ public class GatewayPackage {
     private Map<String, String> metadata;
     private Path archivePath;
     private boolean archiveWritten;
-    
+
     public GatewayPackage(final Path bundlePath, final Map<String, String> metadata) {
         this.bundlePath = bundlePath;
         this.metadata = metadata;
     }
-    
+
     public Path getArchive() {
         return archivePath;
     }
-    
+
     public void createArchive() throws IOException, ArchiveException, CompressorException {
         if (!archiveWritten) {
             String uuid = UUID.randomUUID().toString();
@@ -72,7 +72,11 @@ public class GatewayPackage {
             archiveWritten = true;
         }
     }
-    
+
+    public void deleteArchive() throws IOException {
+    	Files.deleteIfExists(archivePath);
+    }
+
     void writeGZ(final Path gzPath, final Path tarPath) throws IOException, CompressorException {
         CompressorOutputStream cos = new CompressorStreamFactory()
                 .createCompressorOutputStream("gz", Files.newOutputStream(gzPath));
@@ -83,7 +87,7 @@ public class GatewayPackage {
             cos.close();
         }
     }
-    
+
     void createTar(final Path tarPath, final Path ... paths) throws IOException, ArchiveException {
         ArchiveOutputStream os = new ArchiveStreamFactory()
                 .createArchiveOutputStream("tar", Files.newOutputStream(tarPath));
